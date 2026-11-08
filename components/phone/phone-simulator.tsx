@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 import { Moon } from 'lucide-react'
 import type { DaySnapshot } from '@/components/kakao/snapshot'
 import { CalendarApp } from '@/components/calendar/calendar-app'
+import { todayFor } from '@/components/calendar/calendar-data'
 import { InstagramApp } from '@/components/instagram/instagram-app'
 import { StoryViewer } from '@/components/instagram/story-viewer'
 import { NOTIFICATION_COMMENT } from '@/components/instagram/instagram-data'
@@ -77,7 +78,7 @@ function toInstagramId(name: string) {
 const WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
 
 function dayLabel(day: number) {
-  const date = new Date(2026, 9, 25 + day)
+  const date = todayFor(day)
   return `${date.getMonth() + 1}월 ${date.getDate()}일 ${WEEKDAYS[date.getDay()]}`
 }
 
@@ -187,7 +188,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const bannerMessage =
     bannerKind === 'safari'
       ? NOTIFICATION_COMMENT
-        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습���다: ${NOTIFICATION_COMMENT.comment.text}`
+        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습�����다: ${NOTIFICATION_COMMENT.comment.text}`
         : ''
       : kakaoNotice
         ? `${CHAT_DISPLAY_NAMES[kakaoNotice.id] ?? '새 메시지'}: ${kakaoNotice.text}`

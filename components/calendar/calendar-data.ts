@@ -24,34 +24,34 @@ export type CalendarEvent = {
 }
 
 export const YEAR = 2026
-export const MONTH = 9
+export const MONTH = 10
 export function todayFor(gameDay: number) {
-  return new Date(YEAR, MONTH, 25 + gameDay)
+  return new Date(YEAR, MONTH, 5 + gameDay)
 }
 type DayEvent = Omit<CalendarEvent, 'id'>
 
-/** 일정 목록. 게임 1일 차 = 26일 (todayFor 참고) */
+/** 일정 목록. day = 11월 기준 날짜 (0 = 10/31, -1 = 10/30). 게임 1일 차 = 11월 6일 (todayFor 참고) */
 const CALENDAR_EVENTS: DayEvent[] = [
   // 시험기간 주간 (10/30 ~ 11/05)
-  { day: 30, category: 'exam', title: '영현사 과제 대체', start: '10:30' },
-  { day: 30, category: 'exam', title: '대중문화 수업', start: '13:00' },
-  { day: 32, category: 'date', title: '리쿠 스터디, 자취방', start: '16:00' },
-  { day: 33, category: 'exam', title: '대중문화 시험', start: '13:00' },
-  { day: 33, category: 'exam', title: '소비자심리학 시험', start: '15:00' },
-  { day: 33, category: 'date', title: '시온 커피', start: '17:00' },
-  { day: 34, category: 'exam', title: '영현사 시험', start: '10:30' },
-  { day: 34, category: 'exam', title: '브랜드마케팅 시험', start: '13:00' },
-  { day: 35, category: 'date', title: '유우시 재무관리 과외', start: '17:00' },
-  { day: 36, category: 'exam', title: '재무관리 시험', start: '10:30' },
-  { day: 36, category: 'date', title: '시온 드라이브', start: '13:00' },
+  { day: -1, category: 'exam', title: '영현사 과제 대체', start: '10:30' },
+  { day: -1, category: 'exam', title: '대중문화 수업', start: '13:00' },
+  { day: 1, category: 'date', title: '리쿠 스터디, 자취방', start: '16:00' },
+  { day: 2, category: 'exam', title: '대중문화 시험', start: '13:00' },
+  { day: 2, category: 'exam', title: '소비자심리학 시험', start: '15:00' },
+  { day: 2, category: 'date', title: '시온 커피', start: '17:00' },
+  { day: 3, category: 'exam', title: '영현사 시험', start: '10:30' },
+  { day: 3, category: 'exam', title: '브랜드마케팅 시험', start: '13:00' },
+  { day: 4, category: 'date', title: '유우시 재무관리 과외', start: '17:00' },
+  { day: 5, category: 'exam', title: '재무관리 시험', start: '10:30' },
+  { day: 5, category: 'date', title: '시온 드라이브', start: '13:00' },
 
   // 플레이 주간 (11/06 ~ 11/12)
-  { day: 37, category: 'club', title: '동아리 주점 회의', start: '19:00' },
-  { day: 38, category: 'club', title: '주점 장보기/작업', start: '15:00' },
-  { day: 40, category: 'club', title: '동아리 소품 작업', start: '18:00' },
-  { day: 41, category: 'club', title: '축제 주점 1일차', start: '18:00' },
-  { day: 42, category: 'club', title: '축제 주점 2일차 & 회식', start: '18:00' },
-  { day: 43, category: 'club', title: '주점 철거', start: '13:00' },
+  { day: 6, category: 'club', title: '동아리 주점 회의', start: '19:00' },
+  { day: 7, category: 'club', title: '주점 장보기/작업', start: '15:00' },
+  { day: 9, category: 'club', title: '동아리 소품 작업', start: '18:00' },
+  { day: 10, category: 'club', title: '축제 주점 1일차', start: '18:00' },
+  { day: 11, category: 'club', title: '축제 주점 2일차 & 회식', start: '18:00' },
+  { day: 12, category: 'club', title: '주점 철거', start: '13:00' },
 ]
 
 function buildEvents(): CalendarEvent[] {
@@ -68,7 +68,7 @@ export const EVENTS = buildEvents()
 
 const MONTH_START = new Date(YEAR, MONTH, 1)
 
-// day는 이번 달 1일 기준 일수라서 32 이상이면 다음 달로 넘어갑니다(예: 10월 32일 = 11월 1일).
+// day는 11월 1일 기준 일수라서 0 이하는 10월입니다(예: 0 = 10월 31일).
 export function eventsOn(date: Date) {
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
   const day = Math.round((target.getTime() - MONTH_START.getTime()) / 86_400_000) + 1

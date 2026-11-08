@@ -24,12 +24,12 @@ export function formatTime(date: Date | null) {
 }
 
 export function formatLockDate(date: Date | null) {
-  const d = date ?? new Date(2026, 9, 23)
+  const d = date ?? new Date(2026, 10, 6)
   return `${d.getMonth() + 1}월 ${d.getDate()}일 ${WEEKDAYS[d.getDay()]}`
 }
 
 export function weekday(date: Date | null) {
-  return WEEKDAYS[(date ?? new Date(2026, 9, 23)).getDay()]
+  return WEEKDAYS[(date ?? new Date(2026, 10, 6)).getDay()]
 }
 
 export function callName(fullName: string) {
