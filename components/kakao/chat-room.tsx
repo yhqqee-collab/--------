@@ -1,0 +1,914 @@
+'use client'
+
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import Image from 'next/image'
+import { ChevronLeft, Hash, ImageIcon, Menu, Plus, Search, Smile, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { PERSON_AVATARS } from '@/lib/template-config'
+import { Avatar } from './avatar'
+import type { Chat, ChatItem } from './chat-data'
+import { personalizeText } from './replies'
+import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
+import { getStage, STAGE_LABEL, type SuspicionStage } from './suspicion'
+import { SuspicionAlert } from './suspicion-alert'
+
+type Message = Extract<ChatItem, { type: 'msg' }>
+
+export type Delivery = { id: number; texts: string[]; instant?: boolean; badge?: boolean; urgent?: boolean }
+
+type Batch = {
+  texts: string[]
+  dueAt: number
+  instant: boolean
+  badge: boolean
+  turn: number
+  nudge?: boolean
+  reply?: boolean
+  enterNode?: string
+  gateDone?: boolean
+  dateLabel?: string
+  gameOver?: boolean
+  gameOverAlert?: string
+}
+
+const NO_SYNCS: ReadonlySet<string> = new Set()
+const NO_FLAGS: ReadonlySet<string> = new Set()
+const GAME_OVER_DELAY_MS = 2500
+
+const ALERT_REPLY_DELAY_MS = 4000
+const GATE_NO_REPLY_MS = 1200
+
+type ChatRoomProps = {
+  chat: Chat
+  owner: string
+  active: boolean
+  onBack: () => void
+  inbox: Delivery[]
+  suspicion?: number
+  suspicionActive: boolean
+  onSuspicionChange: (delta: number) => number
+  onIncoming: (text: string) => void
+  onSent: (text: string) => void
+  turns?: number
+  onTurn?: (complete: boolean) => void
+  clockStarted?: boolean
+  workEnded?: boolean
+  onGateDone?: () => void
+  onScriptDone?: () => void
+  day?: number
+  flags?: Set<string>
+  onGameOver?: (alert?: string) => void
+  othersDone?: boolean
+  readySyncs?: ReadonlySet<string>
+  onSync?: (key: string) => void
+  onDoomed?: () => void
+  initialAdded?: ChatItem[]
+  onAddedChange?: (items: ChatItem[]) => void
+}
+
+const REPLY_DELAY_MIN_MS = 15000
+const REPLY_DELAY_MAX_MS = 30000
+
+const LINE_GAP_MIN_MS = 1000
+const LINE_GAP_MAX_MS = 2000
+
+function lineGap() {
+  return LINE_GAP_MIN_MS + Math.random() * (LINE_GAP_MAX_MS - LINE_GAP_MIN_MS)
+}
+
+function randomReplyDelay() {
+  return REPLY_DELAY_MIN_MS + Math.random() * (REPLY_DELAY_MAX_MS - REPLY_DELAY_MIN_MS)
+}
+
+const STAGE_COLOR: Record<SuspicionStage, string> = {
+  calm: 'bg-[#4CAF7A]',
+  uneasy: 'bg-[#F0A53A]',
+  cold: 'bg-[#D9453B]',
+}
+
+function nowLabel() {
+  const d = new Date()
+  const h = d.getHours()
+  const period = h < 12 ? '오전' : '오후'
+  const hour = h % 12 === 0 ? 12 : h % 12
+  return `${period} ${hour}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+function sameGroup(a: ChatItem | undefined, b: Message) {
+  return a?.type === 'msg' && a.from === b.from && a.time === b.time && a.sender === b.sender
+}
+
+function typingDuration(text: string) {
+  return Math.min(1200 + text.length * 70, 4000)
+}
+
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange }: ChatRoomProps) {
+  const script = scriptsForDay(day)[chat.id]
+  const groupScript = groupScriptsForDay(day)[chat.id]
+  const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
+  const [groupPicked, setGroupPicked] = useState<number | null>(null)
+  const groupStartedRef = useRef(false)
+  const waitSyncRef = useRef<{ key: string; next: string | null; delayMs: number } | null>(null)
+  const [syncText, setSyncText] = useState<string | null>(null)
+  const activeFlags = flags ?? NO_FLAGS
+  const othersDoneRef = useRef(othersDone)
+  othersDoneRef.current = othersDone
+  const waitNextRef = useRef<{ id: string; delayMs: number } | null>(null)
+  const fillChoice = (line: string) => personalizeText(fillMetName(line, activeFlags), owner)
+  const delayedStart = script?.delayedStartMs !== undefined
+  const [added, setAdded] = useState<ChatItem[]>(() => initialAdded ?? [])
+  const addedChangeRef = useRef(onAddedChange)
+  addedChangeRef.current = onAddedChange
+  useEffect(() => {
+    addedChangeRef.current?.(added)
+  }, [added])
+  const [nodeId, setNodeId] = useState<string | null>(delayedStart ? null : (script?.start ?? null))
+  const [pendingPhase, setPendingPhase] = useState(delayedStart)
+  const startedRef = useRef(false)
+  const gatedNextRef = useRef<string | null>(null)
+  const [waiting, setWaiting] = useState(false)
+  const [picked, setPicked] = useState<number | null>(null)
+  const [typing, setTyping] = useState(false)
+  const [note, setNote] = useState<number | null>(null)
+  const [newBadge, setNewBadge] = useState(false)
+  const [viewer, setViewer] = useState<string | null>(null)
+  const [rosterOpen, setRosterOpen] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const lastIsThem = (() => {
+    const last = chat.items.at(-1)
+    return last?.type === 'msg' && last.from === 'them'
+  })()
+  const awaitingRef = useRef(lastIsThem)
+  const readAtRef = useRef<number | null>(null)
+  const hasChoicesRef = useRef(false)
+  const replyTurnRef = useRef(0)
+  const handledInboxRef = useRef(0)
+  const queueRef = useRef<Batch[]>([])
+  // Bumped whenever the queue is reset so playback chains scheduled before the reset stop instead of double-playing.
+  const queueEpochRef = useRef(0)
+  const playingRef = useRef(false)
+  const timersRef = useRef(new Set<number>())
+  const noteTimerRef = useRef<number | undefined>(undefined)
+  const badgeTimerRef = useRef<number | undefined>(undefined)
+  const waitingRef = useRef(false)
+  const pendingNodeRef = useRef<string | null>(null)
+
+  const scriptDoneRef = useRef(false)
+  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed })
+  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed }
+
+  const hasSuspicion = suspicion !== undefined
+  const items: ChatItem[] = [...chat.items, ...added]
+  const itemsRef = useRef(items)
+  itemsRef.current = items
+
+  function schedule(ms: number, fn: () => void) {
+    const id = window.setTimeout(() => {
+      timersRef.current.delete(id)
+      fn()
+    }, ms)
+    timersRef.current.add(id)
+  }
+
+  function showNote(delta: number) {
+    setNote(delta)
+    window.clearTimeout(noteTimerRef.current)
+    noteTimerRef.current = window.setTimeout(() => setNote(null), 4000)
+  }
+
+  function vibrate() {
+    try {
+      navigator.vibrate?.([180, 90, 180])
+    } catch {}
+  }
+
+  function finishReply() {
+    if (!waitingRef.current) return
+    waitingRef.current = false
+    setNodeId(pendingNodeRef.current)
+    setPicked(null)
+    setWaiting(false)
+  }
+
+  function land(text: string, badge: boolean, nudge: boolean) {
+    setTyping(false)
+    if (text.startsWith(ME_LINE_PREFIX)) {
+      const mine = text.slice(ME_LINE_PREFIX.length)
+      setAdded((prev) => [...prev, { type: 'msg', from: 'me', text: mine, time: nowLabel() }])
+      return
+    }
+    setAdded((prev) => [...prev, { type: 'msg', from: 'them', text, time: nowLabel() }])
+    if (!nudge || readAtRef.current === null) {
+      readAtRef.current = latest.current.active ? Date.now() : null
+    }
+    awaitingRef.current = true
+    latest.current.onIncoming(text)
+    if (badge && latest.current.active) {
+      setNewBadge(true)
+      window.clearTimeout(badgeTimerRef.current)
+      badgeTimerRef.current = window.setTimeout(() => setNewBadge(false), 4000)
+    }
+  }
+
+  function playLine(batch: Batch, index: number) {
+    const epoch = queueEpochRef.current
+    if (batch.turn !== replyTurnRef.current) {
+      if (queueRef.current[0] === batch) queueRef.current.shift()
+      schedule(0, () => playNext(epoch))
+      return
+    }
+    const text = batch.texts[index]
+    const isLast = index === batch.texts.length - 1
+    const finish = () => {
+      if (batch.turn !== replyTurnRef.current || epoch !== queueEpochRef.current) return
+      if (index === 0 && batch.dateLabel) {
+        const label = batch.dateLabel
+        setAdded((prev) => [...prev, { type: 'date', label }])
+      }
+      land(text, batch.badge && index === 0, Boolean(batch.nudge))
+      if (index === 0 && batch.enterNode) vibrate()
+      if (!isLast) return schedule(batch.instant ? 300 : 0, () => playLine(batch, index + 1))
+      if (batch.reply) finishReply()
+      if (batch.enterNode) {
+        setNodeId(batch.enterNode)
+        setPendingPhase(false)
+      }
+      if (batch.gateDone) latest.current.onGateDone?.()
+      if (batch.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(batch.gameOverAlert))
+      queueRef.current.shift()
+      schedule(300, () => playNext(epoch))
+    }
+
+    if (batch.instant) return finish()
+
+    if (index > 0) {
+      const nextIsMine = text.startsWith(ME_LINE_PREFIX)
+      if (latest.current.active && !nextIsMine) setTyping(true)
+      schedule(lineGap(), finish)
+      return
+    }
+
+    if (!latest.current.active) return finish()
+
+    const wait = index === 0 ? Math.max(0, batch.dueAt - Date.now()) : 0
+    const typingMs = batch.reply && wait > 0 ? wait : Math.min(wait || Infinity, typingDuration(text))
+    schedule(wait === 0 ? 0 : wait - typingMs, () => {
+      if (!latest.current.active) return finish()
+      setTyping(true)
+      schedule(typingMs, finish)
+    })
+  }
+
+  function playNext(epoch = queueEpochRef.current) {
+    if (epoch !== queueEpochRef.current) return
+    const batch = queueRef.current[0]
+    if (!batch) {
+      playingRef.current = false
+      return
+    }
+    playingRef.current = true
+    if (batch.instant || !latest.current.active) {
+      schedule(Math.max(0, batch.dueAt - Date.now()), () => playLine(batch, 0))
+      return
+    }
+    playLine(batch, 0)
+  }
+
+  function enqueue(batch: Batch) {
+    queueRef.current.push(batch)
+    if (!playingRef.current) playNext()
+  }
+
+  useEffect(() => {
+    const fresh = inbox.slice(handledInboxRef.current)
+    if (!fresh.length) return
+    handledInboxRef.current = inbox.length
+    fresh.forEach((delivery) => {
+      if (delivery.urgent) {
+        replyTurnRef.current += 1
+        timersRef.current.forEach((id) => window.clearTimeout(id))
+      timersRef.current.clear()
+      queueRef.current = []
+      queueEpochRef.current += 1
+      playingRef.current = false
+        setTyping(false)
+        finishReply()
+      }
+      enqueue({ texts: delivery.texts, dueAt: Date.now(), instant: Boolean(delivery.instant), badge: Boolean(delivery.badge), turn: replyTurnRef.current })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inbox.length])
+
+  const dayRef = useRef(day)
+  useEffect(() => {
+    if (dayRef.current === day) return
+    dayRef.current = day
+    startedRef.current = false
+    gatedNextRef.current = null
+    waitNextRef.current = null
+    waitSyncRef.current = null
+    setSyncText(null)
+    scriptDoneRef.current = false
+    groupStartedRef.current = false
+    setGroupChoices(null)
+    setGroupPicked(null)
+    setNodeId(null)
+    setPendingPhase(Boolean(script))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day])
+
+  function playGroupLines(lines: GroupLine[], onDone: () => void, dateLabel?: string) {
+    let offset = 0
+    lines.forEach((line, index) => {
+      offset += line.delayMs
+      schedule(offset, () => {
+        const text = personalizeText(line.text, latest.current.owner)
+        if (index === 0 && dateLabel) setAdded((prev) => [...prev, { type: 'date', label: dateLabel }])
+        setTyping(false)
+        setAdded((prev) => [...prev, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel() }])
+        latest.current.onIncoming(`${line.sender}: ${text}`)
+        vibrate()
+        if (latest.current.active) {
+          setNewBadge(true)
+          window.clearTimeout(badgeTimerRef.current)
+          badgeTimerRef.current = window.setTimeout(() => setNewBadge(false), 4000)
+        }
+        if (index === lines.length - 1) onDone()
+      })
+    })
+    if (!lines.length) onDone()
+  }
+
+  useEffect(() => {
+    if (!clockStarted || !groupScript || groupStartedRef.current) return
+    groupStartedRef.current = true
+    schedule(groupScript.startDelayMs, () => {
+      playGroupLines(
+        groupScript.messages,
+        () => {
+          if (groupScript.choices.length) setGroupChoices(groupScript.choices)
+          else schedule(2500, () => latest.current.onScriptDone?.())
+        },
+        dayDivider(dayRef.current),
+      )
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clockStarted, day])
+
+  function chooseGroup(choice: GroupChoice, index: number) {
+    if (groupPicked !== null) return
+    setGroupPicked(index)
+    setNewBadge(false)
+    const text = personalizeText(choice.text, owner)
+    setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time: nowLabel() }])
+    onSent(text)
+    playGroupLines(choice.reply, () => {
+      setGroupChoices(null)
+      setGroupPicked(null)
+      schedule(2500, () => latest.current.onScriptDone?.())
+    })
+  }
+
+  useEffect(() => {
+    if (!clockStarted || !script || script.delayedStartMs === undefined || startedRef.current) return
+    startedRef.current = true
+    const startNode = script.nodes[script.start]
+    if (!startNode) return
+    schedule(script.delayedStartMs, () => {
+      enqueue({
+        texts: startNode.lines.map((line) => personalizeText(line, latest.current.owner)),
+        dueAt: Date.now(),
+        instant: false,
+        badge: true,
+        turn: replyTurnRef.current,
+        enterNode: script.start,
+        dateLabel: dayDivider(dayRef.current),
+      })
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clockStarted])
+
+  useEffect(() => {
+    const gated = gatedNextRef.current
+    if (!workEnded || !script || !gated) return
+    gatedNextRef.current = null
+    const next = resolveNode(script, gated, activeFlags)
+    const node = next ? script.nodes[next] : undefined
+    if (!node || !next) {
+      setPendingPhase(false)
+      return
+    }
+    enqueue({
+      texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
+      dueAt: Date.now() + (script.workEndDelayMs ?? 5000),
+      instant: false,
+      badge: true,
+      turn: replyTurnRef.current,
+      enterNode: next,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workEnded])
+
+  useEffect(() => {
+    const waitingNext = waitNextRef.current
+    if (!othersDone || !script || !waitingNext) return
+    waitNextRef.current = null
+    // 다른 캐릭터와의 약속 결과(플래그)가 이제 확정됐으니 다시 분기 판정
+    const nextId = resolveNode(script, waitingNext.id, activeFlags)
+    const node = nextId ? script.nodes[nextId] : undefined
+    if (!nextId || !node) {
+      setPendingPhase(false)
+      if (!scriptDoneRef.current) {
+        scriptDoneRef.current = true
+        latest.current.onScriptDone?.()
+      }
+      return
+    }
+    enqueue({
+      texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
+      dueAt: Date.now() + waitingNext.delayMs,
+      instant: false,
+      badge: true,
+      turn: replyTurnRef.current,
+      enterNode: nextId,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [othersDone])
+
+  useEffect(() => {
+    const pending = waitSyncRef.current
+    if (!script || !pending || !readySyncs.has(pending.key)) return
+    waitSyncRef.current = null
+    setSyncText(null)
+    const next = resolveNode(script, pending.next, activeFlags)
+    const node = next ? script.nodes[next] : undefined
+    if (!node || !next) {
+      setPendingPhase(false)
+      return
+    }
+    if (isDoomNode(node)) latest.current.onDoomed?.()
+    enqueue({
+      texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
+      dueAt: Date.now() + pending.delayMs,
+      instant: false,
+      badge: true,
+      turn: replyTurnRef.current,
+      enterNode: next,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readySyncs])
+
+  useEffect(() => {
+    if (active && awaitingRef.current && readAtRef.current === null) readAtRef.current = Date.now()
+  }, [active])
+
+  useEffect(() => {
+    const timers = timersRef.current
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id))
+      window.clearTimeout(noteTimerRef.current)
+      window.clearTimeout(badgeTimerRef.current)
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [added.length, typing, active, waiting])
+
+  function choose(choice: Choice, index: number) {
+    if (waitingRef.current) return
+    waitingRef.current = true
+    if (choice.setFlag) flags?.add(choice.setFlag)
+    const nextId = script ? resolveNode(script, choice.next, activeFlags) : choice.next
+    pendingNodeRef.current = nextId
+    const says = choice.says.map(fillChoice)
+    const time = nowLabel()
+    let sendOffset = 0
+    says.forEach((text, i) => {
+      const send = () => {
+        setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time }])
+        if (i === says.length - 1) onSent(text)
+      }
+      if (i === 0) return send()
+      sendOffset += lineGap()
+      schedule(sendOffset, send)
+    })
+    setNewBadge(false)
+    setPicked(index)
+    setWaiting(true)
+    const reachesEnd = !nextId || !script?.nodes[nextId]?.choices.length
+
+    const judging = hasSuspicion && suspicionActive
+    let value = suspicion ?? 0
+    if (judging) {
+      const delta = choice.delta
+      if (delta !== 0) {
+        value = onSuspicionChange(delta)
+        showNote(delta)
+      }
+      onTurn?.(reachesEnd)
+    }
+
+    awaitingRef.current = false
+    readAtRef.current = null
+    replyTurnRef.current += 1
+    queueRef.current = []
+    queueEpochRef.current += 1
+    playingRef.current = false
+    setTyping(false)
+
+    if (choice.nextDelayMs !== undefined) {
+      const replyAt = Date.now() + sendOffset
+      const turn = replyTurnRef.current
+      const alert = (choice.reply ?? []).map((line) => personalizeText(line, owner))
+      const nextNode = nextId ? script?.nodes[nextId] : undefined
+      const gatedNext = choice.gate && choice.next && script?.nodes[choice.next] ? choice.next : null
+      waitingRef.current = false
+      setWaiting(false)
+      setPicked(null)
+      setNodeId(null)
+      setPendingPhase(choice.gate ? Boolean(gatedNext) : Boolean(nextNode))
+      const replyDelay = choice.replyDelayMs ?? ALERT_REPLY_DELAY_MS
+      if (alert.length) {
+        enqueue({ texts: alert, dueAt: replyAt + replyDelay, instant: false, badge: false, turn, gateDone: choice.gate, gameOver: choice.gameOver, gameOverAlert: choice.gameOverAlert })
+      } else {
+        if (choice.gate) schedule(sendOffset + GATE_NO_REPLY_MS, () => latest.current.onGateDone?.())
+        if (choice.gameOver) schedule(sendOffset + GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(choice.gameOverAlert))
+      }
+      if (choice.gate) {
+        gatedNextRef.current = gatedNext
+        return
+      }
+      if (choice.sync) {
+        const key = choice.sync
+        waitSyncRef.current = { key, next: choice.next, delayMs: choice.nextDelayMs }
+        setPendingPhase(true)
+        if (choice.waitText) schedule(sendOffset + replyDelay + 1500, () => {
+          if (waitSyncRef.current?.key === key) setSyncText(choice.waitText ?? null)
+        })
+        onSync?.(key)
+        return
+      }
+      if (nextNode && isDoomNode(nextNode)) latest.current.onDoomed?.()
+      if (nextNode && nextId && choice.waitOthers && !othersDoneRef.current) {
+        waitNextRef.current = { id: nextId, delayMs: choice.nextDelayMs }
+        return
+      }
+      if (nextNode && nextId) {
+        enqueue({
+          texts: nextNode.lines.map((line) => personalizeText(line, owner)),
+          dueAt: replyAt + choice.nextDelayMs,
+          instant: false,
+          badge: true,
+          turn,
+          enterNode: nextId,
+        })
+      }
+      return
+    }
+
+    const texts = script ? replyFor(choice, getStage(value), script).map((line) => personalizeText(line, owner)) : []
+    if (!texts.length) {
+      finishReply()
+      return
+    }
+    enqueue({ texts, dueAt: Date.now() + sendOffset + randomReplyDelay(), instant: false, badge: false, turn: replyTurnRef.current, reply: true })
+  }
+
+  const lastItem = items.at(-1)
+  const typingContinues = lastItem?.type === 'msg' && lastItem.from === 'them'
+  const currentNode = nodeId ? script?.nodes[nodeId] : undefined
+  const choices = currentNode?.choices.length ? currentNode.choices : undefined
+  hasChoicesRef.current = Boolean(choices)
+  const finished = Boolean(script) && !choices && !pendingPhase
+
+  useEffect(() => {
+    if (!finished || typing || waiting || scriptDoneRef.current || queueRef.current.length > 0) return
+    const id = window.setTimeout(() => {
+      if (scriptDoneRef.current || queueRef.current.length > 0) return
+      scriptDoneRef.current = true
+      latest.current.onScriptDone?.()
+    }, 2500)
+    return () => window.clearTimeout(id)
+  }, [finished, typing, waiting, added.length])
+
+  return (
+    <div className="relative flex h-full flex-col bg-[#B2C7DA] text-[#191919]">
+      <SuspicionAlert suspicion={suspicion} active={active} />
+      {viewer && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="사진 보기"
+          className="absolute inset-0 z-50 flex flex-col bg-black"
+        >
+          <div className="flex justify-end px-3 pb-2 pt-[56px]">
+            <button
+              type="button"
+              onClick={() => setViewer(null)}
+              className="flex size-9 items-center justify-center rounded-full text-white transition-opacity active:opacity-50"
+              aria-label="닫기"
+            >
+              <X className="size-6" aria-hidden />
+            </button>
+          </div>
+          <div className="flex flex-1 items-center overflow-auto">
+            <Image src={viewer} alt="근무표 사진" width={2370} height={1168} className="h-auto w-full" />
+          </div>
+        </div>
+      )}
+      <header className="flex items-center gap-1 bg-[#B2C7DA]/90 px-2 pb-2 pt-[56px] backdrop-blur">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center text-[16px] transition-opacity active:opacity-50"
+        >
+          <ChevronLeft className="size-[28px]" strokeWidth={1.8} aria-hidden />
+          <span>뒤로</span>
+        </button>
+        <h2 className="flex min-w-0 flex-1 justify-center gap-1 text-center text-[16px] font-semibold tracking-[-0.01em]">
+          <span className="truncate">{chat.name}</span>
+          {chat.members && <span className="shrink-0 font-normal text-[#3c4a57]">{`(${chat.members})`}</span>}
+        </h2>
+        <div className="flex items-center gap-3 pr-2">
+          <Search className="size-[21px]" strokeWidth={1.9} aria-label="대화 검색" />
+          {chat.roster ? (
+            <button
+              type="button"
+              onClick={() => setRosterOpen(true)}
+              className="flex items-center transition-opacity active:opacity-50"
+              aria-label="대화상대 목록 보기"
+              aria-expanded={rosterOpen}
+            >
+              <Menu className="size-[22px]" strokeWidth={1.9} aria-hidden />
+            </button>
+          ) : (
+            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="메뉴" />
+          )}
+        </div>
+      </header>
+
+      {chat.roster && (
+        <div className={cn('absolute inset-0 z-40', rosterOpen ? 'pointer-events-auto' : 'pointer-events-none')}>
+          <button
+            type="button"
+            tabIndex={rosterOpen ? 0 : -1}
+            aria-label="대화상대 목록 닫기"
+            onClick={() => setRosterOpen(false)}
+            className={cn('absolute inset-0 bg-black/40 transition-opacity duration-300', rosterOpen ? 'opacity-100' : 'opacity-0')}
+          />
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="대화상대 목록"
+            aria-hidden={!rosterOpen}
+            className={cn(
+              'absolute inset-y-0 right-0 flex w-[78%] flex-col bg-white shadow-xl transition-transform duration-300 ease-out',
+              rosterOpen ? 'translate-x-0' : 'translate-x-full',
+            )}
+          >
+            <div className="flex items-center justify-between border-b border-[#EEEEEE] px-4 pb-3 pt-[60px]">
+              <h3 className="text-[16px] font-semibold">
+                대화상대 <span className="font-normal text-[#8A8A8A]">{chat.roster.length}</span>
+              </h3>
+              <button
+                type="button"
+                tabIndex={rosterOpen ? 0 : -1}
+                onClick={() => setRosterOpen(false)}
+                className="flex size-8 items-center justify-center rounded-full transition-opacity active:opacity-50"
+                aria-label="닫기"
+              >
+                <X className="size-5" aria-hidden />
+              </button>
+            </div>
+            <ul className="flex-1 overflow-y-auto px-4 py-2 [scrollbar-width:none]">
+              {chat.roster.map((member) => {
+                const isMe = member === '나'
+                const label = isMe ? owner || '여주' : member
+                return (
+                  <li key={member} className="flex items-center gap-3 py-[9px]">
+                    <Avatar src={isMe ? undefined : PERSON_AVATARS[member]} name={label} size={40} />
+                    <span className="truncate text-[15px]">{label}</span>
+                    {isMe && (
+                      <span className="shrink-0 rounded-full bg-[#F2F2F2] px-[7px] py-[1px] text-[11px] font-medium text-[#555555]">
+                        나
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </aside>
+        </div>
+      )}
+
+      {hasSuspicion && (
+        <div className="bg-[#B2C7DA]/90 px-4 pb-2" role="status" aria-label={`의심도 ${suspicion}퍼센트, ${STAGE_LABEL[getStage(suspicion)]}`}>
+          <div className="flex items-center justify-between text-[11px] font-medium text-[#3c4a57]">
+            <span>의심도 · {STAGE_LABEL[getStage(suspicion)]}</span>
+            <span className="tabular-nums">{`${suspicion}%`}</span>
+          </div>
+          <div className="mt-1 h-[5px] overflow-hidden rounded-full bg-white/50">
+            <div
+              className={cn('h-full rounded-full transition-all duration-700 ease-out', STAGE_COLOR[getStage(suspicion)])}
+              style={{ width: `${suspicion}%` }}
+            />
+          </div>
+          {note !== null && (
+            <p className={cn('mt-1 text-[11px] font-semibold tabular-nums', note > 0 ? 'text-[#B3261E]' : 'text-[#2E7D4F]')}>
+              {`[의심도 ${note > 0 ? '+' : ''}${note}]`}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="relative min-h-0 flex-1">
+        <div ref={scrollRef} className="h-full overflow-y-auto px-3 pb-3 [scrollbar-width:none]">
+          {items.map((item, i) => {
+            if (item.type === 'date') {
+              return (
+                <div key={i} className="flex justify-center pb-3 pt-4">
+                  <span className="rounded-full bg-black/[0.13] px-3 py-[4px] text-[11.5px] text-white">
+                    {item.label}
+                  </span>
+                </div>
+              )
+            }
+            if (item.type === 'break') return <div key={i} aria-hidden className="h-5" />
+
+            const first = !sameGroup(items[i - 1], item)
+            const next = items[i + 1]
+            const last = !(next?.type === 'msg' && sameGroup(item, next))
+            const mine = item.from === 'me'
+            const senderName = item.sender ?? chat.name
+            const senderAvatar = item.sender ? PERSON_AVATARS[item.sender] : chat.avatar
+
+            return (
+              <div
+                key={i}
+                className={cn('flex items-start gap-2', mine ? 'justify-end' : 'justify-start', first ? 'mt-[9px]' : 'mt-[4px]')}
+              >
+                {!mine && (
+                  <div className="w-[38px] shrink-0">
+                    {first && <Avatar src={senderAvatar} name={senderName} size={38} />}
+                  </div>
+                )}
+                <div className={cn('flex min-w-0 flex-col', mine ? 'items-end' : 'items-start')}>
+                  {!mine && first && <span className="mb-[4px] text-[12px] text-[#3c4a57]">{senderName}</span>}
+                  <div className={cn('flex items-end gap-[5px]', mine && 'flex-row-reverse')}>
+                    {typeof item.image === 'string' ? (
+                      <button
+                        type="button"
+                        onClick={() => setViewer(item.image as string)}
+                        className="overflow-hidden rounded-[12px] bg-white transition-opacity active:opacity-80"
+                        aria-label={`${senderName}님이 보낸 사진 크게 보기`}
+                      >
+                        <Image
+                          src={item.image}
+                          alt=""
+                          width={2370}
+                          height={1168}
+                          className="h-auto w-[220px]"
+                        />
+                      </button>
+                    ) : item.image ? (
+                      <div
+                        role="img"
+                        aria-label={`${senderName}님이 보낸 사진`}
+                        className="flex aspect-[4/5] w-[180px] items-center justify-center rounded-[12px] bg-[#D9DDE1]"
+                      >
+                        <ImageIcon className="size-[28px] text-[#A3ABB3]" strokeWidth={1.6} aria-hidden />
+                      </div>
+                    ) : (
+                    <p
+                      className={cn(
+                        'relative max-w-[232px] whitespace-pre-wrap break-words rounded-[15px] px-[11px] py-[7px] text-[14.5px] leading-[1.38] tracking-[-0.01em]',
+                        mine ? 'bg-[#FEE500]' : 'bg-white',
+                        first && (mine ? 'rounded-tr-[4px]' : 'rounded-tl-[4px]'),
+                      )}
+                    >
+                      {item.text}
+                    </p>
+                    )}
+                    {item.unread && (
+                      <div className={cn('flex shrink-0 flex-col gap-[2px] self-end pb-[1px]', mine ? 'items-end' : 'items-start')}>
+                        <span className="text-[10.5px] font-bold leading-none text-[#E6B800]" aria-label="읽지 않음">
+                          1
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+          {typing && (
+            <div className="mt-[9px] flex items-start gap-2" role="status" aria-label={`${chat.name} 입력 중`}>
+              <div className="w-[38px] shrink-0">{!typingContinues && <Avatar src={chat.avatar} name={chat.name} size={38} />}</div>
+              <div className="flex flex-col items-start">
+                {!typingContinues && <span className="mb-[4px] text-[12px] text-[#3c4a57]">{chat.name}</span>}
+                <div className="flex items-center gap-[4px] rounded-[15px] bg-white px-[14px] py-[13px]">
+                  {[0, 1, 2].map((dot) => (
+                    <span
+                      key={dot}
+                      className="size-[6px] animate-bounce rounded-full bg-[#9aa3ab]"
+                      style={{ animationDelay: `${dot * 150}ms`, animationDuration: '900ms' }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        {newBadge && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center" role="status">
+            <span className="flex items-center gap-[6px] rounded-full bg-[#FA5A3C] px-3 py-[6px] text-[12.5px] font-semibold text-white shadow-lg">
+              <span className="size-[7px] rounded-full bg-white" aria-hidden />
+              새 메시지 도착
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white px-3 pb-[28px] pt-[10px]">
+        {syncText && (
+          <p className="mb-[8px] text-center text-[12px] text-[#6b7680]" role="status" aria-live="polite">
+            {syncText}
+          </p>
+        )}
+        {waiting && (
+          <div className="mb-[8px] flex items-center gap-[8px] text-[12px] text-[#6b7680]" role="status" aria-live="polite">
+            <span className="flex items-center gap-[3px]" aria-hidden>
+              {[0, 1, 2].map((dot) => (
+                <span
+                  key={dot}
+                  className="size-[5px] animate-pulse rounded-full bg-[#9aa3ab]"
+                  style={{ animationDelay: `${dot * 200}ms`, animationDuration: '1s' }}
+                />
+              ))}
+            </span>
+            <span>{`${chat.name} 님이 입력 중입니다...`}</span>
+          </div>
+        )}
+        {groupChoices ? (
+          <fieldset className="flex flex-col gap-[7px]" disabled={groupPicked !== null}>
+            <legend className="mb-[7px] text-[11.5px] font-medium text-[#8a8a8a]">답장 선택</legend>
+            {groupChoices.map((choice, index) => (
+              <button
+                key={choice.id}
+                type="button"
+                onClick={() => chooseGroup(choice, index)}
+                disabled={groupPicked !== null}
+                aria-pressed={groupPicked === index}
+                className={cn(
+                  'w-full rounded-[14px] border border-[#E5E5E5] bg-[#F7F7F7] px-[13px] py-[9px] text-left text-[14px] leading-[1.38] tracking-[-0.01em] transition-colors enabled:hover:border-[#FEE500] enabled:hover:bg-[#FFFBD6] enabled:active:scale-[0.99] enabled:active:bg-[#FEE500] disabled:cursor-not-allowed',
+                  groupPicked !== null && (groupPicked === index ? 'border-[#FEE500] bg-[#FFFBD6] text-[#191919]' : 'opacity-45'),
+                )}
+              >
+                {personalizeText(choice.text, owner)}
+              </button>
+            ))}
+          </fieldset>
+        ) : choices ? (
+          <fieldset className="flex flex-col gap-[7px]" disabled={waiting}>
+            <legend className="mb-[7px] text-[11.5px] font-medium text-[#8a8a8a]">답장 선택</legend>
+            {choices.map((choice, index) => (
+              <button
+                key={`${nodeId}-${index}`}
+                type="button"
+                onClick={() => choose(choice, index)}
+                disabled={waiting}
+                aria-pressed={picked === index}
+                className={cn(
+                  'w-full rounded-[14px] border border-[#E5E5E5] bg-[#F7F7F7] px-[13px] py-[9px] text-left text-[14px] leading-[1.38] tracking-[-0.01em] transition-colors enabled:hover:border-[#FEE500] enabled:hover:bg-[#FFFBD6] enabled:active:scale-[0.99] enabled:active:bg-[#FEE500] disabled:cursor-not-allowed',
+                  waiting && (picked === index ? 'border-[#FEE500] bg-[#FFFBD6] text-[#191919]' : 'opacity-45'),
+                )}
+              >
+                {choice.says.map(fillChoice).join(' ')}
+              </button>
+            ))}
+          </fieldset>
+        ) : (
+          <div className="flex items-center gap-[10px]">
+            <Plus className="size-[24px] shrink-0 text-[#8A8A8A]" strokeWidth={1.7} aria-hidden />
+            <label className="sr-only" htmlFor={`kakao-input-${chat.id}`}>
+              메시지 입력
+            </label>
+            <input
+              id={`kakao-input-${chat.id}`}
+              type="text"
+              disabled
+              value=""
+              readOnly
+              className="h-[36px] min-w-0 flex-1 cursor-not-allowed rounded-full bg-[#F3F3F3] px-[14px] text-[14px] outline-none"
+            />
+            <Smile className="size-[23px] shrink-0 text-[#8A8A8A]" strokeWidth={1.7} aria-hidden />
+            <Hash className="size-[22px] shrink-0 text-[#8A8A8A]" strokeWidth={1.7} aria-hidden />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,153 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { ENDING_CHOICES, endingFor, type EndingRoute } from '@/components/kakao/endings'
+import { personalizeText } from '@/components/kakao/replies'
+import { cn } from '@/lib/utils'
+
+type FinalEndingScreenProps = {
+  owner: string
+  day: number
+  suspicion: Record<string, number>
+  hidden?: boolean
+  onRetryDay: () => void
+  onRestart: () => void
+  onViewHistory: () => void
+}
+
+const LINE_FADE_MS = 700
+
+export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRetryDay, onRestart, onViewHistory }: FinalEndingScreenProps) {
+  const [shown, setShown] = useState(false)
+  const [route, setRoute] = useState<EndingRoute | null>(null)
+  const [visibleLines, setVisibleLines] = useState(0)
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setShown(true), 50)
+    return () => window.clearTimeout(id)
+  }, [])
+
+  const ending = route ? endingFor(route, suspicion[route] ?? 0) : null
+  const lines = ending?.lines.map((line) => personalizeText(line, owner)) ?? []
+  const allShown = ending !== null && visibleLines >= lines.length
+  const obsessive = ending?.type === 'obsessive'
+
+  function choose(id: EndingRoute) {
+    setRoute(id)
+    window.setTimeout(() => setVisibleLines(1), 1200)
+  }
+
+  function advance() {
+    if (!ending || allShown) return
+    setVisibleLines((count) => Math.min(lines.length, count + 1))
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={ending ? ending.title : '최종 선택'}
+      className={cn(
+        'absolute inset-0 z-[85] flex flex-col bg-black text-white transition-opacity duration-[2000ms] ease-in sm:rounded-[55px]',
+        shown ? 'opacity-100' : 'opacity-0',
+        hidden && 'hidden',
+      )}
+    >
+      {!route && (
+        <div
+          className={cn(
+            'flex flex-1 flex-col items-center justify-center gap-8 px-8 transition-opacity delay-[1800ms] duration-1000',
+            shown ? 'opacity-100' : 'opacity-0',
+          )}
+        >
+          <div className="flex flex-col items-center gap-3 text-center">
+            <p className="text-xs font-semibold tracking-[0.4em] text-white/50">FINAL CHOICE</p>
+            <h2 className="text-balance text-xl font-bold leading-relaxed">
+              세 사람이 나를 기다리고 있다.
+              <br />
+              오늘 밤, 누구에게 갈까?
+            </h2>
+          </div>
+          <ul className="flex w-full max-w-[260px] flex-col gap-3">
+            {ENDING_CHOICES.map((choice) => (
+              <li key={choice.id}>
+                <button
+                  type="button"
+                  onClick={() => choose(choice.id)}
+                  className="min-h-12 w-full rounded-xl border border-white/30 px-5 py-3 text-[15px] font-semibold transition-colors hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  {choice.name}에게 간다
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {ending && (
+        <button
+          type="button"
+          onClick={advance}
+          disabled={allShown}
+          aria-label={allShown ? undefined : '다음 문장 보기'}
+          className="flex flex-1 flex-col justify-center gap-4 overflow-y-auto px-7 py-16 text-left disabled:cursor-default"
+        >
+          {lines.slice(0, visibleLines).map((line, index) => {
+            const isDialogue = line.startsWith('"')
+            return (
+              <p
+                key={index}
+                style={{ animationDuration: `${LINE_FADE_MS}ms` }}
+                className={cn(
+                  'animate-in fade-in slide-in-from-bottom-1 whitespace-pre-line text-pretty text-[14px] leading-relaxed',
+                  isDialogue ? 'font-semibold text-white' : 'text-white/65',
+                  isDialogue && obsessive && 'text-[#ff9a9a]',
+                  isDialogue && !obsessive && 'text-[#ffd9e4]',
+                )}
+              >
+                {line}
+              </p>
+            )
+          })}
+          {!allShown && visibleLines > 0 && (
+            <span aria-hidden="true" className="mt-2 animate-pulse self-center text-xs text-white/40">
+              화면을 눌러 계속
+            </span>
+          )}
+        </button>
+      )}
+
+      {ending && allShown && (
+        <div className="flex animate-in flex-col items-center gap-5 px-8 pb-16 pt-2 text-center fade-in duration-1000">
+          <p className={cn('text-xs font-semibold tracking-[0.4em]', obsessive ? 'text-[#ff9a9a]' : 'text-[#ffd9e4]')}>
+            {obsessive ? 'OBSESSIVE END' : 'HAPPY END'}
+          </p>
+          <h2 className="text-balance text-lg font-black leading-snug">{ending.title}</h2>
+          <div className="flex w-full max-w-[240px] flex-col gap-3 border-t border-white/10 pt-5">
+            <button
+              type="button"
+              onClick={onRetryDay}
+              className="min-h-11 rounded-full bg-white px-7 py-3 text-sm font-bold text-black transition-colors hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {day}일차부터 다시하기
+            </button>
+            <button
+              type="button"
+              onClick={onRestart}
+              className="min-h-11 rounded-full border border-white/25 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              처음부터 다시하기
+            </button>
+            <button
+              type="button"
+              onClick={onViewHistory}
+              className="min-h-11 rounded-full px-7 py-3 text-sm font-medium text-white/55 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              대화 기록 보기
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
