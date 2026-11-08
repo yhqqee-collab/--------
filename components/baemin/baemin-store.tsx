@@ -16,7 +16,7 @@ export function cartCount(cart: Cart) {
   return Object.values(cart).reduce((sum, qty) => sum + qty, 0)
 }
 
-function TopBar({ title, onBack }: { title: string; onBack: () => void }) {
+export function TopBar({ title, onBack }: { title: string; onBack: () => void }) {
   return (
     <header className="flex shrink-0 items-center gap-1 border-b border-[#EEE] bg-white px-2 pb-2 pt-[52px]">
       <button

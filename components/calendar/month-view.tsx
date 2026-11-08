@@ -4,19 +4,20 @@ import { sameDay, WEEKDAYS } from './calendar-utils'
 import { DayAgenda } from './day-agenda'
 
 type MonthViewProps = {
+  month?: number
   selected: Date
   today: Date
   onSelectDate: (date: Date) => void
   onSelectEvent: (event: CalendarEvent) => void
 }
 
-export function MonthView({ selected, today, onSelectDate, onSelectEvent }: MonthViewProps) {
-  const first = new Date(YEAR, MONTH, 1)
+export function MonthView({ month = MONTH, selected, today, onSelectDate, onSelectEvent }: MonthViewProps) {
+  const first = new Date(YEAR, month, 1)
   const offset = (first.getDay() + 6) % 7
-  const daysInMonth = new Date(YEAR, MONTH + 1, 0).getDate()
+  const daysInMonth = new Date(YEAR, month + 1, 0).getDate()
   const cells: (Date | null)[] = [
     ...Array.from({ length: offset }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, i) => new Date(YEAR, MONTH, i + 1)),
+    ...Array.from({ length: daysInMonth }, (_, i) => new Date(YEAR, month, i + 1)),
   ]
   while (cells.length % 7 !== 0) cells.push(null)
 
@@ -35,7 +36,7 @@ export function MonthView({ selected, today, onSelectDate, onSelectEvent }: Mont
         ))}
       </div>
 
-      <div role="grid" aria-label={`${YEAR}년 ${MONTH + 1}월`} className="px-2 pb-2">
+      <div role="grid" aria-label={`${YEAR}년 ${month + 1}월`} className="px-2 pb-2">
         {weeks.map((week, wi) => (
           <div key={wi} role="row" className="grid grid-cols-7 border-t border-black/[0.08]">
             {week.map((date, di) => {
