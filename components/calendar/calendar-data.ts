@@ -37,7 +37,7 @@ const CALENDAR_EVENTS: DayEvent[] = [
   { day: -1, category: 'exam', title: '대중문화 수업', start: '13:00' },
   { day: 1, category: 'date', title: '리쿠 스터디, 자취방', start: '16:00' },
   { day: 2, category: 'exam', title: '대중문화 시험', start: '13:00' },
-  { day: 2, category: 'exam', title: '소비자심리학 시험', start: '15:00' },
+  { day: 2, category: 'exam', title: '소비자행동론 시험', start: '15:00' },
   { day: 2, category: 'date', title: '시온 커피', start: '17:00' },
   { day: 3, category: 'exam', title: '영현사 시험', start: '10:30' },
   { day: 3, category: 'exam', title: '브랜드마케팅 시험', start: '13:00' },
