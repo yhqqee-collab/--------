@@ -1,4 +1,4 @@
-import { CHARACTERS } from '@/lib/template-config'
+import { CHARACTERS, GROUP_CHAT_NAME, GROUP_MEMBERS } from '@/lib/template-config'
 
 export type ChatItem =
   | { type: 'date'; label: string }
@@ -57,15 +57,15 @@ const T = 'them' as const
 const M = 'me' as const
 
 const ME = '나'
-const SION = '오시온'
-const RIKU = '리쿠'
-const YUSHI = '유우시'
-const MINWOO = '정민우'
-const SUJIN = '박수진'
-const YUNA = '이윤아'
-const DAEYOUNG = '김대영'
-const SAKUYA = '사쿠야'
-const RYO = '료'
+const SION = CHARACTERS.a.name
+const RIKU = CHARACTERS.b.name
+const YUSHI = CHARACTERS.c.name
+const MINWOO = GROUP_MEMBERS.minwoo.name
+const SUJIN = GROUP_MEMBERS.sujin.name
+const YUNA = GROUP_MEMBERS.yuna.name
+const DAEYOUNG = GROUP_MEMBERS.daeyoung.name
+const SAKUYA = GROUP_MEMBERS.sakuya.name
+const RYO = GROUP_MEMBERS.ryo.name
 
 const STAFF_ROSTER = [ME, SION, RIKU, YUSHI, MINWOO, SUJIN, YUNA, DAEYOUNG, SAKUYA, RYO]
 
@@ -377,7 +377,7 @@ export const CHATS: Chat[] = [
   },
   {
     id: 'staff',
-    name: '카페 직원 단톡방',
+    name: GROUP_CHAT_NAME,
     members: STAFF_ROSTER.length,
     roster: STAFF_ROSTER,
     preview: '아놔 이것들은 단톡방에서는 엄청 떠들면서 사석으론 절대 안 모여 ㅡㅡ',
@@ -401,7 +401,7 @@ export const CHATS: Chat[] = [
       ...say(ME, '오후 2:12', '웅 유우시도 미들 수고해!'),
 
       day('2026년 10월 21일 수요일'),
-      ...say(SUJIN, '오후 12:31', '아 오늘 단체석 왜케 많아 ㅠㅠ 민우 오빠 빨리 와!'),
+      ...say(SUJIN, '오후 12:31', '아 오늘 단체석 왜��� 많아 ㅠㅠ 민우 오빠 빨리 와!'),
       ...say(MINWOO, '오후 12:32', '달리고 있다... 버스 놓침 ㅠ'),
       ...say(DAEYOUNG, '오후 12:34', '윤아 누나 얼음 모자라요 제발 구원 좀 ㅠㅠ'),
       ...say(RIKU, '오후 3:48', '근데 오늘 여주 안 보네', '스터디 엄청 오래 하나방'),

@@ -39,30 +39,43 @@ export type Character = {
   color: string
 }
 
-/** 등장인물 프로필 사진 (이름 기준). 카카오톡·인스타그램에 공통 적용됩니다. */
-export const PERSON_AVATARS: Record<string, string> = {
-  오시온: '/avatars/sion.jpg',
-  '리쿠': '/avatars/riku.jpg',
-  '유우시': '/avatars/yushi.jpg',
-  사쿠야: '/avatars/sakuya.jpg',
-  료: '/avatars/ryo.jpg',
-  김대영: '/avatars/daeyoung.jpg',
+/* ═══════════════ 캐릭터 설정 (이름·프로필은 여기 한 곳에서만 바꾸세요) ═══════════════ */
+
+/** 메인 공략 캐릭터 3명. 키(a/b/c)는 채팅방 id·스크립트 키와 연결됩니다. */
+export const CHARACTERS: Record<'a' | 'b' | 'c', Character> = {
+  a: { name: '오시온', handle: 'sion_5', avatar: '/avatars/sion.jpg', color: '#4F7DD8' },
+  b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku.jpg', color: '#E8A33D' },
+  c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi.jpg', color: '#4CAF7A' },
 }
 
-export const CHARACTERS: Record<'a' | 'b' | 'c', Character> = {
-  a: { name: '오시온', handle: 'sion_5', avatar: PERSON_AVATARS['오시온'], color: '#4F7DD8' },
-  b: { name: '리쿠', handle: 'maeda__', avatar: PERSON_AVATARS['리쿠'], color: '#E8A33D' },
-  c: { name: '유우시', handle: 'yushiii', avatar: PERSON_AVATARS['유우시'], color: '#4CAF7A' },
-}
+/** 단톡방 조연 멤버. avatar/handle 이 있으면 카카오톡·인스타그램에 함께 쓰입니다. */
+export const GROUP_MEMBERS = {
+  minwoo: { name: '정민우' },
+  sujin: { name: '박수진' },
+  yuna: { name: '이윤아' },
+  daeyoung: { name: '김대영', handle: 'dddaaaeee', avatar: '/avatars/daeyoung.jpg' },
+  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.jpg' },
+  ryo: { name: '료', handle: 'ryoryoryo', avatar: '/avatars/ryo.jpg' },
+} satisfies Record<string, { name: string; handle?: string; avatar?: string }>
+
+/** 단톡방 이름 */
+export const GROUP_CHAT_NAME = '카페 직원 단톡방'
+
+/** 등장인물 프로필 사진 (이름 기준). 카카오톡·인스타그램에 공통 적용됩니다. */
+export const PERSON_AVATARS: Record<string, string> = Object.fromEntries(
+  [...Object.values(CHARACTERS), ...Object.values(GROUP_MEMBERS)]
+    .filter((person): person is typeof person & { avatar: string } => 'avatar' in person && Boolean(person.avatar))
+    .map((person) => [person.name, person.avatar]),
+)
 
 /** 인스타그램 아이디 고정값. 댓글·좋아요·DM에는 항상 이 아이디가 노출됩니다. */
 export const INSTAGRAM_IDS = {
-  sion: { id: 'sion_5', name: '오시온' },
-  riku: { id: 'maeda__', name: '리쿠' },
-  yushi: { id: 'yushiii', name: '유우시' },
-  sakuya: { id: 'fujinagakun', name: '사쿠야' },
-  ryo: { id: 'ryoryoryo', name: '료' },
-  daeyoung: { id: 'dddaaaeee', name: '김대영' },
+  sion: { id: CHARACTERS.a.handle, name: CHARACTERS.a.name },
+  riku: { id: CHARACTERS.b.handle, name: CHARACTERS.b.name },
+  yushi: { id: CHARACTERS.c.handle, name: CHARACTERS.c.name },
+  sakuya: { id: GROUP_MEMBERS.sakuya.handle, name: GROUP_MEMBERS.sakuya.name },
+  ryo: { id: GROUP_MEMBERS.ryo.handle, name: GROUP_MEMBERS.ryo.name },
+  daeyoung: { id: GROUP_MEMBERS.daeyoung.handle, name: GROUP_MEMBERS.daeyoung.name },
 } as const
 
 /** 이름을 입력하지 않았을 때 쓰는 여주 인스타그램 아이디 */
