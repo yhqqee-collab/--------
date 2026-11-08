@@ -1,4 +1,4 @@
-import { INSTAGRAM_AVATAR_OVERRIDES, INSTAGRAM_IDS, PERSON_AVATARS } from '@/lib/template-config'
+import { INSTAGRAM_AVATAR_OVERRIDES, INSTAGRAM_IDS, OWNER_AVATAR, PERSON_AVATARS } from '@/lib/template-config'
 import type { PostComment } from './comments-sheet'
 import type { FriendStory } from './friend-story-viewer'
 import type { UserProfileData } from './user-profile'
@@ -19,7 +19,7 @@ const avatarOf = (person: { name: string }) =>
   INSTAGRAM_AVATAR_OVERRIDES[person.name] ?? PERSON_AVATARS[person.name] ?? DEFAULT_AVATAR
 
 /** 여주(휴대폰 주인) 프로필 및 기본 스토리 */
-export const MY_AVATAR = DEFAULT_AVATAR
+export const MY_AVATAR = OWNER_AVATAR
 export const MY_PROFILE = {
   followers: 100,
   following: 100,
