@@ -37,6 +37,14 @@ export function WeverseArt() {
   return <IconImage src="/images/icons/weverse.jpeg" />
 }
 
+export function EverytimeArt() {
+  return (
+    <span className="relative block size-full bg-white">
+      <IconImage src="/images/icons/everytime.png" />
+    </span>
+  )
+}
+
 export function TikTokArt() {
   return <IconImage src="/images/icons/tiktok.png" />
 }

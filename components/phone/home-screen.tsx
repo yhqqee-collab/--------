@@ -12,7 +12,7 @@ import {
   XArt,
   YouTubeMusicArt,
 } from './app-icon-art'
-import { AblyArt, DuolingoArt, FortuneArt, GoogleMapsArt, StockArt, TikTokArt, WeverseArt } from './extra-app-art'
+import { AblyArt, DuolingoArt, EverytimeArt, FortuneArt, GoogleMapsArt, StockArt, TikTokArt, WeverseArt } from './extra-app-art'
 import { Wallpaper } from './wallpaper'
 import { CalendarWidget, NotesWidget } from './widgets'
 
@@ -35,6 +35,7 @@ type HomeScreenProps = {
   onOpenWeverse: () => void
   onOpenFortune: () => void
   onOpenNotes: () => void
+  onOpenEverytime: () => void
 }
 
 export function HomeScreen({
@@ -56,6 +57,7 @@ export function HomeScreen({
   onOpenWeverse,
   onOpenFortune,
   onOpenNotes,
+  onOpenEverytime,
 }: HomeScreenProps) {
   return (
     <section aria-label="홈 화면" aria-hidden={!active} inert={!active} className="absolute inset-0">
@@ -100,6 +102,7 @@ export function HomeScreen({
               { name: '주식', onClick: onOpenStock, art: <StockArt /> },
               { name: 'Weverse', onClick: onOpenWeverse, art: <WeverseArt /> },
               { name: '운세', onClick: onOpenFortune, art: <FortuneArt /> },
+              { name: '에브리타임', onClick: onOpenEverytime, art: <EverytimeArt /> },
             ]}
           />
         </div>
