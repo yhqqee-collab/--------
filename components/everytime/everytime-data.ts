@@ -70,9 +70,9 @@ const CHARACTERS: Friend[] = [
       { name: '브랜드마케팅', room: '경영관 401호', day: 1, start: 13, end: 15 },
       { name: '디지털미디어실습', room: '조형관 102호', day: 2, start: 10.5, end: 12 },
       { name: '광고크리에이티브', room: '경영관 205호', day: 2, start: 13, end: 15 },
-      { name: '글로벌마케팅', room: '경영관 402호', day: 3, start: 13, end: 14.5 },
       { name: '브랜드마케팅', room: '경영관 401호', day: 3, start: 15, end: 17 },
       { name: '디지털미디어실습', room: '조형관 102호', day: 4, start: 10.5, end: 12 },
+      { name: '글로벌마케팅', room: '경영관 402호', day: 4, start: 13, end: 14.5 },
     ],
   },
   {
