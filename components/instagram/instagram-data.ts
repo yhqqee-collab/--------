@@ -1,4 +1,4 @@
-import { INSTAGRAM_IDS, PERSON_AVATARS } from '@/lib/template-config'
+import { INSTAGRAM_AVATAR_OVERRIDES, INSTAGRAM_IDS, PERSON_AVATARS } from '@/lib/template-config'
 import type { PostComment } from './comments-sheet'
 import type { FriendStory } from './friend-story-viewer'
 import type { UserProfileData } from './user-profile'
@@ -15,7 +15,8 @@ export const DEFAULT_AVATAR = '/images/default/instagram-default.png'
 
 const { sion, riku, yushi, sakuya, ryo, daeyoung } = INSTAGRAM_IDS
 
-const avatarOf = (person: { name: string }) => PERSON_AVATARS[person.name] ?? DEFAULT_AVATAR
+const avatarOf = (person: { name: string }) =>
+  INSTAGRAM_AVATAR_OVERRIDES[person.name] ?? PERSON_AVATARS[person.name] ?? DEFAULT_AVATAR
 
 /** 여주(휴대폰 주인) 프로필 및 기본 스토리 */
 export const MY_AVATAR = DEFAULT_AVATAR
