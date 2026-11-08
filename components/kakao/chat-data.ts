@@ -161,6 +161,10 @@ export const CHATS: Chat[] = [
 ]
 
 /** 목록 하단에 표시되는 클릭 불가 배경용 채팅방 템플릿 */
+export const CHAT_DISPLAY_NAMES: Record<string, string> = Object.fromEntries(
+  CHATS.map((chat) => [chat.id, chat.name]),
+)
+
 export const BACKGROUND_CHATS: BackgroundChat[] = [
   {
     name: '[배경 단톡방 1]',
