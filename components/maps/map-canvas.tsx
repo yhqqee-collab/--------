@@ -1,280 +1,270 @@
-import { Navigation } from 'lucide-react'
-import { useEffect, useRef, type RefObject } from 'react'
+'use client'
+
+import 'leaflet/dist/leaflet.css'
+import type { LayerGroup, Map as LeafletMap, Marker } from 'leaflet'
+import { useEffect, useRef, useState, type MutableRefObject } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import {
-  AREA_GROUP,
-  BASE_HEIGHT as MAP_BASE_HEIGHT,
-  BASE_WIDTH as MAP_BASE_WIDTH,
-  DISTRICT_LABELS,
-  DISTRICTS,
-  MAP_HEIGHT,
-  MAP_SCALE,
-  MAP_WIDTH,
+  CAMPUS,
+  DEFAULT_ZOOM,
+  ICON_ZOOM,
+  KOREA_BOUNDS,
+  LABEL_ZOOM,
+  MAX_ZOOM,
+  MIN_ZOOM,
   PLACES,
+  type Place,
   type TravelModeId,
 } from './map-data'
-import { HOME, type Point } from './map-utils'
+import { HOME, toLatLng, type Point } from './map-utils'
+import { NEIGHBORHOOD_MIN_ZOOM, NEIGHBORHOOD_SHAPES } from './map-neighborhood'
 import { KIND_STYLES, PlaceIcon } from './place-icon'
 
-const MINOR_ROADS = [
-  'M0,150 H960',
-  'M0,700 H960',
-  'M0,1000 H960',
-  'M120,0 V1180',
-  'M380,0 V1180',
-  'M860,0 V1180',
-  ...PLACES.flatMap((place) => [`M0,${place.y} H960`, `M${place.x},0 V1180`]),
-]
+type Leaflet = typeof import('leaflet')
 
-const MAIN_ROADS = ['M0,630 C300,590 640,690 960,600', 'M620,0 C590,380 680,760 640,1180']
+const TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+const LABEL_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'
+const ALWAYS_VISIBLE = new Set(['home'])
+export const INITIAL_CENTER: Point = [0, 0]
+
+const ROUTE_COLORS: Record<TravelModeId, { line: string; outline: string }> = {
+  car: { line: '#03C75A', outline: '#02873D' },
+  transit: { line: '#2F6FE4', outline: '#1D4FAF' },
+  walk: { line: '#03C75A', outline: '#02873D' },
+  bike: { line: '#00A8A8', outline: '#007A7A' },
+}
 
 type MapCanvasProps = {
-  scrollRef: RefObject<HTMLDivElement | null>
+  mapRef: MutableRefObject<LeafletMap | null>
+  active: boolean
   zoom: number
   selectedId: string | null
   route: { points: Point[]; mode: TravelModeId } | null
   navPoint: Point | null
-  onZoom: (next: number, anchorX: number, anchorY: number) => void
+  onZoomChange: (zoom: number) => void
   onSelect: (id: string) => void
   onBackground: () => void
 }
 
-export function MapCanvas({ scrollRef, zoom, selectedId, route, navPoint, onZoom, onSelect, onBackground }: MapCanvasProps) {
-  const polyline = route?.points.map((point) => point.join(',')).join(' ')
-  const zoomRef = useRef(zoom)
-  const onZoomRef = useRef(onZoom)
+export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, onZoomChange, onSelect, onBackground }: MapCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const markersRef = useRef<Record<string, Marker>>({})
+  const overlayRef = useRef<LayerGroup | null>(null)
+  const [leaflet, setLeaflet] = useState<Leaflet | null>(null)
+  const [elements, setElements] = useState<Record<string, HTMLElement>>({})
+  const handlers = useRef({ onZoomChange, onBackground })
 
   useEffect(() => {
-    zoomRef.current = zoom
-    onZoomRef.current = onZoom
+    handlers.current = { onZoomChange, onBackground }
   })
 
   useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    let pinch: { distance: number; zoom: number } | null = null
+    let cancelled = false
+    let map: LeafletMap | null = null
 
-    // The phone frame may be CSS-scaled, so convert screen px to the element's own px.
-    const toLocal = (clientX: number, clientY: number): [number, number] => {
-      const rect = el.getBoundingClientRect()
-      const ratio = el.clientWidth / rect.width || 1
-      return [(clientX - rect.left) * ratio, (clientY - rect.top) * ratio]
-    }
-    const distance = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+    import('leaflet').then((module) => {
+      const L = (module as unknown as { default?: Leaflet }).default ?? (module as Leaflet)
+      if (cancelled || !containerRef.current) return
 
-    const handleTouchStart = (event: TouchEvent) => {
-      if (event.touches.length === 2) pinch = { distance: distance(event.touches), zoom: zoomRef.current }
-    }
-    const handleTouchMove = (event: TouchEvent) => {
-      if (!pinch || event.touches.length !== 2) return
-      event.preventDefault()
-      const [t0, t1] = [event.touches[0], event.touches[1]]
-      const [ax, ay] = toLocal((t0.clientX + t1.clientX) / 2, (t0.clientY + t1.clientY) / 2)
-      onZoomRef.current((pinch.zoom * distance(event.touches)) / pinch.distance, ax, ay)
-    }
-    const handleTouchEnd = (event: TouchEvent) => {
-      if (event.touches.length < 2) pinch = null
-    }
-    const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return
-      event.preventDefault()
-      const [ax, ay] = toLocal(event.clientX, event.clientY)
-      onZoomRef.current(zoomRef.current * Math.exp(-event.deltaY * 0.01), ax, ay)
-    }
+      map = L.map(containerRef.current, {
+        center: toLatLng(...INITIAL_CENTER),
+        zoom: DEFAULT_ZOOM,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        maxBounds: KOREA_BOUNDS,
+        maxBoundsViscosity: 1,
+        zoomControl: false,
+        attributionControl: false,
+        zoomSnap: 1,
+        wheelPxPerZoomLevel: 90,
+      })
+      L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map)
 
-    el.addEventListener('touchstart', handleTouchStart, { passive: true })
-    el.addEventListener('touchmove', handleTouchMove, { passive: false })
-    el.addEventListener('touchend', handleTouchEnd)
-    el.addEventListener('touchcancel', handleTouchEnd)
-    el.addEventListener('wheel', handleWheel, { passive: false })
+      L.tileLayer(TILE_URL, {
+        maxZoom: NEIGHBORHOOD_MIN_ZOOM + 1,
+        maxNativeZoom: 13,
+        attribution: 'Tiles &copy; Esri',
+      }).addTo(map)
+      L.tileLayer(LABEL_URL, { maxZoom: NEIGHBORHOOD_MIN_ZOOM - 1, maxNativeZoom: 13, pane: 'overlayPane' }).addTo(map)
+
+      const renderer = L.canvas({ padding: 0.5 })
+      const neighborhood = L.layerGroup(
+        NEIGHBORHOOD_SHAPES.map((shape) =>
+          L.polygon(
+            shape.points.map(([x, y]) => toLatLng(x, y)),
+            { renderer, color: shape.stroke, weight: 1, fillColor: shape.fill, fillOpacity: 1, interactive: false },
+          ),
+        ),
+      )
+      const syncNeighborhood = () => {
+        if (!map) return
+        const visible = map.getZoom() >= NEIGHBORHOOD_MIN_ZOOM
+        if (visible && !map.hasLayer(neighborhood)) neighborhood.addTo(map)
+        if (!visible && map.hasLayer(neighborhood)) neighborhood.remove()
+      }
+      syncNeighborhood()
+      map.on('zoomend', syncNeighborhood)
+
+      L.polygon(
+        CAMPUS.points.map(([x, y]) => toLatLng(x, y)),
+        { color: '#B7CAEA', weight: 1, fillColor: '#DCE6F7', fillOpacity: 0.9, interactive: false },
+      ).addTo(map)
+
+      const nextElements: Record<string, HTMLElement> = {}
+      for (const place of PLACES) {
+        const marker = L.marker(toLatLng(place.x, place.y), {
+          icon: L.divIcon({ className: 'naver-poi', html: '', iconSize: [0, 0] }),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: place.id === HOME.id ? 500 : place.kind === 'school' ? 100 : 0,
+        }).addTo(map)
+        markersRef.current[place.id] = marker
+        const element = marker.getElement()
+        if (element) nextElements[place.id] = element
+      }
+
+      overlayRef.current = L.layerGroup().addTo(map)
+
+      map.on('zoomend', () => map && handlers.current.onZoomChange(map.getZoom()))
+      map.on('click', (event) => {
+        const target = event.originalEvent.target as HTMLElement | null
+        if (!target?.closest('[data-poi]')) handlers.current.onBackground()
+      })
+
+      mapRef.current = map
+      setElements(nextElements)
+      setLeaflet(L)
+    })
+
     return () => {
-      el.removeEventListener('touchstart', handleTouchStart)
-      el.removeEventListener('touchmove', handleTouchMove)
-      el.removeEventListener('touchend', handleTouchEnd)
-      el.removeEventListener('touchcancel', handleTouchEnd)
-      el.removeEventListener('wheel', handleWheel)
+      cancelled = true
+      map?.remove()
+      mapRef.current = null
+      markersRef.current = {}
+      overlayRef.current = null
     }
-  }, [scrollRef])
+  }, [mapRef])
 
-  const pos = (x: number, y: number) => ({ left: x * zoom * MAP_SCALE, top: y * zoom * MAP_SCALE })
-  const width = MAP_WIDTH * zoom
-  const height = MAP_HEIGHT * zoom
+  useEffect(() => {
+    if (active) mapRef.current?.invalidateSize()
+  }, [active, mapRef])
+
+  useEffect(() => {
+    for (const [id, marker] of Object.entries(markersRef.current)) {
+      const base = id === HOME.id ? 500 : 0
+      marker.setZIndexOffset(id === selectedId ? 1000 : base)
+    }
+  }, [selectedId, leaflet])
+
+  useEffect(() => {
+    const group = overlayRef.current
+    if (!leaflet || !group) return
+    group.clearLayers()
+
+    if (route) {
+      const latLngs = route.points.map(([x, y]) => toLatLng(x, y))
+      const colors = ROUTE_COLORS[route.mode]
+      if (route.mode === 'walk') {
+        leaflet
+          .polyline(latLngs, { color: colors.line, weight: 6, dashArray: '1 11', lineCap: 'round', interactive: false })
+          .addTo(group)
+      } else {
+        leaflet.polyline(latLngs, { color: colors.outline, weight: 10, lineJoin: 'round', interactive: false }).addTo(group)
+        leaflet.polyline(latLngs, { color: colors.line, weight: 6, lineJoin: 'round', interactive: false }).addTo(group)
+      }
+      leaflet
+        .circleMarker(latLngs[0], { radius: 6, color: colors.outline, weight: 3, fillColor: '#FFFFFF', fillOpacity: 1, interactive: false })
+        .addTo(group)
+    }
+
+    if (navPoint) {
+      leaflet
+        .marker(toLatLng(...navPoint), {
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 2000,
+          icon: leaflet.divIcon({
+            className: 'naver-poi',
+            iconSize: [0, 0],
+            html: '<span style="position:absolute;left:-17px;top:-17px;width:34px;height:34px;border-radius:9999px;background:#03C75A;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)"></span>',
+          }),
+        })
+        .addTo(group)
+    }
+  }, [leaflet, route, navPoint])
 
   return (
-    <div
-      ref={scrollRef}
-      className="absolute inset-0 touch-pan-x touch-pan-y overflow-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
-      <div className="flex min-h-full min-w-full items-center justify-center" style={{ width, height }}>
-      <div
-        className="relative shrink-0"
-        style={{ width, height }}
-        onClick={onBackground}
-        onDoubleClick={(event) => {
-          const el = scrollRef.current
-          if (!el) return
-          const rect = el.getBoundingClientRect()
-          const ratio = el.clientWidth / rect.width || 1
-          onZoom(zoom * 1.6, (event.clientX - rect.left) * ratio, (event.clientY - rect.top) * ratio)
-        }}
-      >
-        <svg aria-hidden width={width} height={height} viewBox={`0 0 ${MAP_BASE_WIDTH} ${MAP_BASE_HEIGHT}`} className="absolute inset-0">
-          <defs>
-            <pattern id="gmap-blocks" width="56" height="56" patternUnits="userSpaceOnUse">
-              <rect x="7" y="7" width="42" height="42" rx="4" fill="#000000" fillOpacity={0.045} />
-            </pattern>
-          </defs>
-          <rect width={MAP_BASE_WIDTH} height={MAP_BASE_HEIGHT} fill="#F1F3F4" />
-
-          {DISTRICTS.map((district) => (
-            <polygon key={district.name} points={district.points} fill={district.fill} />
-          ))}
-          <rect width={MAP_BASE_WIDTH} height={MAP_BASE_HEIGHT} fill="url(#gmap-blocks)" />
-
-          <ellipse cx="840" cy="500" rx="90" ry="60" fill="#CEEAD6" />
-          <ellipse cx="140" cy="590" rx="75" ry="45" fill="#CEEAD6" />
-          <ellipse cx="580" cy="930" rx="85" ry="42" fill="#CEEAD6" />
-          <rect x="640" y="180" width="170" height="150" rx="20" fill="#F3E8D8" />
-          <ellipse cx="110" cy="180" rx="80" ry="55" fill="#AECBFA" />
-          <path d="M-20,1085 C250,1010 560,1145 980,1050" fill="none" stroke="#AECBFA" strokeWidth="46" />
-
-          {MINOR_ROADS.map((d, index) => (
-            <path key={`minor-${index}`} d={d} fill="none" stroke="#FFFFFF" strokeWidth={9} />
-          ))}
-          {MAIN_ROADS.map((d, index) => (
-            <g key={`main-${index}`}>
-              <path d={d} fill="none" stroke="#F2C14E" strokeWidth={19} />
-              <path d={d} fill="none" stroke="#FDE293" strokeWidth={15} />
-            </g>
-          ))}
-
-          {DISTRICTS.map((district) => (
-            <polygon
-              key={district.name}
-              points={district.points}
-              fill="none"
-              stroke="#80868B"
-              strokeOpacity={0.7}
-              strokeWidth={1.5}
-              strokeDasharray="6 5"
-              vectorEffect="non-scaling-stroke"
-            />
-          ))}
-          <path
-            d={AREA_GROUP.path}
-            fill="#8E63CE"
-            fillOpacity={0.06}
-            stroke="#8E63CE"
-            strokeOpacity={0.75}
-            strokeWidth={2.5}
-            strokeDasharray="10 6"
-            vectorEffect="non-scaling-stroke"
-          />
-
-          {polyline &&
-            (route?.mode === 'walk' ? (
-              <polyline
-                points={polyline}
-                fill="none"
-                stroke="#1A73E8"
-                strokeWidth={8}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeDasharray="0.1 14"
-              />
-            ) : (
-              <>
-                <polyline points={polyline} fill="none" stroke="#1967D2" strokeWidth={12} strokeLinejoin="round" strokeLinecap="round" />
-                <polyline
-                  points={polyline}
-                  fill="none"
-                  stroke={route?.mode === 'transit' ? '#34A853' : '#4285F4'}
-                  strokeWidth={8}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              </>
-            ))}
-          {route && (
-            <circle cx={route.points[0][0]} cy={route.points[0][1]} r={7} fill="#FFFFFF" stroke="#1967D2" strokeWidth={4} />
-          )}
-        </svg>
-
-        {DISTRICT_LABELS.map((label) => (
-          <span
-            key={label.name}
-            aria-hidden
-            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 text-[15px] font-semibold tracking-[0.25em] text-[#5F6368] [text-shadow:0_0_3px_#fff,0_0_3px_#fff]"
-            style={pos(label.x, label.y)}
-          >
-            {label.name}
-          </span>
-        ))}
-
-        {!navPoint && (
-          <span
-            aria-hidden
-            className="absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#1A73E8] shadow ring-[10px] ring-[#1A73E8]/20"
-            style={pos(HOME.x, HOME.y)}
-          />
-        )}
-
-        {PLACES.map((place) => {
-          const selected = place.id === selectedId
-          if (place.kind === 'area' && !selected) return null
-          return (
-            <button
-              key={place.id}
-              type="button"
-              aria-label={`${place.name} (${place.dong})`}
-              aria-pressed={selected}
-              onClick={(event) => {
-                event.stopPropagation()
-                onSelect(place.id)
-              }}
-              onDoubleClick={(event) => event.stopPropagation()}
-              className="absolute flex -translate-x-1/2 -translate-y-full flex-col items-center"
-              style={pos(place.x, place.y)}
-            >
-              {selected ? (
-                <span className="mb-1.5 flex size-8 -rotate-45 items-center justify-center rounded-[50%_50%_50%_0] bg-[#EA4335] shadow-md">
-                  <span className="size-3 rounded-full bg-[#B31412]" />
-                </span>
-              ) : (
-                <>
-                  <PlaceIcon
-                    kind={place.kind}
-                    className={cn('border-2 border-white shadow-md', place.kind === 'area' ? 'size-6' : 'size-8')}
-                    iconClassName={place.kind === 'area' ? 'size-3' : 'size-4'}
-                  />
-                  <span className="h-2 w-0.5 bg-[#5F6368]" />
-                </>
-              )}
-              <span className="absolute left-full top-1/4 ml-0.5 flex flex-col items-start gap-0.5">
-                <span
-                  className={cn(
-                    'whitespace-nowrap text-[13px] font-semibold leading-tight [text-shadow:0_0_2px_#fff,0_0_3px_#fff,0_0_4px_#fff]',
-                    selected ? 'text-[#C5221F]' : KIND_STYLES[place.kind].text,
-                  )}
-                >
-                  {place.name}
-                </span>
-              </span>
-            </button>
-          )
-        })}
-
-        {navPoint && (
-          <span
-            aria-hidden
-            className="absolute z-10 flex size-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-white bg-[#1A73E8] shadow-lg transition-[left,top] duration-700"
-            style={pos(navPoint[0], navPoint[1])}
-          >
-            <Navigation className="size-4 fill-white text-white" />
-          </span>
-        )}
-      </div>
-      </div>
+    <div className="absolute inset-0 isolate">
+      <div ref={containerRef} className="size-full [&.leaflet-container]:!bg-white [&_.leaflet-control-attribution]:!bg-white/70 [&_.leaflet-control-attribution]:!text-[9px]" />
+      {PLACES.map((place) => {
+        const element = elements[place.id]
+        if (!element) return null
+        return createPortal(
+          <Pin
+            place={place}
+            zoom={zoom}
+            selected={place.id === selectedId}
+            hidden={place.id === HOME.id && navPoint !== null}
+            onSelect={onSelect}
+          />,
+          element,
+          place.id,
+        )
+      })}
     </div>
+  )
+}
+
+type PinProps = {
+  place: Place
+  zoom: number
+  selected: boolean
+  hidden: boolean
+  onSelect: (id: string) => void
+}
+
+function Pin({ place, zoom, selected, hidden, onSelect }: PinProps) {
+  if (hidden) return null
+  const isHome = place.id === HOME.id
+  const isUnion = place.id === 'union'
+  const showIcon = selected || ALWAYS_VISIBLE.has(place.id) || zoom >= ICON_ZOOM || (isUnion && zoom >= 13)
+  if (!showIcon) return null
+  const showLabel = selected || zoom >= LABEL_ZOOM || (place.kind === 'school' && zoom >= ICON_ZOOM) || (isUnion && zoom >= 13)
+  const label = isUnion && zoom < ICON_ZOOM ? '소원대학교' : place.name
+
+  return (
+    <button
+      type="button"
+      data-poi
+      aria-label={`${place.name} (${place.dong})`}
+      aria-pressed={selected}
+      onClick={() => onSelect(place.id)}
+      style={{ pointerEvents: 'auto' }}
+      className={cn(
+        'absolute left-0 top-0 flex -translate-x-1/2 items-center justify-center font-sans',
+        selected ? '-translate-y-full' : '-translate-y-1/2',
+      )}
+    >
+      {selected ? (
+        <span className="mb-0.5 flex size-9 -rotate-45 items-center justify-center rounded-[50%_50%_50%_0] border-2 border-white bg-[#03C75A] shadow-md">
+          <PlaceIcon kind={place.kind} className="size-5 rotate-45 bg-transparent" iconClassName="size-3.5" />
+        </span>
+      ) : isHome ? (
+        <span className="size-4 rounded-full border-[3px] border-white bg-[#2F7BF5] shadow ring-[9px] ring-[#2F7BF5]/20" />
+      ) : (
+        <PlaceIcon kind={place.kind} className="size-[22px] border-[1.5px] border-white shadow-[0_1px_3px_rgba(0,0,0,0.3)]" iconClassName="size-3" />
+      )}
+      {showLabel && (
+        <span
+          className={cn(
+            'absolute left-1/2 top-full mt-0.5 -translate-x-1/2 whitespace-nowrap text-center text-[12px] font-bold leading-tight [text-shadow:0_0_2px_#fff,0_0_3px_#fff,0_0_4px_#fff,0_0_5px_#fff]',
+            selected ? 'text-[#02873D]' : isHome ? 'text-[#2F7BF5]' : KIND_STYLES[place.kind].text,
+          )}
+        >
+          {label}
+        </span>
+      )}
+    </button>
   )
 }

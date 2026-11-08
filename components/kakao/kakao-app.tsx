@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { replaceUserName } from '@/lib/korean-name'
+import { OWNER_AVATAR } from '@/lib/template-config'
 import { cn } from '@/lib/utils'
 import { CHATS } from './chat-data'
 import { ChatList } from './chat-list'
@@ -26,6 +27,7 @@ function personalizeChat(chat: Chat, owner: string): Chat {
 
   return {
     ...chat,
+    avatar: chat.self ? OWNER_AVATAR : chat.avatar,
     name: replaceName(chat.name),
     preview: replaceName(chat.preview),
     items: chat.items.map((item) => item.type === 'msg' ? { ...item, text: replaceName(item.text) } : item),

@@ -99,7 +99,7 @@ function ReservationSection({
                   <button
                     type="button"
                     onClick={() => onDirections(place.id)}
-                    className="flex h-11 items-center gap-2 rounded-full bg-[#1A73E8] px-4 text-[14px] font-semibold text-white active:bg-[#1765CC]"
+                    className="flex h-11 items-center gap-2 rounded-full bg-[#03C75A] px-4 text-[14px] font-semibold text-white active:bg-[#02B350]"
                   >
                     <Navigation aria-hidden className="size-4 fill-white" />
                     길찾기
@@ -107,7 +107,7 @@ function ReservationSection({
                   <button
                     type="button"
                     onClick={() => onShowOnMap(place.id)}
-                    className="flex h-11 items-center rounded-full border border-[#DADCE0] px-4 text-[14px] font-semibold text-[#1A73E8] active:bg-black/5"
+                    className="flex h-11 items-center rounded-full border border-[#DADCE0] px-4 text-[14px] font-semibold text-[#02A84C] active:bg-black/5"
                   >
                     지도에서 보기
                   </button>

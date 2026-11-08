@@ -18,6 +18,7 @@ import { AREA_GROUP, PLACES, TRAVEL_MODES, type Place, type TravelModeId } from 
 import {
   arrivalLabel,
   buildTrip,
+  formatDistance,
   formatDuration,
   HOME,
   placeLabel,
@@ -87,7 +88,7 @@ export function DirectionsHeader({
             onClick={onPickOrigin}
             className="flex h-11 items-center gap-3 rounded-lg border border-[#DADCE0] px-3 text-left text-[15px] text-[#202124]"
           >
-            <span aria-hidden className="size-3 shrink-0 rounded-full border-[3px] border-[#1A73E8]" />
+            <span aria-hidden className="size-3 shrink-0 rounded-full border-[3px] border-[#03C75A]" />
             <span className="sr-only">출발지: </span>
             <span className="truncate">{placeLabel(origin)}</span>
           </button>
@@ -129,7 +130,7 @@ export function DirectionsHeader({
                 onClick={() => onModeChange(item.id)}
                 className={cn(
                   'flex h-10 shrink-0 items-center gap-1.5 rounded-full px-3 text-[14px]',
-                  active ? 'bg-[#E8F0FE] font-semibold text-[#1A73E8]' : 'text-[#3C4043]',
+                  active ? 'bg-[#E6F9EE] font-semibold text-[#02A84C]' : 'text-[#3C4043]',
                 )}
               >
                 <Icon aria-hidden className="size-4" />
@@ -158,7 +159,9 @@ export function RouteSheet({ origin, trip, mode, onPickDestination, onStart }: R
         <Handle />
         <h2 className="text-[18px] font-semibold text-[#202124]">어디로 갈까요?</h2>
         <ul className="mt-2 max-h-[220px] overflow-y-auto">
-          {PLACES.filter((place) => place.id !== origin.id).map((place) => (
+          {PLACES.filter((place) => place.id !== origin.id)
+            .sort((a, b) => routeKm(origin, a) - routeKm(origin, b))
+            .map((place) => (
             <li key={place.id}>
               <button
                 type="button"
@@ -170,7 +173,7 @@ export function RouteSheet({ origin, trip, mode, onPickDestination, onStart }: R
                   <span className="block text-[15px] text-[#202124]">{place.name}</span>
                   <span className="block text-[13px] text-[#5F6368]">{place.dong}</span>
                 </span>
-                <span className="text-[13px] text-[#5F6368]">{routeKm(origin, place)}km</span>
+                <span className="text-[13px] text-[#5F6368]">{formatDistance(routeKm(origin, place))}</span>
               </button>
             </li>
           ))}
@@ -197,7 +200,7 @@ export function RouteSheet({ origin, trip, mode, onPickDestination, onStart }: R
         <button
           type="button"
           onClick={onStart}
-          className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-[#1A73E8] px-5 text-[15px] font-semibold text-white active:bg-[#1765CC]"
+          className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-[#03C75A] px-5 text-[15px] font-semibold text-white active:bg-[#02B350]"
         >
           <Navigation aria-hidden className="size-4 fill-white" />
           시작
@@ -213,7 +216,7 @@ export function RouteSheet({ origin, trip, mode, onPickDestination, onStart }: R
                 aria-hidden
                 className={cn(
                   'size-5 shrink-0',
-                  step.icon === 'end' ? 'text-[#EA4335]' : step.icon === 'start' ? 'text-[#1A73E8]' : 'text-[#5F6368]',
+                  step.icon === 'end' ? 'text-[#EA4335]' : step.icon === 'start' ? 'text-[#02A84C]' : 'text-[#5F6368]',
                 )}
               />
               <span className="text-[15px] text-[#3C4043]">{step.text}</span>
@@ -267,7 +270,7 @@ export function NavigationView({ trip, step, onNext, onEnd }: NavigationViewProp
         <button
           type="button"
           onClick={last ? onEnd : onNext}
-          className="flex h-11 shrink-0 items-center rounded-full bg-[#1A73E8] px-4 text-[15px] font-semibold text-white"
+          className="flex h-11 shrink-0 items-center rounded-full bg-[#03C75A] px-4 text-[15px] font-semibold text-white"
         >
           {last ? '완료' : '다음 안내'}
         </button>
@@ -347,7 +350,7 @@ export function PlaceSheet({ place, onClose, onDirections, onSetOrigin, onSelect
         <button
           type="button"
           onClick={onDirections}
-          className="flex h-11 items-center gap-2 rounded-full bg-[#1A73E8] px-5 text-[15px] font-semibold text-white active:bg-[#1765CC]"
+          className="flex h-11 items-center gap-2 rounded-full bg-[#03C75A] px-5 text-[15px] font-semibold text-white active:bg-[#02B350]"
         >
           <Navigation aria-hidden className="size-4 fill-white" />
           길찾기
@@ -355,7 +358,7 @@ export function PlaceSheet({ place, onClose, onDirections, onSetOrigin, onSelect
         <button
           type="button"
           onClick={onSetOrigin}
-          className="flex h-11 items-center gap-2 rounded-full border border-[#DADCE0] px-5 text-[15px] font-semibold text-[#1A73E8] active:bg-black/5"
+          className="flex h-11 items-center gap-2 rounded-full border border-[#DADCE0] px-5 text-[15px] font-semibold text-[#02A84C] active:bg-black/5"
         >
           출발
         </button>

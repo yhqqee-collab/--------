@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 import { Moon } from 'lucide-react'
 import type { DaySnapshot } from '@/components/kakao/snapshot'
 import { CalendarApp } from '@/components/calendar/calendar-app'
+import { todayFor } from '@/components/calendar/calendar-data'
 import { InstagramApp } from '@/components/instagram/instagram-app'
 import { StoryViewer } from '@/components/instagram/story-viewer'
 import { NOTIFICATION_COMMENT } from '@/components/instagram/instagram-data'
@@ -22,6 +23,7 @@ import { WeverseApp } from '@/components/weverse/weverse-app'
 import { FortuneApp } from '@/components/fortune/fortune-app'
 import { NotesApp } from '@/components/notes/notes-app'
 import { EverytimeApp } from '@/components/everytime/everytime-app'
+import { BaeminApp } from '@/components/baemin/baemin-app'
 import { DEFAULT_INSTAGRAM_ID, DEFAULT_OWNER_NAME } from '@/lib/template-config'
 import { BustedScreen } from './busted-screen'
 import { SpamOverlay } from './spam-overlay'
@@ -56,6 +58,7 @@ type AppId =
   | 'fortune'
   | 'notes'
   | 'everytime'
+  | 'baemin'
 
 const INITIALS = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'c', 'k', 't', 'p', 'h']
 const MEDIALS = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i']
@@ -77,7 +80,7 @@ function toInstagramId(name: string) {
 const WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
 
 function dayLabel(day: number) {
-  const date = new Date(2026, 9, 25 + day)
+  const date = todayFor(day)
   return `${date.getMonth() + 1}월 ${date.getDate()}일 ${WEEKDAYS[date.getDay()]}`
 }
 
@@ -187,7 +190,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const bannerMessage =
     bannerKind === 'safari'
       ? NOTIFICATION_COMMENT
-        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습���다: ${NOTIFICATION_COMMENT.comment.text}`
+        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습�����다: ${NOTIFICATION_COMMENT.comment.text}`
         : ''
       : kakaoNotice
         ? `${CHAT_DISPLAY_NAMES[kakaoNotice.id] ?? '새 메시지'}: ${kakaoNotice.text}`
@@ -246,8 +249,10 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenFortune={() => setOpenApp('fortune')}
         onOpenNotes={() => setOpenApp('notes')}
         onOpenEverytime={() => setOpenApp('everytime')}
+        onOpenBaemin={() => setOpenApp('baemin')}
       />
       <EverytimeApp open={activeApp === 'everytime'} />
+      <BaeminApp open={activeApp === 'baemin'} />
       <FortuneApp open={activeApp === 'fortune'} day={currentDay} dateLabel={dayLabel(currentDay)} />
       <NotesApp open={activeApp === 'notes'} />
       <PhotosApp open={activeApp === 'photos'} />

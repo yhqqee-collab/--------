@@ -44,9 +44,12 @@ export type Character = {
 /** 메인 공략 캐릭터 3명. 키(a/b/c)는 채팅방 id·스크립트 키와 연결됩니다. */
 export const CHARACTERS: Record<'a' | 'b' | 'c', Character> = {
   a: { name: '오시온', handle: 'sion_5', avatar: '/avatars/sion.jpg', color: '#4F7DD8' },
-  b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku.jpg', color: '#E8A33D' },
-  c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi.jpg', color: '#4CAF7A' },
+  b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku.png', color: '#E8A33D' },
+  c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi.png', color: '#4CAF7A' },
 }
+
+/** 여주(휴대폰 주인) 프로필 사진. 카카오톡·인스타그램에 공통 적용됩니다. */
+export const OWNER_AVATAR = '/avatars/yeoju.png'
 
 /** 단톡방 조연 멤버. avatar/handle 이 있으면 카카오톡·인스타그램에 함께 쓰입니다. */
 export const GROUP_MEMBERS = {
@@ -54,12 +57,16 @@ export const GROUP_MEMBERS = {
   sujin: { name: '박수진' },
   yuna: { name: '이윤아' },
   daeyoung: { name: '김대영', handle: 'dddaaaeee', avatar: '/avatars/daeyoung.jpg' },
-  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.jpg' },
+  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.png' },
   ryo: { name: '료', handle: 'ryoryoryo', avatar: '/avatars/ryo.jpg' },
 } satisfies Record<string, { name: string; handle?: string; avatar?: string }>
 
 /** 단톡방 이름 */
-export const GROUP_CHAT_NAME = '카페 직원 단톡방'
+export const GROUP_CHAT_NAME = '경영경제 학우들'
+
+/** 동아리 단톡방 이름 / 총 인원 */
+export const CLUB_CHAT_NAME = '한일문화교류동아리'
+export const CLUB_CHAT_MEMBERS = 23
 
 /** 등장인물 프로필 사진 (이름 기준). 카카오톡·인스타그램에 공통 적용됩니다. */
 export const PERSON_AVATARS: Record<string, string> = Object.fromEntries(
@@ -67,6 +74,12 @@ export const PERSON_AVATARS: Record<string, string> = Object.fromEntries(
     .filter((person): person is typeof person & { avatar: string } => 'avatar' in person && Boolean(person.avatar))
     .map((person) => [person.name, person.avatar]),
 )
+
+/** 인스타그램에서만 카카오톡과 다른 프로필 사진을 쓰는 인물 (이름 기준). */
+export const INSTAGRAM_AVATAR_OVERRIDES: Record<string, string> = {
+  오시온: '/avatars/sion-insta.png',
+  유우시: '/avatars/yushi.jpg',
+}
 
 /** 인스타그램 아이디 고정값. 댓글·좋아요·DM에는 항상 이 아이디가 노출됩니다. */
 export const INSTAGRAM_IDS = {

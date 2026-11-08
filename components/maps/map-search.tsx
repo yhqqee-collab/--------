@@ -2,19 +2,22 @@
 
 import { ArrowLeft, X } from 'lucide-react'
 import { useState } from 'react'
-import { HOME, routeKm, searchPlaces } from './map-utils'
+import { formatDistance, HOME, routeKm, searchPlaces } from './map-utils'
 import { PlaceIcon } from './place-icon'
 
 type MapSearchProps = {
   placeholder: string
+  initialQuery?: string
   excludeId?: string | null
   onClose: () => void
   onPick: (id: string) => void
 }
 
-export function MapSearch({ placeholder, excludeId, onClose, onPick }: MapSearchProps) {
-  const [query, setQuery] = useState('')
-  const results = searchPlaces(query).filter((place) => place.id !== excludeId)
+export function MapSearch({ placeholder, initialQuery = '', excludeId, onClose, onPick }: MapSearchProps) {
+  const [query, setQuery] = useState(initialQuery)
+  const results = searchPlaces(query)
+    .filter((place) => place.id !== excludeId)
+    .sort((a, b) => routeKm(HOME, a) - routeKm(HOME, b))
 
   return (
     <div className="absolute inset-0 z-40 flex flex-col bg-white">
@@ -77,7 +80,7 @@ export function MapSearch({ placeholder, excludeId, onClose, onPick }: MapSearch
                     </span>
                   </span>
                   <span className="shrink-0 text-[13px] text-[#5F6368]">
-                    {place.id === HOME.id ? '내 위치' : `${routeKm(HOME, place)}km`}
+                    {place.id === HOME.id ? '내 위치' : formatDistance(routeKm(HOME, place))}
                   </span>
                 </button>
               </li>

@@ -31,7 +31,7 @@ const DIVIDER_WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '�
 
 /** 각 멤버의 그날 첫 카톡 위에 붙는 날짜 구분선 */
 export function dayDivider(day: number) {
-  const date = new Date(2026, 9, 25 + day)
+  const date = new Date(2026, 10, 5 + day)
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${DIVIDER_WEEKDAYS[date.getDay()]}`
 }
 

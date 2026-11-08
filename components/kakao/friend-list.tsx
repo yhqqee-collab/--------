@@ -1,3 +1,4 @@
+import { OWNER_AVATAR } from '@/lib/template-config'
 import { Avatar } from './avatar'
 import type { Chat } from './chat-data'
 
@@ -28,7 +29,7 @@ export function FriendList({ chats, owner }: FriendListProps) {
     <div className="flex-1 overflow-y-auto pb-3 [scrollbar-width:none]">
       {me && (
         <div className="flex items-center gap-3 px-5 py-3">
-          <Avatar name={me.name} size={58} />
+          <Avatar src={OWNER_AVATAR} name={me.name} size={58} />
           <span className="text-[16px] font-semibold tracking-[-0.01em]">{me.name}</span>
         </div>
       )}
