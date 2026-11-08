@@ -62,7 +62,11 @@ export const GROUP_MEMBERS = {
 } satisfies Record<string, { name: string; handle?: string; avatar?: string }>
 
 /** 단톡방 이름 */
-export const GROUP_CHAT_NAME = '카페 직원 단톡방'
+export const GROUP_CHAT_NAME = '경영경제 학우들'
+
+/** 동아리 단톡방 이름 / 총 인원 */
+export const CLUB_CHAT_NAME = '한일문화교류동아리'
+export const CLUB_CHAT_MEMBERS = 23
 
 /** 등장인물 프로필 사진 (이름 기준). 카카오톡·인스타그램에 공통 적용됩니다. */
 export const PERSON_AVATARS: Record<string, string> = Object.fromEntries(

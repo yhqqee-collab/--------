@@ -1,4 +1,4 @@
-import { CHARACTERS, GROUP_CHAT_NAME, GROUP_MEMBERS } from '@/lib/template-config'
+import { CHARACTERS, CLUB_CHAT_MEMBERS, CLUB_CHAT_NAME, GROUP_CHAT_NAME, GROUP_MEMBERS } from '@/lib/template-config'
 
 export type ChatItem =
   | { type: 'date'; label: string }
@@ -60,7 +60,17 @@ const DAEYOUNG = GROUP_MEMBERS.daeyoung.name
 const SAKUYA = GROUP_MEMBERS.sakuya.name
 const RYO = GROUP_MEMBERS.ryo.name
 
-const STAFF_ROSTER = [ME, SION, RIKU, YUSHI, DAEYOUNG, SAKUYA, RYO]
+const MINWOO = GROUP_MEMBERS.minwoo.name
+const SUJIN = GROUP_MEMBERS.sujin.name
+const YUNA = GROUP_MEMBERS.yuna.name
+
+const STAFF_ROSTER = [ME, SION, MINWOO, SUJIN, YUNA]
+
+const CLUB_EXTRA_MEMBERS = [
+  '강하늘', '김서연', '나카무라 히나', '문지호', '박건우', '송유진', '스즈키 렌', '안다은',
+  '오카다 미유', '윤재민', '이채원', '장민서', '최도윤', '타나카 소라', '한예린', '황지훈',
+]
+const CLUB_ROSTER = [ME, SION, RIKU, YUSHI, DAEYOUNG, SAKUYA, RYO, ...CLUB_EXTRA_MEMBERS].slice(0, CLUB_CHAT_MEMBERS)
 
 /** 단톡방 한 사람의 연속 발화. ME('나')는 오른쪽 노란 말풍선으로 표시됩니다. */
 function say(sender: string, time: string, ...texts: string[]): ChatItem[] {
@@ -376,7 +386,7 @@ export const CHATS: Chat[] = [
     ],
   },
 
-  /* ────────��────────────── 3. 토쿠노 유우시 (c) ─────────────────────── */
+  /* ────────���────────────── 3. 토쿠노 유우시 (c) ─────────────────────── */
   {
     id: 'c',
     name: CHARACTERS.c.name,
@@ -511,12 +521,39 @@ export const CHATS: Chat[] = [
     ],
   },
 
-  /* ─────────────────────── 4. 동아리 단톡방 (staff) ─────────────────────── */
+  /* ─────────────────────── 4. 경영경제 학우들 (staff) ─────────────────────── */
   {
     id: 'staff',
     name: GROUP_CHAT_NAME,
     members: STAFF_ROSTER.length,
     roster: STAFF_ROSTER,
+    preview: '다들 방학 전에 종강 파티 한 번 하자 ㅋㅋ',
+    time: '어제',
+    unread: 0,
+    items: [
+      day('2026년 11월 4일 수요일'),
+      ...say(MINWOO, '오후 9:12', '내일 경제원론 시험 범위 7장까지 맞지?', '교수님이 수업 때 6장까지라고 하신 것 같기도 하고...'),
+      ...say(SUJIN, '오후 9:14', '공지 다시 봤는데 7장까지 맞아 ㅠㅠ'),
+      ...say(YUNA, '오후 9:15', '헐 7장 탄력성 계산 문제 나오면 끝인데'),
+      ...say(SION, '오후 9:18', '내가 소행론이랑 경제원론 요약본 만들어둔 거 있음', '이따 올려줄게 ㅋㅋ'),
+      ...say(ME, '오후 9:19', '시온이 최고 ㅠㅠ 고마워!!'),
+      ...say(MINWOO, '오후 9:20', '오시온 이번 학기 과탑 각이다'),
+
+      day('2026년 11월 5일 목요일'),
+      ...say(SUJIN, '오후 1:05', '경제원론 끝!!! 다들 어땠어?'),
+      ...say(YUNA, '오후 1:07', '시온이 요약본에서 거의 다 나왔어 미쳤다'),
+      ...say(ME, '오후 1:08', '나도 요약본 덕분에 살았어 ㅋㅋㅋ'),
+      ...say(MINWOO, '오후 1:10', '다음 주 재무관리 팀플 자료조사 분담은 주말에 정하자'),
+      ...say(SION, '오후 1:12', '다들 방학 전에 종강 파티 한 번 하자 ㅋㅋ'),
+    ],
+  },
+
+  /* ─────────────────────── 5. 한일문화교류동아리 (club) ─────────────────────── */
+  {
+    id: 'club',
+    name: CLUB_CHAT_NAME,
+    members: CLUB_CHAT_MEMBERS,
+    roster: CLUB_ROSTER,
     preview: '오케이 내일 7시 동방 늦지 마셈!',
     time: '어제',
     unread: 0,
