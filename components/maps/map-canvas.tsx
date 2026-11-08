@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import {
   CAMPUS,
+  CAMPUS_BUILDINGS,
   DEFAULT_ZOOM,
   ICON_ZOOM,
   KOREA_BOUNDS,
@@ -110,6 +111,28 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
         CAMPUS.points.map(([x, y]) => toLatLng(x, y)),
         { color: '#B7CAEA', weight: 1, fillColor: '#DCE6F7', fillOpacity: 0.9, interactive: false },
       ).addTo(map)
+
+      for (const building of CAMPUS_BUILDINGS) {
+        const halfW = building.w / 2
+        const halfH = building.h / 2
+        const corners: Point[] = [
+          [building.x - halfW, building.y - halfH],
+          [building.x + halfW, building.y - halfH],
+          [building.x + halfW, building.y + halfH],
+          [building.x - halfW, building.y + halfH],
+        ]
+        const isField = building.kind === 'field'
+        L.polygon(
+          corners.map(([x, y]) => toLatLng(x, y)),
+          {
+            color: isField ? '#9FCF9A' : '#A9B6CC',
+            weight: 1,
+            fillColor: isField ? '#CDE8C5' : '#EEF1F6',
+            fillOpacity: 1,
+            interactive: false,
+          },
+        ).addTo(map)
+      }
 
       const nextElements: Record<string, HTMLElement> = {}
       for (const place of PLACES) {

@@ -102,6 +102,8 @@ const SEEDS: Seed[] = [
   ['library', '중앙도서관', 'school', -150, -110, '소원동', '소원대학교 중앙도서관 · 열람실 24시간', ['소원대', '도서관', '열람실']],
   ['engineering', '공학관', 'school', 170, -120, '소원동', '소원대학교 공학관', ['소원대']],
   ['humanities', '인문관', 'school', -175, 75, '소원동', '소원대학교 인문관', ['소원대']],
+  ['business', '경영관', 'school', 25, -130, '소원동', '소원대학교 경영관 · 경영경제대학', ['소원대', '경영', '경제', '경영경제']],
+  ['social-science', '사과관', 'school', -65, 130, '소원동', '소원대학교 사회과학관', ['소원대', '사회과학관', '사과대']],
   ['field', '대운동장', 'park', 155, 95, '소원동', '소원대학교 대운동장', ['소원대', '운동장']],
 
   ['mega-coffee', '메가MGC커피 소원대정문점', 'cafe', -45, 285, '구서동', '저가 커피 · 테이크아웃', ['메가커피']],
@@ -184,6 +186,17 @@ export const CAMPUS = {
     [-270, 215],
   ] as [number, number][],
 }
+
+/** 캠퍼스 건물 사각형. x, y 는 건물 중심, w, h 는 가로·세로 미터 */
+export const CAMPUS_BUILDINGS: { id: string; x: number; y: number; w: number; h: number; kind?: 'field' }[] = [
+  { id: 'union', x: 0, y: 0, w: 70, h: 50 },
+  { id: 'library', x: -150, y: -110, w: 95, h: 60 },
+  { id: 'engineering', x: 170, y: -120, w: 100, h: 55 },
+  { id: 'humanities', x: -175, y: 75, w: 80, h: 55 },
+  { id: 'business', x: 25, y: -130, w: 85, h: 50 },
+  { id: 'social-science', x: -65, y: 130, w: 70, h: 55 },
+  { id: 'field', x: 155, y: 95, w: 150, h: 95, kind: 'field' },
+]
 
 export const AREA_GROUP = {
   name: '소원대 정문 상권',
