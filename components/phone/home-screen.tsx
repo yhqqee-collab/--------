@@ -12,7 +12,7 @@ import {
   XArt,
   YouTubeMusicArt,
 } from './app-icon-art'
-import { AblyArt, DuolingoArt, EverytimeArt, FortuneArt, GoogleMapsArt, StockArt, TikTokArt, WeverseArt } from './extra-app-art'
+import { AblyArt, DuolingoArt, EverytimeArt, FortuneArt, GoogleMapsArt, StockArt, WeverseArt } from './extra-app-art'
 import { Wallpaper } from './wallpaper'
 import { CalendarWidget, NotesWidget } from './widgets'
 
@@ -28,7 +28,6 @@ type HomeScreenProps = {
   onOpenPhotos: () => void
   onOpenDuolingo: () => void
   onOpenAbly: () => void
-  onOpenTikTok: () => void
   onOpenStock: () => void
   onOpenHotel: () => void
   onOpenMaps: () => void
@@ -50,7 +49,6 @@ export function HomeScreen({
   onOpenPhotos,
   onOpenDuolingo,
   onOpenAbly,
-  onOpenTikTok,
   onOpenStock,
   onOpenHotel,
   onOpenMaps,
@@ -98,7 +96,6 @@ export function HomeScreen({
             apps={[
               { name: '듀오링고', onClick: onOpenDuolingo, art: <DuolingoArt /> },
               { name: '에이블리', onClick: onOpenAbly, art: <AblyArt /> },
-              { name: '틱톡', onClick: onOpenTikTok, art: <TikTokArt /> },
               { name: '주식', onClick: onOpenStock, art: <StockArt /> },
               { name: 'Weverse', onClick: onOpenWeverse, art: <WeverseArt /> },
               { name: '운세', onClick: onOpenFortune, art: <FortuneArt /> },

@@ -169,6 +169,9 @@ function MyPage({ onBack }: { onBack: () => void }) {
             </h3>
             <span className="text-[12px] text-[#777]">{`총 ${MY_BOOKINGS.length}건`}</span>
           </div>
+          {MY_BOOKINGS.length === 0 && (
+            <p className="mt-3 rounded-2xl bg-white p-6 text-center text-[13px] text-[#777]">예약 내역이 없습니다.</p>
+          )}
           <ul className="mt-3 flex flex-col gap-3">
             {MY_BOOKINGS.map((booking) => (
               <li key={booking.id} className="overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">

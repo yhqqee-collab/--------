@@ -48,7 +48,11 @@ export function NotesApp({ open }: { open: boolean }) {
             </div>
           </header>
           <div className="flex-1 overflow-y-auto px-4 pb-6 [scrollbar-width:none]">
-            <h2 className="px-1 pb-1.5 pt-3 text-[18px] font-bold">최근</h2>
+            {NOTES.length === 0 ? (
+              <p className="py-16 text-center text-[15px] text-black/40">메모 없음</p>
+            ) : (
+              <h2 className="px-1 pb-1.5 pt-3 text-[18px] font-bold">최근</h2>
+            )}
             <ul className="overflow-hidden rounded-[12px] bg-white">
               {NOTES.map((n, i) => {
                 const { title, content } = splitNote(n)

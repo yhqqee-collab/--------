@@ -52,30 +52,7 @@ const HOME_PLACE: Place = {
  *  - x, y: 지도 좌표 (가로 0~960, 세로 0~1180)
  *  - keywords: 검색어
  */
-export const MAP_LOCATIONS: Place[] = [
-  {
-    id: 'sample-1',
-    name: '[샘플 장소 1]',
-    dong: '구서동',
-    address: '[주소 입력]',
-    kind: 'cafe',
-    x: 500,
-    y: 560,
-    description: '[샘플 장소 1 - 설명 입력]',
-    keywords: ['샘플1'],
-  },
-  {
-    id: 'sample-2',
-    name: '[샘플 장소 2]',
-    dong: '미추동',
-    address: '[주소 입력]',
-    kind: 'restaurant',
-    x: 620,
-    y: 830,
-    description: '[샘플 장소 2 - 설명 입력]',
-    keywords: ['샘플2'],
-  },
-]
+export const MAP_LOCATIONS: Place[] = []
 
 export const PLACES: Place[] = [HOME_PLACE, ...MAP_LOCATIONS]
 
@@ -122,25 +99,4 @@ export const TRAVEL_MODES: { id: TravelModeId; label: string; speedKmh: number; 
   { id: 'bike', label: '자전거', speedKmh: 14, extraMin: 0 },
 ]
 
-export const RESERVATIONS: Reservation[] = [
-  {
-    id: 'r1',
-    placeId: 'sample-1',
-    title: '[샘플 예약 1]',
-    date: '10월 28일 (수)',
-    time: '오후 2:00',
-    people: 2,
-    status: '예약 확정',
-    note: '[예약 메모 입력]',
-  },
-  {
-    id: 'r2',
-    placeId: 'sample-2',
-    title: '[샘플 예약 2]',
-    date: '10월 20일 (화)',
-    time: '오후 6:30',
-    people: 1,
-    status: '방문 완료',
-    note: '[예약 메모 입력]',
-  },
-]
+export const RESERVATIONS: Reservation[] = []

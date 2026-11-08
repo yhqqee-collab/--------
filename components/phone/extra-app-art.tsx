@@ -45,10 +45,6 @@ export function EverytimeArt() {
   )
 }
 
-export function TikTokArt() {
-  return <IconImage src="/images/icons/tiktok.png" />
-}
-
 export function StockArt() {
   return (
     <span className="flex size-full flex-col items-center justify-center gap-0.5 bg-gradient-to-br from-[#6B2BD9] to-[#C2185B]">

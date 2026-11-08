@@ -3,47 +3,18 @@
 import { BookOpen, Bookmark, ChevronLeft, ChevronRight, Copy, Lock, RotateCw, Share } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { NaverMapPage } from './naver-map-page'
-import { POST } from './post-data'
-import { PostPage } from './post-page'
 import { TabSwitcher, type TabSummary } from './tab-switcher'
 
-type TabKind = 'store' | 'post' | 'map' | 'motel' | 'blank'
+type TabKind = 'blank'
 type Tab = { id: string; kind: TabKind }
 
-const INITIAL_TABS: Tab[] = [
-  { id: 'tab-store', kind: 'store' },
-  { id: 'tab-post', kind: 'post' },
-  { id: 'tab-map', kind: 'map' },
-  { id: 'tab-motel', kind: 'motel' },
-]
+const INITIAL_TABS: Tab[] = [{ id: 'tab-start', kind: 'blank' }]
 
 function Favicon({ className, children }: { className: string; children: ReactNode }) {
   return (
     <span className={cn('flex size-[14px] items-center justify-center rounded-[3px] text-[8.5px] font-black text-white', className)} aria-hidden>
       {children}
     </span>
-  )
-}
-
-function MotelPage() {
-  return (
-    <div className="min-h-full bg-[#f7f7f7] px-5 pb-10 pt-5 text-[#202124]">
-      <div className="flex items-center justify-between">
-        <span className="text-[22px] font-bold tracking-[-0.04em] text-[#111]">[사이트 이름]</span>
-        <span className="rounded-full bg-[#ff4b55] px-3 py-1 text-[11px] font-semibold text-white">[배지]</span>
-      </div>
-      <div className="mt-7 rounded-[22px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
-        <p className="text-[13px] font-medium text-[#777]">[카드 라벨]</p>
-        <h2 className="mt-2 text-[28px] font-bold tracking-[-0.06em]">[카드 제목]</h2>
-        <p className="mt-1 text-[14px] text-[#666]">[날짜 · 부가 정보]</p>
-        <div className="mt-5 grid grid-cols-2 gap-3 rounded-[14px] bg-[#f5f5f5] p-3">
-          <div><p className="text-[11px] text-[#888]">[항목 1]</p><p className="mt-1 text-[17px] font-semibold">[값 1]</p></div>
-          <div><p className="text-[11px] text-[#888]">[항목 2]</p><p className="mt-1 text-[17px] font-semibold text-[#ff4b55]">[값 2]</p></div>
-        </div>
-        <div className="mt-5 flex min-h-[46px] w-full items-center justify-center rounded-[12px] bg-[#ff4b55] text-[15px] font-semibold text-white" aria-hidden="true">[버튼 텍스트]</div>
-      </div>
-    </div>
   )
 }
 
@@ -71,41 +42,7 @@ function StartPage() {
   )
 }
 
-function StorePage() {
-  return (
-    <img
-      src="/images/safari/smtown-keyring.jpg"
-      alt="SMTOWN &STORE 상품 페이지: 2025 NCT WISH 1st CONCERT TOUR 'INTO THE WISH Our WISH' FANLIGHT DOLL KEY RING, 15,000원"
-      className="block h-auto w-full"
-    />
-  )
-}
-
 const TAB_META: Record<TabKind, { title: string; url: string; favicon: ReactNode; render: () => ReactNode }> = {
-  store: {
-    title: 'FANLIGHT DOLL KEY RING - SMTOWN &STORE',
-    url: 'smtownandstore.com',
-    favicon: <Favicon className="bg-[#2E2E40]">&amp;</Favicon>,
-    render: () => <StorePage />,
-  },
-  post: {
-    title: POST.title,
-    url: 'm.community.example',
-    favicon: <Favicon className="bg-[#0A84FF]">A</Favicon>,
-    render: () => <PostPage />,
-  },
-  motel: {
-    title: '[웹페이지 제목]',
-    url: 'www.example.com',
-    favicon: <Favicon className="bg-[#ff4b55]">B</Favicon>,
-    render: () => <MotelPage />,
-  },
-  map: {
-    title: '길찾기 - 네이버 지도',
-    url: 'm.map.naver.com',
-    favicon: <Favicon className="bg-[#03C75A]">N</Favicon>,
-    render: () => <NaverMapPage />,
-  },
   blank: {
     title: '시작 페이지',
     url: '',

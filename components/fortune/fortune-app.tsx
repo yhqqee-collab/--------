@@ -13,15 +13,7 @@ type Fortune = {
   warning: string
 }
 
-const FORTUNES: Record<number, Fortune> = {
-  1: {
-    title: '평소의 궤도를 벗어나지 말아야 할 날',
-    quote: '"사소한 흔적 하나가 엉뚱한 오해의 불씨가 될 수 있습니다."',
-    body: '오늘 하루는 정해진 규칙과 패턴을 유지하는 것이 이롭습니다. 일찍 일어나는 새가 오히려 덫에 걸릴 수 있으니, 주어진 시간에 맞게 움직이세요. 무심코 남긴 낯선 말투가 당신을 곤경에 빠뜨릴 수 있습니다.',
-    lucky: '늘 하던 대로 행동하기',
-    warning: '과도한 부지런함, 평소와 다른 언행',
-  },
-}
+const FORTUNES: Record<number, Fortune> = {}
 
 const FALLBACK: Fortune = {
   title: '별들이 아직 침묵하는 날',

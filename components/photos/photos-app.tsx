@@ -31,6 +31,8 @@ function PhotoViewer({
     if (next >= 0 && next < PHOTOS.length) onChange(next)
   }
 
+  if (!photo) return null
+
   return (
     <div
       role="dialog"
@@ -191,6 +193,9 @@ export function PhotosApp({ open }: { open: boolean }) {
           </div>
         </header>
 
+        {PHOTOS.length === 0 && (
+          <p className="px-4 py-16 text-center text-[15px] text-[#8E8E93]">사진 또는 비디오 없음</p>
+        )}
         <ul className="grid grid-cols-3 gap-[2px]">
           {PHOTOS.map((photo, i) => (
             <li key={photo.id}>

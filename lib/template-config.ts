@@ -6,7 +6,7 @@
  *  - 인스타그램: components/instagram/instagram-data.ts
  *  - 캘린더: components/calendar/calendar-data.ts
  *  - 메시지: components/messages/messages-data.ts
- *  - 사파리: components/safari/post-data.ts, naver-map-page.tsx
+ *  - 사파리: components/safari/safari-app.tsx (INITIAL_TABS / TAB_META)
  *  - 사진: components/photos/photos-data.ts
  *
  * 텍스트 안에서 사용자 이름 치환 토큰을 쓸 수 있습니다 (lib/korean-name.ts).

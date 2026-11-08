@@ -16,7 +16,6 @@ import { SafariApp } from '@/components/safari/safari-app'
 import { AblyApp } from '@/components/ably/ably-app'
 import { DuolingoApp } from '@/components/duolingo/duolingo-app'
 import { StockApp } from '@/components/stock/stock-app'
-import { TikTokApp } from '@/components/tiktok/tiktok-app'
 import { HotelApp } from '@/components/hotel/hotel-app'
 import { MapsApp } from '@/components/maps/maps-app'
 import { WeverseApp } from '@/components/weverse/weverse-app'
@@ -50,7 +49,6 @@ type AppId =
   | 'photos'
   | 'duolingo'
   | 'ably'
-  | 'tiktok'
   | 'stock'
   | 'hotel'
   | 'maps'
@@ -181,7 +179,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const activeApp = locked ? null : openApp
   const appOpen = activeApp !== null
   const showStory = !locked && storyOpen && hasMyStory
-  const lightChrome = showStory || activeApp === 'tiktok'
+  const lightChrome = showStory
   const name = userName ?? owner ?? DEFAULT_OWNER_NAME
   const instagramOwner = toInstagramId(name)
 
@@ -189,7 +187,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const bannerMessage =
     bannerKind === 'safari'
       ? NOTIFICATION_COMMENT
-        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습니다: ${NOTIFICATION_COMMENT.comment.text}`
+        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습���다: ${NOTIFICATION_COMMENT.comment.text}`
         : ''
       : kakaoNotice
         ? `${CHAT_DISPLAY_NAMES[kakaoNotice.id] ?? '새 메시지'}: ${kakaoNotice.text}`
@@ -223,13 +221,6 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
     setKakaoNotice((current) => (current?.id === id ? null : current))
   }, [])
 
-  const spammingRef = useRef(false)
-  spammingRef.current = spams !== null
-  const handleIncoming = useCallback((id: string, text: string) => {
-    if (spammingRef.current) return
-    setKakaoNotice({ id, text, nonce: Date.now() })
-  }, [])
-
   return (
     <IPhoneFrame
       onSideButton={lock}
@@ -248,7 +239,6 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenPhotos={() => setOpenApp('photos')}
         onOpenDuolingo={() => setOpenApp('duolingo')}
         onOpenAbly={() => setOpenApp('ably')}
-        onOpenTikTok={() => setOpenApp('tiktok')}
         onOpenStock={() => setOpenApp('stock')}
         onOpenHotel={() => setOpenApp('hotel')}
         onOpenMaps={() => setOpenApp('maps')}
@@ -265,7 +255,6 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
       <WeverseApp open={activeApp === 'weverse'} onClose={goHome} />
       <DuolingoApp open={activeApp === 'duolingo'} />
       <AblyApp open={activeApp === 'ably'} />
-      <TikTokApp open={activeApp === 'tiktok'} />
       <StockApp open={activeApp === 'stock'} />
       <HotelApp open={activeApp === 'hotel'} />
       <KakaoApp
@@ -273,7 +262,6 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         owner={name}
         requestedRoom={requestedRoom}
         onRoomOpen={handleRoomOpen}
-        onIncoming={handleIncoming}
         onBusted={(alert) => {
           setBustedAlert(alert)
           setBusted(true)

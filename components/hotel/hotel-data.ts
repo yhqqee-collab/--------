@@ -32,44 +32,7 @@ export type Booking = {
   image: string
 }
 
-export const MY_BOOKINGS: Booking[] = [
-  {
-    id: 'b1',
-    stayName: '스카이모텔',
-    area: '상성동',
-    date: '2026.10.22 (목)',
-    time: '오후 4:00 ~ 오후 10:00',
-    type: '대실',
-    room: '디럭스룸',
-    price: 45000,
-    tone: 'from-[#CFE0F7] to-[#8FB2E6]',
-    image: '/images/hotel/motel-exterior.png',
-  },
-  {
-    id: 'b2',
-    stayName: '그레이 모텔',
-    area: '인가동',
-    date: '2026.10.20 (화)',
-    time: '오후 6:00 ~ 오후 11:00',
-    type: '대실',
-    room: '스탠다드룸',
-    price: 35000,
-    tone: 'from-[#E2E4E8] to-[#A9AFB8]',
-    image: '/images/hotel/motel-room-1.png',
-  },
-  {
-    id: 'b3',
-    stayName: '스카이모텔',
-    area: '상성동',
-    date: '2026.10.15 (목)',
-    time: '오후 7:00 ~ 오후 11:00',
-    type: '대실',
-    room: '디럭스룸',
-    price: 40000,
-    tone: 'from-[#CFE0F7] to-[#8FB2E6]',
-    image: '/images/hotel/motel-room-2.png',
-  },
-]
+export const MY_BOOKINGS: Booking[] = []
 
 export const STAY_CATEGORIES = ['전체', '호텔', '모텔', '펜션', '게스트하우스']
 
