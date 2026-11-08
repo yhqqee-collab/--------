@@ -30,7 +30,7 @@ function StartPage() {
       <h2 className="text-[20px] font-bold text-black">즐겨찾기</h2>
       <ul className="mt-3 grid grid-cols-4 gap-3">
         {favorites.map((f) => (
-          <li key={f.label} className="flex flex-col items-center gap-1.5">
+          <li key={`${f.label}-${f.mark}`} className="flex flex-col items-center gap-1.5">
             <span className={cn('flex size-[58px] items-center justify-center rounded-[14px] text-[22px] font-black text-white', f.bg)} aria-hidden>
               {f.mark}
             </span>
