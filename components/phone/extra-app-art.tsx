@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { Sparkles, TrendingUp } from 'lucide-react'
+import { NaverMapLogo } from '@/components/maps/naver-map-logo'
 
 export function FortuneArt() {
   return (
@@ -25,12 +26,16 @@ export function AblyArt() {
   )
 }
 
-export function GoogleMapsArt() {
+export function NaverMapArt() {
   return (
-    <span className="relative block size-full bg-white">
-      <Image src="/images/icons/google-maps.jpeg" alt="" fill sizes="60px" className="object-contain p-2" />
+    <span className="flex size-full items-center justify-center bg-white">
+      <NaverMapLogo className="size-[70%]" />
     </span>
   )
+}
+
+export function BaeminArt() {
+  return <IconImage src="/images/icons/baemin.png" />
 }
 
 export function WeverseArt() {

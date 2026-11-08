@@ -12,7 +12,7 @@ import {
   XArt,
   YouTubeMusicArt,
 } from './app-icon-art'
-import { AblyArt, DuolingoArt, EverytimeArt, FortuneArt, GoogleMapsArt, StockArt, WeverseArt } from './extra-app-art'
+import { AblyArt, BaeminArt, DuolingoArt, EverytimeArt, FortuneArt, NaverMapArt, StockArt, WeverseArt } from './extra-app-art'
 import { Wallpaper } from './wallpaper'
 import { CalendarWidget, NotesWidget } from './widgets'
 
@@ -35,6 +35,7 @@ type HomeScreenProps = {
   onOpenFortune: () => void
   onOpenNotes: () => void
   onOpenEverytime: () => void
+  onOpenBaemin: () => void
 }
 
 export function HomeScreen({
@@ -56,6 +57,7 @@ export function HomeScreen({
   onOpenFortune,
   onOpenNotes,
   onOpenEverytime,
+  onOpenBaemin,
 }: HomeScreenProps) {
   return (
     <section aria-label="홈 화면" aria-hidden={!active} inert={!active} className="absolute inset-0">
@@ -88,8 +90,11 @@ export function HomeScreen({
           <AppIcon name="X">
             <XArt />
           </AppIcon>
-          <AppIcon name="구글 지도" onClick={onOpenMaps}>
-            <GoogleMapsArt />
+          <AppIcon name="네이버 지도" onClick={onOpenMaps}>
+            <NaverMapArt />
+          </AppIcon>
+          <AppIcon name="배달의민족" onClick={onOpenBaemin}>
+            <BaeminArt />
           </AppIcon>
           <AppFolder
             name="기타"

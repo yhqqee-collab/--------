@@ -23,6 +23,7 @@ import { WeverseApp } from '@/components/weverse/weverse-app'
 import { FortuneApp } from '@/components/fortune/fortune-app'
 import { NotesApp } from '@/components/notes/notes-app'
 import { EverytimeApp } from '@/components/everytime/everytime-app'
+import { BaeminApp } from '@/components/baemin/baemin-app'
 import { DEFAULT_INSTAGRAM_ID, DEFAULT_OWNER_NAME } from '@/lib/template-config'
 import { BustedScreen } from './busted-screen'
 import { SpamOverlay } from './spam-overlay'
@@ -57,6 +58,7 @@ type AppId =
   | 'fortune'
   | 'notes'
   | 'everytime'
+  | 'baemin'
 
 const INITIALS = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'c', 'k', 't', 'p', 'h']
 const MEDIALS = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i']
@@ -247,8 +249,10 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenFortune={() => setOpenApp('fortune')}
         onOpenNotes={() => setOpenApp('notes')}
         onOpenEverytime={() => setOpenApp('everytime')}
+        onOpenBaemin={() => setOpenApp('baemin')}
       />
       <EverytimeApp open={activeApp === 'everytime'} />
+      <BaeminApp open={activeApp === 'baemin'} />
       <FortuneApp open={activeApp === 'fortune'} day={currentDay} dateLabel={dayLabel(currentDay)} />
       <NotesApp open={activeApp === 'notes'} />
       <PhotosApp open={activeApp === 'photos'} />

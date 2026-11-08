@@ -1,7 +1,8 @@
 import {
   AREA_GROUP,
-  MAP_SCALE,
+  KIND_LABELS,
   METERS_PER_PX,
+  ORIGIN_LATLNG,
   PLACES,
   ROAD_FACTOR,
   TRAVEL_MODES,
@@ -117,19 +118,20 @@ export function searchPlaces(query: string) {
       place.dong,
       place.address,
       place.description,
+      KIND_LABELS[place.kind],
       ...(place.keywords ?? []),
       AREA_GROUP.placeIds.includes(place.id) ? AREA_GROUP.name : '',
     ].some((field) => field && normalize(field).includes(q)),
   )
 }
 
-export function scrollMapTo(
-  el: HTMLElement | null,
-  x: number,
-  y: number,
-  zoom: number,
-  behavior: ScrollBehavior = 'smooth',
-) {
-  const scale = zoom * MAP_SCALE
-  el?.scrollTo({ left: x * scale - el.clientWidth / 2, top: y * scale - el.clientHeight * 0.4, behavior })
+const METERS_PER_DEGREE = 111_320
+
+export function toLatLng(x: number, y: number): [number, number] {
+  const [lat0, lng0] = ORIGIN_LATLNG
+  return [lat0 - y / METERS_PER_DEGREE, lng0 + x / (METERS_PER_DEGREE * Math.cos((lat0 * Math.PI) / 180))]
+}
+
+export function formatDistance(km: number) {
+  return km < 1 ? `${Math.max(10, Math.round(km * 100) * 10)}m` : `${km}km`
 }
