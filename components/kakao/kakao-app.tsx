@@ -18,6 +18,7 @@ import {
   SUSPICION_100_GAME_OVER_TEXT,
   syncMembers,
   type SpamNotification,
+  type CrossMessage,
 } from './scripts'
 import { INITIAL_SUSPICION, turnLimit } from './suspicion'
 
@@ -285,6 +286,17 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     preWorkCallbackRef.current?.()
   }, [])
 
+  const handleCrossMessage = useCallback(
+    ({ chat, texts, delayMs, delta }: CrossMessage) => {
+      window.setTimeout(() => {
+        if (bustedRef.current) return
+        deliver(chat, texts, { badge: true })
+        if (delta) changeSuspicion(chat, delta)
+      }, delayMs)
+    },
+    [deliver, changeSuspicion],
+  )
+
   const handleIncoming = useCallback((id: string, text: string) => {
     setPreviews((current) => ({ ...current, [id]: text }))
     if (viewingRef.current === id) return
@@ -375,6 +387,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               })()}
               gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
               onReply={() => markReplied(chat.id)}
+              onCrossMessage={handleCrossMessage}
             />
           </div>
         )

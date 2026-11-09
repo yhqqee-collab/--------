@@ -9,7 +9,7 @@ import { PERSON_AVATARS } from '@/lib/template-config'
 import { Avatar } from './avatar'
 import type { Chat, ChatItem } from './chat-data'
 import { personalizeText } from './replies'
-import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
+import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type CrossMessage, type GroupChoice, type GroupLine } from './scripts'
 import { getStage, STAGE_LABEL, type SuspicionStage } from './suspicion'
 import { SuspicionAlert } from './suspicion-alert'
 
@@ -81,6 +81,7 @@ type ChatRoomProps = {
   /** 지정하면 startGate 가 열린 뒤 이 시간(ms) 후 첫 카톡이 도착 */
   gatedStartMs?: number
   onReply?: () => void
+  onCrossMessage?: (message: CrossMessage) => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -126,7 +127,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -179,8 +180,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const pendingNodeRef = useRef<string | null>(null)
 
   const scriptDoneRef = useRef(false)
-  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply })
-  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply }
+  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage })
+  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage }
 
   const hasSuspicion = suspicion !== undefined
   const items: ChatItem[] = [...chat.items, ...added]
@@ -594,6 +595,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     waitingRef.current = true
     latest.current.onReply?.()
     if (choice.setFlag) flags?.add(choice.setFlag)
+    if (choice.crossMessage) latest.current.onCrossMessage?.(choice.crossMessage)
     const deferBranch = Boolean(choice.next && choice.next === holdNodeRef.current && script?.nodes[choice.next]?.branch)
     const nextId = script && !deferBranch ? resolveNode(script, choice.next, activeFlags) : choice.next
     pendingNodeRef.current = nextId

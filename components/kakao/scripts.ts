@@ -11,7 +11,7 @@ import type { SuspicionStage } from './suspicion'
 const WORK_TRANSITION_TEXTS: Record<number, string> = {
   1: '⏳ [<영화와 현대사회> 수업 듣는 중...] (10:30 ~ 12:00) ⏳',
   2: '⏳ [오후 장보기 및 동방 짐 정리 진행 중...] (14:30 ~ 21:30) ⏳',
-  3: '⏳ [3일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
+  3: '⏳ [시온과 용산공원에서 피크닉 데이트 중...] (13:00 ~ 17:00) ⏳',
   4: '⏳ [4일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   5: '⏳ [5일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   6: '⏳ [6일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
@@ -59,7 +59,12 @@ export type Choice = {
   waitText?: string
   /** 게임 오버 팝업에 표시될 문구 */
   gameOverAlert?: string
+  /** 고르면 다른 톡방에 카톡이 도착 (예: 시온 톡에서 고른 선택에 유우시가 반응) */
+  crossMessage?: CrossMessage
 }
+
+/** 다른 톡방으로 보내는 카톡. delta 는 받는 사람의 의심도 변화량 */
+export type CrossMessage = { chat: string; texts: string[]; delayMs: number; delta: number }
 
 /** 플래그 조합에 따른 분기. all 은 모두 켜져 있어야, none 은 모두 꺼져 있어야 일치 */
 export type Branch = { all?: string[]; none?: string[]; to: string | null }
@@ -126,6 +131,8 @@ type PhaseChoice = {
   setFlag?: string
   gameOver?: boolean
   setGlobal?: Record<string, boolean>
+  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 사람의 의심도 */
+  sendTo?: { chat: string; message: string; delay: number; susp?: number }
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
@@ -236,6 +243,12 @@ function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming:
           waitOthers: nextPhase?.waitOthers,
           sync: phase.nextCheckGlobal,
           waitText: phase.transitionText,
+          crossMessage: choice.sendTo && {
+            chat: choice.sendTo.chat,
+            texts: splitLines(choice.sendTo.message).map(toPauseToken),
+            delayMs: choice.sendTo.delay * 1000,
+            delta: choice.sendTo.susp ?? 0,
+          },
         }
       }),
     }
@@ -372,7 +385,7 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지는 플래그 (유���시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
@@ -768,7 +781,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     preWork: true,
     message: '나랑 같이 다이소 가지 ㅠㅠ\n시온이 형 차 타는 게 더 조앗어?\n흥',
     choices: [
-      { id: 'A', text: '미아내 ㅠㅠ\n마트에 살 거 있어서... ㅠㅠ', susp: 15, reply: '알겟어 ㅠㅠ 이따 동방에서 봥', next: 'P3_Night' },
+      { id: 'A', text: '미아내 ㅠㅠ\n��트에 살 거 있어서... ㅠㅠ', susp: 15, reply: '알겟어 ㅠㅠ 이따 동방에서 봥', next: 'P3_Night' },
       { id: 'B', text: '다이소 걸어가야 하니까... ㅜㅜ\n쏘리 ...', susp: 20, reply: '치사해 진짜 ㅠㅠ', next: 'P3_Night' },
     ],
   },
@@ -874,6 +887,87 @@ const YUSHI_DAY2: Record<string, PhaseNode> = {
   },
 }
 
+/** 시온 Day 3: 아침 → 피크닉 약속 → (데이트 전환) → 인스타 댓글 선택 (유우시 반응) → 귀가 인사 */
+const SION_DAY3: Record<string, PhaseNode> = {
+  P1_Morning: {
+    preWork: true,
+    message: '어제 늦게 잤지 ㅎㅎ\n피곤한 거 아니야?',
+    choices: [
+      { id: 'A', text: '웅 방금 일어났으 ...', susp: 0, next: 'P1_A' },
+      { id: 'B', text: '아직 이불 속이야 ㅠㅠ', susp: 0, next: 'P1_B' },
+    ],
+  },
+  P1_A: {
+    preWork: true,
+    delay: 6,
+    message: '다행이네 밥은 먹었고?',
+    choices: [{ id: 'A', text: '이제 먹으려고! ㅎㅎ', susp: 0, next: 'P1_Common' }],
+  },
+  P1_B: {
+    preWork: true,
+    delay: 6,
+    message: '얼른 일어나 ㅋㅋ',
+    choices: [{ id: 'A', text: '웅 일어날게 ㅠㅠ', susp: 0, next: 'P1_Common' }],
+  },
+  P1_Common: {
+    preWork: true,
+    message: '오늘 날씨 좋은데 공원 갈까?\n시험 기간 때 피크닉 가고 싶어 했잖아\n더 추워지기 전에 갈래?',
+    choices: [
+      { id: 'A', text: '헐 좋아!! 당장 준비할게 ㅋㅋ', susp: -5, next: 'P1_Accept' },
+      { id: 'B', text: '오 나 거기 안 가봤어\n가자가자!!', susp: -5, next: 'P1_Accept' },
+    ],
+  },
+  P1_Accept: {
+    preWork: true,
+    delay: 6,
+    message: 'ㅋㅋㅋㅋ 알았어\n천천히 준비해❤️\n1시에 소원대역 앞에서 보자',
+    // 이 답장 후 데이트 전환 팝업 (WORK_TRANSITION_TEXTS[3])
+    choices: [{ id: 'A', text: '웅 이따 봐!', susp: 0, next: 'P2_Insta' }],
+  },
+  // 데이트를 마치고 카페에 앉은 뒤. 댓글 선택에 따라 10초 뒤 유우시 톡방에 카톡 도착
+  P2_Insta: {
+    message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산공원에서 논 거랑\n역에서 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
+    choices: [
+      {
+        id: 'A',
+        text: '오키ㅣㅣ\n[댓글] 포토그래퍼 금손이네 🙋‍♀️',
+        susp: 0,
+        next: 'P3_Evening',
+        sendTo: { chat: 'c', message: '집에 있는다며\n형 사진 찍어주고 있었네 ㅋㅋㅋ', delay: 10, susp: 50 },
+      },
+      {
+        id: 'B',
+        text: '오키ㅣㅣ\n[댓글] 와 날씨 좋다 ㅠㅠ 나도 놀러 갈래~',
+        susp: 0,
+        next: 'P3_Evening',
+        sendTo: {
+          chat: 'c',
+          message: '시온이 형 인스타에 댓글 달았네\n솔직히 질투나 ㅋㅋㅋ ㅠㅠ\n다른 남자 인스타에 댓글 달지 마...',
+          delay: 10,
+          susp: 10,
+        },
+      },
+      {
+        id: 'C',
+        text: '오키ㅣㅣ\n[댓글] 옷 예쁘다 ㅋㅋㅋㅋ',
+        susp: 0,
+        reply: '[답글] 저번에 여주가 골라준 거 ㅎㅎ',
+        next: 'P3_Evening',
+        sendTo: { chat: 'c', message: '저번에 형 옷도 골라줬어?', delay: 10, susp: 30 },
+      },
+    ],
+  },
+  // 유우시 카톡(10초) 이후 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
+  P3_Evening: {
+    delay: 50,
+    message: '오늘 진짜 재밌었어 ㅋㅋ 피곤할 텐데 얼른 들어가서 쉬어!\n도착하면 톡 하고❤️',
+    choices: [
+      { id: 'A', text: '나 방금 집 도착했어 ㅋㅋ', susp: 0, next: 'end' },
+      { id: 'B', text: '오늘 진짜 힐링 ㅠㅠ 나 지금 씻으려고!', susp: 0, next: 'end' },
+    ],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -890,7 +984,9 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     b: fromPhases('P0_Morning', RIKU_DAY2, SAMPLE_TIMING.b),
     c: fromPhases('P0_Morning', YUSHI_DAY2, SAMPLE_TIMING.c),
   },
-  3: sampleDay(),
+  3: {
+    a: fromPhases('P1_Morning', SION_DAY3, SAMPLE_TIMING.a),
+  },
   4: sampleDay(),
   5: sampleDay(),
   6: sampleDay(),
