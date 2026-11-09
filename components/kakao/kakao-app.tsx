@@ -18,6 +18,8 @@ import {
   SPAM_START_DELAY_MS,
   SUSPICION_100_GAME_OVER_TEXT,
   syncMembers,
+  INSTA_SYNC_SOURCE,
+  SYNC_EXTERNAL_SOURCES,
   type SpamNotification,
   type CrossMessage,
 } from './scripts'
@@ -251,7 +253,8 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     const answered = syncAnswersRef.current.get(key) ?? new Set<string>()
     answered.add(id)
     syncAnswersRef.current.set(key, answered)
-    if (!syncMembers(dayRef.current, key).every((member) => answered.has(member))) return
+    const required = [...syncMembers(dayRef.current, key), ...(SYNC_EXTERNAL_SOURCES[key] ?? [])]
+    if (!required.every((member) => answered.has(member))) return
     setReadySyncs((current) => new Set(current).add(key))
   }, [])
 
@@ -288,14 +291,15 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
   }, [])
 
   const handleCrossMessage = useCallback(
-    ({ chat, texts, delayMs, delta }: CrossMessage) => {
+    ({ chat, texts, delayMs, delta, sync }: CrossMessage) => {
       window.setTimeout(() => {
         if (bustedRef.current) return
         deliver(chat, texts, { badge: true })
         if (delta) changeSuspicion(chat, delta)
+        if (sync) handleSync(INSTA_SYNC_SOURCE, sync)
       }, delayMs)
     },
-    [deliver, changeSuspicion],
+    [deliver, changeSuspicion, handleSync],
   )
 
   useEffect(() => {

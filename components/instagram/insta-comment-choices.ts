@@ -1,4 +1,4 @@
-import type { CrossMessage } from '@/components/kakao/scripts'
+import { SYNC_DAY3_EVENING, type CrossMessage } from '@/components/kakao/scripts'
 
 /**
  * 인스타 게시물 댓글창 선택지.
@@ -9,7 +9,8 @@ export type InstaCommentChoice = {
   id: string
   comment: string
   authorReply?: string
-  sendTo?: { chat: string; message: string; delay: number; susp?: number }
+  /** sync: 메시지가 도착하면 해당 키로 대기 중인 카톡이 이어서 옴 */
+  sendTo?: { chat: string; message: string; delay: number; susp?: number; sync?: string }
 }
 
 export type InstaCommentPrompt = { day: number; postId: string; choices: InstaCommentChoice[] }
@@ -25,7 +26,7 @@ export const INSTA_COMMENT_PROMPTS: InstaCommentPrompt[] = [
       {
         id: 'A',
         comment: '포토그래퍼 금손이네 🙋‍♀️',
-        sendTo: { chat: 'c', message: '집에 있는다며\n형 사진 찍어주고 있었네 ㅋㅋㅋ', delay: 10, susp: 50 },
+        sendTo: { chat: 'c', message: '집에 있는다며\n형 사진 찍어주고 있었네 ㅋㅋㅋ', delay: 10, susp: 50, sync: SYNC_DAY3_EVENING },
       },
       {
         id: 'B',
@@ -35,13 +36,14 @@ export const INSTA_COMMENT_PROMPTS: InstaCommentPrompt[] = [
           message: '시온이 형 인스타에 댓글 달았네\n솔직히 질투나 ㅋㅋㅋ ㅠㅠ\n다른 남자 인스타에 댓글 달지 마...',
           delay: 10,
           susp: 10,
+          sync: SYNC_DAY3_EVENING,
         },
       },
       {
         id: 'C',
         comment: '옷 예쁘다 ㅋㅋㅋㅋ',
         authorReply: '저번에 여주가 골라준 거 ㅎㅎ',
-        sendTo: { chat: 'c', message: '저번에 형 옷도 골라줬어?', delay: 10, susp: 30 },
+        sendTo: { chat: 'c', message: '저번에 형 옷도 골라줬어?', delay: 10, susp: 30, sync: SYNC_DAY3_EVENING },
       },
     ],
   },
@@ -62,6 +64,7 @@ export function emitInstaCommentChoice(choice: InstaCommentChoice) {
     texts: choice.sendTo.message.split('\n').map((line) => line.trim()).filter(Boolean),
     delayMs: choice.sendTo.delay * 1000,
     delta: choice.sendTo.susp ?? 0,
+    sync: choice.sendTo.sync,
   }
   window.dispatchEvent(new CustomEvent<CrossMessage>(INSTA_CROSS_MESSAGE_EVENT, { detail }))
 }

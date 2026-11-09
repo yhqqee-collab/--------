@@ -64,7 +64,19 @@ export type Choice = {
 }
 
 /** 다른 톡방으로 보내는 카톡. delta 는 받는 사람의 의심도 변화량 */
-export type CrossMessage = { chat: string; texts: string[]; delayMs: number; delta: number }
+/** sync: 지정하면 메시지가 도착한 뒤 해당 sync 키의 외부 조건(INSTA_SYNC_SOURCE)을 충족시킵니다 */
+export type CrossMessage = { chat: string; texts: string[]; delayMs: number; delta: number; sync?: string }
+
+/** 인스타 댓글 → 카톡 메시지가 도착해야 풀리는 sync 의 발신원 id */
+export const INSTA_SYNC_SOURCE = 'insta'
+
+/** 시온 Day 3: 인스타 댓글을 보고 유우시 카톡이 온 뒤에 시온의 저녁 카톡이 도착 */
+export const SYNC_DAY3_EVENING = 'day3-evening'
+
+/** 카톡 답장 외에 추가로 충족돼야 하는 sync 조건 */
+export const SYNC_EXTERNAL_SOURCES: Record<string, string[]> = {
+  [SYNC_DAY3_EVENING]: [INSTA_SYNC_SOURCE],
+}
 
 /** 플래그 조합에 따른 분기. all 은 모두 켜져 있어야, none 은 모두 꺼져 있어야 일치 */
 export type Branch = { all?: string[]; none?: string[]; to: string | null }
@@ -762,7 +774,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 잘 잣어?? ㅠㅠ 나 아직 졸려 죽겟어',
     choices: [
-      { id: 'A', text: '얼른 ���어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+      { id: 'A', text: '얼른 �����어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
       { id: 'B', text: '나도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
     ],
   },
@@ -788,7 +800,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
   P2_Riku_Daiso: {
     preWork: true,
     message:
-      '여주야 나 1층에서 종이컵 좀 찾고 올라갈게!!\n근데 아까 동방에서 료가 ���러는데\n그저께 밤에 시온이 형네 자취방 골목 쪽에서 너 봣다던데...?\n너 그때 어머니 만나고 일찍 뻗엇다구 하지 안앗어...?',
+      '여주야 나 1층에서 종이컵 좀 찾고 올라갈게!!\n근데 아까 동방에서 ��가 ���러는데\n그저께 밤에 시온이 형네 자취방 골목 쪽에서 너 봣다던데...?\n너 그때 어머니 만나고 일찍 뻗엇다구 하지 안앗어...?',
     choices: [
       {
         id: 'A',
@@ -927,12 +939,13 @@ const SION_DAY3: Record<string, PhaseNode> = {
   // 데이트를 마치고 카페에 앉은 뒤. 실제 댓글 선택지는 인스타 시온 게시물 댓글창에서 뜸
   // (components/instagram/insta-comment-choices.ts → SION_DAY3_POST_ID)
   P2_Insta: {
+    nextCheckGlobal: SYNC_DAY3_EVENING,
     message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산공원에서 논 거랑\n역에서 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
     choices: [{ id: 'A', text: '오키ㅣㅣ', susp: 0, next: 'P3_Evening' }],
   },
-  // 유우시 카톡(10초) 이후 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
+  // 인스타 댓글 → 유우시 카톡이 도착한 뒤 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
   P3_Evening: {
-    delay: 50,
+    delay: 30,
     message: '오늘 진짜 재밌었어 ㅋㅋ 피곤할 텐데 얼른 들어가서 쉬어!\n도착하면 톡 하고❤️',
     choices: [
       { id: 'A', text: '나 방금 집 도착했어 ㅋㅋ', susp: 0, next: 'end' },
