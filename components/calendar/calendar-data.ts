@@ -35,13 +35,13 @@ const CALENDAR_EVENTS: DayEvent[] = [
   // 지지지난주 (10/16 ~ 10/22)
   { day: -14, category: 'date', title: '시온 영화', start: '14:00' },
   { day: -13, category: 'date', title: '유우시 카페', start: '13:00' },
-  { day: -13, category: 'date', title: '리쿠', start: '18:30' },
-  { day: -10, category: 'date', title: '시온', start: '14:00' },
+  { day: -13, category: 'date', title: '리쿠 집', start: '18:30' },
+  { day: -10, category: 'date', title: '시온 집', start: '14:00' },
 
   // 지지난주 (10/23 ~ 10/29)
   { day: -7, category: 'date', title: '리쿠 쇼핑', start: '15:00' },
   { day: -6, category: 'date', title: '시온 브런치', start: '12:00' },
-  { day: -6, category: 'date', title: '유우시', start: '18:30' },
+  { day: -6, category: 'date', title: '유우시 집', start: '18:30' },
 
   // 시험기간 주간 (10/30 ~ 11/05)
   { day: -1, category: 'exam', title: '영현사 과제 대체', start: '10:30' },
