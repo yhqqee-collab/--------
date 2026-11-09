@@ -9,7 +9,7 @@ import { PERSON_AVATARS } from '@/lib/template-config'
 import { Avatar } from './avatar'
 import type { Chat, ChatItem } from './chat-data'
 import { personalizeText } from './replies'
-import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
+import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
 import { getStage, STAGE_LABEL, type SuspicionStage } from './suspicion'
 import { SuspicionAlert } from './suspicion-alert'
 
@@ -76,6 +76,11 @@ type ChatRoomProps = {
   /** 단톡방 stages 중 재생을 허락받은 단계 수 */
   stageCue?: number
   onStageDone?: (stage: number) => void
+  /** false 면 첫 카톡 도착을 미룹니다 (앞 사람에게 답장할 때까지) */
+  startGate?: boolean
+  /** 지정하면 startGate 가 열린 뒤 이 시간(ms) 후 첫 카톡이 도착 */
+  gatedStartMs?: number
+  onReply?: () => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -86,6 +91,13 @@ const LINE_GAP_MAX_MS = 2000
 
 function lineGap() {
   return LINE_GAP_MIN_MS + Math.random() * (LINE_GAP_MAX_MS - LINE_GAP_MIN_MS)
+}
+
+const INCOMING_GAP_MIN_MS = 2000
+const INCOMING_GAP_MAX_MS = 5000
+
+function incomingGap() {
+  return INCOMING_GAP_MIN_MS + Math.random() * (INCOMING_GAP_MAX_MS - INCOMING_GAP_MIN_MS)
 }
 
 function randomReplyDelay() {
@@ -114,7 +126,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -167,8 +179,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const pendingNodeRef = useRef<string | null>(null)
 
   const scriptDoneRef = useRef(false)
-  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed })
-  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed }
+  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply })
+  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply }
 
   const hasSuspicion = suspicion !== undefined
   const items: ChatItem[] = [...chat.items, ...added]
@@ -231,6 +243,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       return
     }
     const text = batch.texts[index]
+    const pause = pauseDuration(text)
     const isLast = index === batch.texts.length - 1
     const finish = () => {
       if (batch.turn !== replyTurnRef.current || epoch !== queueEpochRef.current) return
@@ -238,7 +251,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         const label = batch.dateLabel
         setAdded((prev) => [...prev, { type: 'date', label }])
       }
-      land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time)
+      if (pause === null) land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time)
       if (index === 0 && batch.enterNode) vibrate()
       if (!isLast) return schedule(batch.instant ? 300 : 0, () => playLine(batch, index + 1))
       if (batch.reply) finishReply()
@@ -248,16 +261,24 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       }
       if (batch.gateDone) latest.current.onGateDone?.()
       if (batch.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(batch.gameOverAlert))
+      const enteredNode = batch.enterNode ? script?.nodes[batch.enterNode] : undefined
+      if (enteredNode?.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(enteredNode.gameOverAlert))
       queueRef.current.shift()
       schedule(300, () => playNext(epoch))
     }
 
     if (batch.instant) return finish()
 
+    if (pause !== null) {
+      setTyping(false)
+      schedule(pause, finish)
+      return
+    }
+
     if (index > 0) {
       const nextIsMine = text.startsWith(ME_LINE_PREFIX)
       if (latest.current.active && !nextIsMine) setTyping(true)
-      schedule(lineGap(), finish)
+      schedule(nextIsMine ? lineGap() : incomingGap(), finish)
       return
     }
 
@@ -307,6 +328,28 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     const held = heldBatchRef.current
     if (!held || held.batch.enterNode === holdNode) return
     heldBatchRef.current = null
+    const heldId = held.batch.enterNode
+    // 단톡방 선택으로 플래그가 정해진 뒤에 분기 노드를 다시 판정
+    if (script && heldId && script.nodes[heldId]?.branch) {
+      const resolved = resolveNode(script, heldId, activeFlags)
+      const node = resolved ? script.nodes[resolved] : undefined
+      if (!resolved || !node) {
+        setPendingPhase(false)
+        if (!scriptDoneRef.current) {
+          scriptDoneRef.current = true
+          latest.current.onScriptDone?.()
+        }
+        return
+      }
+      enqueue({
+        ...held.batch,
+        texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
+        enterNode: resolved,
+        dueAt: Date.now() + held.remainingMs,
+        turn: replyTurnRef.current,
+      })
+      return
+    }
     enqueue({ ...held.batch, dueAt: Date.now() + held.remainingMs, turn: replyTurnRef.current })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holdNode])
@@ -387,6 +430,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clockStarted, day])
 
+  const stageChoiceRef = useRef<number | null>(null)
   const stagesPlayedRef = useRef(0)
   const stageDoneRef = useRef(onStageDone)
   stageDoneRef.current = onStageDone
@@ -402,6 +446,12 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       playGroupLines(
         stages[index].messages,
         () => {
+          const stageChoices = stages[index].choices
+          if (stageChoices?.length) {
+            stageChoiceRef.current = index
+            setGroupChoices(stageChoices)
+            return
+          }
           stageDoneRef.current?.(index)
           if (index === stages.length - 1) schedule(2500, () => latest.current.onScriptDone?.())
         },
@@ -415,22 +465,29 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (groupPicked !== null) return
     setGroupPicked(index)
     setNewBadge(false)
+    if (choice.setFlag) flags?.add(choice.setFlag)
     const text = personalizeText(choice.text, owner)
     setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time: nowLabel() }])
     onSent(text)
+    const stageIndex = stageChoiceRef.current
+    stageChoiceRef.current = null
     playGroupLines(choice.reply, () => {
       setGroupChoices(null)
       setGroupPicked(null)
+      if (stageIndex !== null) {
+        stageDoneRef.current?.(stageIndex)
+        if (stageIndex !== (groupScript?.stages?.length ?? 0) - 1) return
+      }
       schedule(2500, () => latest.current.onScriptDone?.())
     })
   }
 
   useEffect(() => {
-    if (!clockStarted || !script || script.delayedStartMs === undefined || startedRef.current) return
+    if (!clockStarted || !startGate || !script || script.delayedStartMs === undefined || startedRef.current) return
     startedRef.current = true
     const startNode = script.nodes[script.start]
     if (!startNode) return
-    schedule(script.delayedStartMs, () => {
+    schedule(gatedStartMs ?? script.delayedStartMs, () => {
       enqueue({
         texts: startNode.lines.map((line) => personalizeText(line, latest.current.owner)),
         dueAt: Date.now(),
@@ -442,7 +499,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       })
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clockStarted])
+  }, [clockStarted, startGate])
 
   useEffect(() => {
     const gated = gatedNextRef.current
@@ -535,8 +592,10 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   function choose(choice: Choice, index: number) {
     if (waitingRef.current) return
     waitingRef.current = true
+    latest.current.onReply?.()
     if (choice.setFlag) flags?.add(choice.setFlag)
-    const nextId = script ? resolveNode(script, choice.next, activeFlags) : choice.next
+    const deferBranch = Boolean(choice.next && choice.next === holdNodeRef.current && script?.nodes[choice.next]?.branch)
+    const nextId = script && !deferBranch ? resolveNode(script, choice.next, activeFlags) : choice.next
     pendingNodeRef.current = nextId
     const says = choice.says.map(fillChoice)
     const time = nowLabel()
@@ -553,7 +612,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     setNewBadge(false)
     setPicked(index)
     setWaiting(true)
-    const reachesEnd = !nextId || !script?.nodes[nextId]?.choices.length
+    const reachesEnd = !deferBranch && (!nextId || !script?.nodes[nextId]?.choices.length)
 
     const judging = hasSuspicion && suspicionActive
     let value = suspicion ?? 0
@@ -700,7 +759,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
               <Menu className="size-[22px]" strokeWidth={1.9} aria-hidden />
             </button>
           ) : (
-            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="메뉴" />
+            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="��뉴" />
           )}
         </div>
       </header>
