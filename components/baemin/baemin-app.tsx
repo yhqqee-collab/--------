@@ -231,10 +231,20 @@ export function BaeminApp({ open }: { open: boolean }) {
                           className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-black/5"
                         >
                           <span
-                            className="flex size-[72px] shrink-0 items-center justify-center rounded-xl bg-[#E6F8F7]"
+                            className="relative flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#E6F8F7]"
                             style={{ color: MINT }}
                           >
-                            <Icon aria-hidden className="size-8" />
+                            {item.thumbnail ? (
+                              <Image
+                                src={item.thumbnail}
+                                alt=""
+                                fill
+                                sizes="72px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <Icon aria-hidden className="size-8" />
+                            )}
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-[16px] font-bold">

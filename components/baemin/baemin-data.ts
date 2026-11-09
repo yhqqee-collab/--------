@@ -10,6 +10,7 @@ export type Store = {
   deliveryFee: number
   minOrder: number
   tagline: string
+  thumbnail?: string
   menu: MenuItem[]
 }
 
@@ -41,6 +42,7 @@ export const STORES: Store[] = [
     deliveryFee: 3000,
     minOrder: 16000,
     tagline: '허니콤보 단골 많은 집',
+    thumbnail: '/images/baemin/kyochon.png',
     menu: [
       { id: 'k1', name: '허니콤보', price: 23000, description: '달콤한 허니소스 + 날개·다리', popular: true },
       { id: 'k2', name: '레드콤보', price: 23000, description: '매콤한 청양고추 소스', popular: true },
@@ -59,6 +61,7 @@ export const STORES: Store[] = [
     deliveryFee: 2500,
     minOrder: 14000,
     tagline: '시험기간 야식 1등',
+    thumbnail: '/images/baemin/yupdduk.png',
     menu: [
       { id: 'y1', name: '엽기떡볶이 (오리지널)', price: 14000, description: '매운맛 단계 선택', popular: true },
       { id: 'y2', name: '엽기로제떡볶이', price: 16000, description: '크림 로제 소스', popular: true },
