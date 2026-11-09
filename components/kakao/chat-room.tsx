@@ -93,6 +93,13 @@ function lineGap() {
   return LINE_GAP_MIN_MS + Math.random() * (LINE_GAP_MAX_MS - LINE_GAP_MIN_MS)
 }
 
+const INCOMING_GAP_MIN_MS = 2000
+const INCOMING_GAP_MAX_MS = 5000
+
+function incomingGap() {
+  return INCOMING_GAP_MIN_MS + Math.random() * (INCOMING_GAP_MAX_MS - INCOMING_GAP_MIN_MS)
+}
+
 function randomReplyDelay() {
   return REPLY_DELAY_MIN_MS + Math.random() * (REPLY_DELAY_MAX_MS - REPLY_DELAY_MIN_MS)
 }
@@ -271,7 +278,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (index > 0) {
       const nextIsMine = text.startsWith(ME_LINE_PREFIX)
       if (latest.current.active && !nextIsMine) setTyping(true)
-      schedule(lineGap(), finish)
+      schedule(nextIsMine ? lineGap() : incomingGap(), finish)
       return
     }
 

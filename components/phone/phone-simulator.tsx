@@ -267,6 +267,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         owner={name}
         requestedRoom={requestedRoom}
         onRoomOpen={handleRoomOpen}
+        onIncoming={(id, text) => setKakaoNotice({ id, text, nonce: Date.now() })}
         onBusted={(alert) => {
           setBustedAlert(alert)
           setBusted(true)
