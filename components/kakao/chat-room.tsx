@@ -759,7 +759,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
               <Menu className="size-[22px]" strokeWidth={1.9} aria-hidden />
             </button>
           ) : (
-            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="��뉴" />
+            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="메뉴" />
           )}
         </div>
       </header>
