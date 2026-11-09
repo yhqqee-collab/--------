@@ -21,6 +21,10 @@ import {
 } from './scripts'
 import { INITIAL_SUSPICION, turnLimit } from './suspicion'
 
+/** 첫 카톡 도착 순서: 앞 사람에게 답장해야 다음 사람의 첫 카톡이 옵니다 (시온 → 리쿠 → 유우시) */
+const START_ORDER = ['a', 'b', 'c']
+const SEQUENTIAL_START_DELAY_MS = 4000
+
 function personalizeChat(chat: Chat, owner: string): Chat {
   const replaceName = (text: string) => replaceUserName(text, owner)
 
@@ -65,6 +69,17 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
   preWorkCallbackRef.current = onPreWorkDone
   const [roomId, setRoomId] = useState<string | null>(null)
   const [completedScripts, setCompletedScripts] = useState<Set<string>>(new Set())
+  const [repliedChats, setRepliedChats] = useState<Set<string>>(
+    () => new Set(Object.keys(resume?.added ?? {}).filter((id) => resume?.added[id].some((item) => item.type === 'msg' && item.from === 'me'))),
+  )
+  const markReplied = useCallback((id: string) => {
+    setRepliedChats((current) => (current.has(id) ? current : new Set(current).add(id)))
+  }, [])
+  const startPredecessor = (chatId: string) => {
+    const order = START_ORDER.filter((id) => id in scriptsForDay(day))
+    const index = order.indexOf(chatId)
+    return index > 0 ? order[index - 1] : null
+  }
   const [startedRooms, setStartedRooms] = useState<Set<string>>(
     () => new Set(Object.keys(resume?.added ?? {}).filter((id) => resume?.added[id].length)),
   )
@@ -338,6 +353,12 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               onHeld={(node) => setHeldAt((current) => ({ ...current, [chat.id]: node }))}
               stageCue={chat.id === stagedGroupId ? stageCue : 0}
               onStageDone={(index) => setStagesPlayed((current) => Math.max(current, index + 1))}
+              startGate={(() => {
+                const prev = startPredecessor(chat.id)
+                return !prev || repliedChats.has(prev) || completedScripts.has(prev)
+              })()}
+              gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
+              onReply={() => markReplied(chat.id)}
             />
           </div>
         )
