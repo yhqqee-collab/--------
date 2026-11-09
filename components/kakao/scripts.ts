@@ -340,11 +340,11 @@ export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 const YUSHI_LUNCH_BRANCH = (variant: 'B' | 'C'): Branch[] => [
-  { all: [FLAG_YUSHI_LUNCH_SEOGA], to: `END_Sakuya_Step1_${variant}` },
-  { all: [FLAG_YUSHI_LUNCH_RAMEN], to: `P2_Safe2_${variant}` },
+  { all: [FLAG_YUSHI_LUNCH_RAMEN], to: `END_RyoYushi_Step1_${variant}` },
+  { all: [FLAG_YUSHI_LUNCH_SEOGA], to: `P2_Safe2_${variant}` },
 ]
 
-const SAKUYA_FINAL_REPLY = '리쿠: ㅋㅋ... / 유우시랑 다 얘기 햇는데 / 양다리 제대로 걸쳣네? / 사람 하나 바보 만들고... / 내가 그렇게 호구 같아 보였어?'
+const RYO_YUSHI_FINAL_REPLY = '리쿠: ㅋㅋ... / 유우시랑 다 얘기 햇는데 / 양다리 제대로 걸쳣네? / 사람 하나 바보 만들고... / 내가 그렇게 호구 같아 보였어?'
 
 /** 리쿠 Day 1: 수업 전 점심 제안 → 점심 동선 → 동방 시식회 후 밤 카톡 */
 const RIKU_DAY1: Record<string, PhaseNode> = {
@@ -412,34 +412,34 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     message: '여주야 수업 끝낫지??\n대본 보기 전에 뭐라도 먹어 ㅠㅠ 어디서 먹을 거야?',
     branch: YUSHI_LUNCH_BRANCH('B'),
     choices: [
-      { id: 'A', text: '후문 서가앤쿡 잠깐 들를 것 같아', susp: 0, next: 'END_Sakuya_Step1_B' },
-      { id: 'B', text: '정문 쪽 라멘야에서 빨리 먹으려구', susp: 10, next: 'P2_Safe2_B' },
+      { id: 'A', text: '후문 서가앤쿡 잠깐 들를 것 같아', susp: 10, next: 'P2_Safe2_B' },
+      { id: 'B', text: '정문 쪽 라멘야에서 빨리 먹으려구', susp: 0, next: 'END_RyoYushi_Step1_B' },
     ],
   },
   P2_YushiLink_C: {
     message: '여주야 수업 끝낫지??\n동기랑 어디서 먹어?',
     branch: YUSHI_LUNCH_BRANCH('C'),
     choices: [
-      { id: 'A', text: '후문 서가앤쿡 가기로 했어', susp: 0, next: 'END_Sakuya_Step1_C' },
-      { id: 'B', text: '정문 쪽 라멘야 가려구', susp: 10, next: 'P2_Safe2_C' },
+      { id: 'A', text: '후문 서가앤쿡 가기로 했어', susp: 10, next: 'P2_Safe2_C' },
+      { id: 'B', text: '정문 쪽 라멘야 가려구', susp: 0, next: 'END_RyoYushi_Step1_C' },
     ],
   },
-  END_Sakuya_Step1_B: {
+  END_RyoYushi_Step1_B: {
     delay: 8,
-    message: '사쿠야가 단톡에 사회과학관 길목에서 너랑 유우시 봤다는데?\n둘이 서가앤쿡 간다고\n혼자 대본 본다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
-    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 100, reply: SAKUYA_FINAL_REPLY, next: 'END_Sakuya_Final' }],
+    message: '료가 단톡에 정문 라멘야에서 너랑 유우시 봤다는데?\n둘이 라멘 먹고 있다고\n혼자 대본 본다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
+    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 100, reply: RYO_YUSHI_FINAL_REPLY, next: 'END_RyoYushi_Final' }],
   },
-  END_Sakuya_Step1_C: {
+  END_RyoYushi_Step1_C: {
     delay: 8,
-    message: '사쿠야가 단톡에 사회과학관 길목에서 너랑 유우시 봤다는데?\n둘이 서가앤쿡 간다고\n선약 잇다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
-    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 100, reply: SAKUYA_FINAL_REPLY, next: 'END_Sakuya_Final' }],
+    message: '료가 단톡에 정문 라멘야에서 너랑 유우시 봤다는데?\n둘이 라멘 먹고 있다고\n선약 잇다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
+    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 100, reply: RYO_YUSHI_FINAL_REPLY, next: 'END_RyoYushi_Final' }],
   },
-  END_Sakuya_Final: {
+  END_RyoYushi_Final: {
     isGameOver: true,
     message: '',
     choices: [],
     alert:
-      '[단톡방] 사쿠야: 어 방금 사회과학관 길목에서 유우시 형이랑 여주 누나 봤어요 ㅋㅋㅋ 두 분 서가앤쿡 가세요?!\n사쿠야의 목격담으로 리쿠와 유우시가 모든 사실을 알게 되었습니다.',
+      '[단톡방] 료: 어 여주 누나 유우시 형이랑 정문 라멘야 계시네요?! 이따 1시 대중문화 수업 때 봬요!\n료의 목격담으로 리쿠와 유우시가 모든 사실을 알게 되었습니다.',
   },
   P2_Safe2_B: {
     delay: 20,
@@ -512,7 +512,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         text: '서가앤쿡 가자!',
         susp: 0,
         reply: '응 이따 수업 끝나고 같이 가자 ^_^',
-        next: 'P2_Sakuya',
+        next: 'P2_Safe1',
         setFlag: FLAG_YUSHI_LUNCH_SEOGA,
       },
       {
@@ -520,19 +520,19 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         text: '라멘야 어때?',
         susp: 0,
         reply: '알겠어 / 이따 사물함만 들렀다가 그쪽으로 갈게 ^_^',
-        next: 'P2_Safe1',
+        next: 'P2_Ryo',
         setFlag: FLAG_YUSHI_LUNCH_RAMEN,
       },
     ],
   },
-  P2_Sakuya: {
-    message: '여주야 사회과학관 길목이야\n방금 사쿠야 지나갔는데 우리 봤나 봐',
+  P2_Ryo: {
+    message: '여주야 정문 라멘야 앞이야\n방금 료 지나갔는데 우리 봤나 봐',
     choices: [
       {
         id: 'A',
         text: '헉 진짜? 금방 갈게!',
         susp: 0,
-        reply: '유우시: 사쿠야가 단톡에 우리 서가앤쿡 간다고 올렸네',
+        reply: '유우시: 료가 단톡에 우리 라멘야 있다고 올렸네',
         next: 'END_Riku',
       },
     ],
@@ -542,10 +542,10 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
     message: '',
     choices: [],
     alert:
-      '[단톡방] 사쿠야: 어 방금 사회과학관 길목에서 유우시 형이랑 여주 누나 봤어요 ㅋㅋㅋ 두 분 서가앤쿡 가세요?!\n사회과학관 동선이 겹치는 사쿠야에게 목격되어 리쿠에게 양다리가 발각되었습니다.',
+      '[단톡방] 료: 어 여주 누나 유우시 형이랑 정문 라멘야 계시네요?! 이따 1시 대중문화 수업 때 봬요!\n정문 라멘야에서 료에게 목격되어 리쿠에게 양다리가 발각되었습니다.',
   },
   P2_Safe1: {
-    message: '라멘 맛있네 ㅎㅎ\n머리끈 여기 있어 ^_^',
+    message: '서가앤쿡 맛있네 ㅎㅎ\n머리끈 여기 있어 ^_^',
     choices: [{ id: 'A', text: '고마워 ㅎㅎ 1시 수업 잘 들어!', susp: 0, next: 'P4_Start' }],
   },
   P2_RikuFlow_B: {
