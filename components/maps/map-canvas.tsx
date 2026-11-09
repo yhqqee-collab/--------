@@ -114,15 +114,20 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
       ).addTo(map)
 
       const roadMap = map
-      const roadLayers = CAMPUS_ROADS.map((road) => {
-        const latLngs = road.points.map(([x, y]) => toLatLng(x, y))
-        const style = { lineCap: 'round', lineJoin: 'round', interactive: false } as const
-        return {
-          width: road.width,
-          edge: L.polyline(latLngs, { ...style, color: '#C9D6EC', opacity: 0.7 }).addTo(roadMap),
-          fill: L.polyline(latLngs, { ...style, color: '#FFFFFF' }).addTo(roadMap),
-        }
-      })
+      const roadStyle = { lineCap: 'round', lineJoin: 'round', interactive: false } as const
+      const roadLines = CAMPUS_ROADS.map((road) => ({
+        width: road.width,
+        latLngs: road.points.map(([x, y]) => toLatLng(x, y)),
+      }))
+      // Draw every border before any white fill so junctions merge without seams.
+      const roadEdges = roadLines.map((road) =>
+        L.polyline(road.latLngs, { ...roadStyle, color: '#C3D1EA', opacity: 1 }).addTo(roadMap),
+      )
+      const roadLayers = roadLines.map((road, index) => ({
+        width: road.width,
+        edge: roadEdges[index],
+        fill: L.polyline(road.latLngs, { ...roadStyle, color: '#FFFFFF', opacity: 1 }).addTo(roadMap),
+      }))
       const syncRoadWidths = () => {
         if (!map) return
         const metersPerPixel = (156543.03 * Math.cos((map.getCenter().lat * Math.PI) / 180)) / 2 ** map.getZoom()

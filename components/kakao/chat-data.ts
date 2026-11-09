@@ -27,6 +27,7 @@ export type BackgroundChat = {
   preview: string
   time: string
   color: string
+  avatar?: string
   members?: number
   unread?: number
   muted?: boolean
@@ -602,5 +603,6 @@ export const BACKGROUND_CHATS: BackgroundChat[] = [
     preview: '우리 딸 시험 다 끝났어? 주말에 내려오니?',
     time: '11월 3일',
     color: '#f472b6',
+    avatar: '/images/kakao/mom.png',
   },
 ]
