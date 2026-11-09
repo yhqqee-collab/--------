@@ -190,7 +190,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const bannerMessage =
     bannerKind === 'safari'
       ? NOTIFICATION_COMMENT
-        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습�����다: ${NOTIFICATION_COMMENT.comment.text}`
+        ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습니다: ${NOTIFICATION_COMMENT.comment.text}`
         : ''
       : kakaoNotice
         ? `${CHAT_DISPLAY_NAMES[kakaoNotice.id] ?? '새 메시지'}: ${kakaoNotice.text}`
