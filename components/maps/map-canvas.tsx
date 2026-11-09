@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import {
   CAMPUS,
   CAMPUS_BUILDINGS,
+  CAMPUS_ROADS,
   DEFAULT_ZOOM,
   ICON_ZOOM,
   KOREA_BOUNDS,
@@ -111,6 +112,27 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
         CAMPUS.points.map(([x, y]) => toLatLng(x, y)),
         { color: '#B7CAEA', weight: 1, fillColor: '#DCE6F7', fillOpacity: 0.9, interactive: false },
       ).addTo(map)
+
+      const roadLayers = CAMPUS_ROADS.map((road) => {
+        const latLngs = road.points.map(([x, y]) => toLatLng(x, y))
+        const style = { lineCap: 'round', lineJoin: 'round', interactive: false } as const
+        return {
+          width: road.width,
+          edge: L.polyline(latLngs, { ...style, color: '#C3D0E6' }).addTo(map),
+          fill: L.polyline(latLngs, { ...style, color: '#FFFFFF' }).addTo(map),
+        }
+      })
+      const syncRoadWidths = () => {
+        if (!map) return
+        const metersPerPixel = (156543.03 * Math.cos((map.getCenter().lat * Math.PI) / 180)) / 2 ** map.getZoom()
+        for (const road of roadLayers) {
+          const weight = road.width / metersPerPixel
+          road.fill.setStyle({ weight })
+          road.edge.setStyle({ weight: weight > 1.5 ? weight + 2 : 0 })
+        }
+      }
+      syncRoadWidths()
+      map.on('zoomend', syncRoadWidths)
 
       for (const building of CAMPUS_BUILDINGS) {
         const halfW = building.w / 2
