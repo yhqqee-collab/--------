@@ -9,6 +9,7 @@ import { CommentsSheet, type PostComment } from './comments-sheet'
 import { FriendStoryViewer, type FriendStory } from './friend-story-viewer'
 import { MyProfile } from './my-profile'
 import { UserProfile } from './user-profile'
+import { commentPromptFor, emitInstaCommentChoice } from './insta-comment-choices'
 import {
   ALL_POSTS,
   COMMENT_AVATARS,
@@ -19,10 +20,15 @@ import {
   NOTIFICATION_COMMENT,
   POSTS,
   PROFILES,
+  isPostVisible,
+  postsOf,
   shiftTime,
   storiesForDay,
+  tilesOf,
   type Post,
 } from './instagram-data'
+
+const AUTHOR_REPLY_DELAY_MS = 4000
 
 const logoFont = Grand_Hotel({ weight: '400', subsets: ['latin'] })
 
@@ -232,9 +238,12 @@ export function InstagramApp({
   revealNotificationComment = false,
   hasMyStory = false,
   day = 1,
+  workEnded = true,
 }: { 
   hasMyStory?: boolean
   day?: number
+  /** 그날 데이트(업무) 전환이 끝났는지. afterWork 게시물·스토리 노출에 사용 */
+  workEnded?: boolean
   open: boolean
   owner: string
   ownerName?: string
@@ -245,15 +254,24 @@ export function InstagramApp({
 }) {
   const initial = owner.slice(-2, -1) || owner.slice(0, 1)
   const ownerHandle = owner || 'yeoju'
-  const elapsedDays = day - 1
   const withOwner = (post: Post): Post => ({
     ...post,
     handle: post.handle === MY_HANDLE ? ownerHandle : post.handle,
-    time: shiftTime(post.time, elapsedDays),
+    time: shiftTime(post.time, day - (post.day ?? 1)),
   })
   const agedComments = (comments: PostComment[]) =>
-    comments.map((comment) => ({ ...comment, time: shiftTime(comment.time, day - (comment.postedDay ?? 1)) }))
-  const todayStories = storiesForDay(day)
+    comments.map((comment) => ({
+      ...comment,
+      time: shiftTime(comment.time, day - (comment.postedDay ?? 1)),
+      replies: comment.replies?.map((reply) => ({ ...reply, time: shiftTime(reply.time, day - (reply.postedDay ?? 1)) })),
+    }))
+  const todayStories = storiesForDay(day, workEnded)
+  const visible = (post: Post) => isPostVisible(post, day, workEnded)
+  const feedPosts = POSTS.filter(visible)
+  const profileFor = (handle: string) => {
+    const base = PROFILES[handle]
+    return base ? { ...base, tiles: tilesOf(postsOf(handle).filter(visible)) } : null
+  }
   const seenKey = (handle: string) => `${day}:${handle}`
   const storyStateOf = (handle: string): StoryState => {
     if (!todayStories.some((item) => item.handle === handle && item.story)) return 'none'
@@ -268,6 +286,37 @@ export function InstagramApp({
     ),
   )
   const [activePost, setActivePost] = useState<string | null>(null)
+  const [chosenPrompts, setChosenPrompts] = useState<string[]>([])
+  const activePrompt = activePost ? commentPromptFor(day, activePost) : undefined
+  const promptKey = activePost ? `${day}:${activePost}` : ''
+  const pendingChoices = activePrompt && !chosenPrompts.includes(promptKey) ? activePrompt.choices : undefined
+  const chooseComment = (id: string) => {
+    const choice = activePrompt?.choices.find((item) => item.id === id)
+    if (!activePost || !choice || chosenPrompts.includes(promptKey)) return
+    const postId = activePost
+    const author = findPost(postId)?.handle ?? ''
+    setChosenPrompts((prev) => [...prev, promptKey])
+    setCommentsByPost((prev) => ({
+      ...prev,
+      [postId]: [
+        ...(prev[postId] ?? findPost(postId)?.comments ?? []),
+        { name: ownerHandle, mine: true, text: choice.comment, time: '방금', likes: 0, postedDay: day },
+      ],
+    }))
+    emitInstaCommentChoice(choice)
+    if (!choice.authorReply) return
+    const reply: PostComment = { name: author, text: choice.authorReply, time: '방금', likes: 0, postedDay: day }
+    window.setTimeout(() => {
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: (prev[postId] ?? []).map((comment) =>
+          comment.mine && comment.text === choice.comment && comment.postedDay === day
+            ? { ...comment, replies: [...(comment.replies ?? []), reply] }
+            : comment,
+        ),
+      }))
+    }, AUTHOR_REPLY_DELAY_MS)
+  }
   const [activeStory, setActiveStory] = useState<FriendStory | null>(null)
   const [seenStories, setSeenStories] = useState<string[]>([])
   const [activeProfile, setActiveProfile] = useState<string | null>(null)
@@ -376,7 +425,7 @@ export function InstagramApp({
           })}
         </ul>
 
-        {POSTS.map((post) => {
+        {feedPosts.map((post) => {
           const renderedPost = withOwner(post)
           const mine = post.handle === MY_HANDLE
           return (
@@ -469,6 +518,8 @@ export function InstagramApp({
         ownerInitial={initial}
         ownerAvatar={MY_AVATAR}
         comments={activePost ? agedComments(commentsByPost[activePost] ?? findPost(activePost)?.comments ?? []) : []}
+        choices={pendingChoices}
+        onChoose={chooseComment}
         onAdd={(text) => {
           if (!activePost) return
           setCommentsByPost((prev) => ({
@@ -483,11 +534,11 @@ export function InstagramApp({
       />
 
       <UserProfile
-        profile={open && activeProfile ? (PROFILES[activeProfile] ?? null) : null}
+        profile={open && activeProfile ? profileFor(activeProfile) : null}
         storyState={activeProfile ? storyStateOf(activeProfile) : 'none'}
         onClose={() => setActiveProfile(null)}
         onOpenPost={(handle) => {
-          const post = POSTS.find((item) => item.handle === handle)
+          const post = feedPosts.find((item) => item.handle === handle)
           if (post) {
             setActiveProfile(null)
             setActivePost(post.id)

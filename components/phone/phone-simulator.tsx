@@ -302,7 +302,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
       <CalendarApp open={activeApp === 'calendar'} day={currentDay} />
       <SafariApp open={activeApp === 'safari'} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />
       <MessagesApp open={activeApp === 'messages'} owner={name} />
-      <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} />
+      <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} workEnded={workPhase === 'after'} />
       <StoryViewer open={showStory} owner={name} onClose={() => setStoryOpen(false)} />
       <LockScreen visible={locked} name={userName ?? ''} onUnlock={setOwner} dateLabel={dayLabel(currentDay)} />
       {userName === null && (

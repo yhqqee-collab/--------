@@ -1,5 +1,6 @@
 import { INSTAGRAM_AVATAR_OVERRIDES, INSTAGRAM_IDS, OWNER_AVATAR, PERSON_AVATARS } from '@/lib/template-config'
 import type { PostComment } from './comments-sheet'
+import { SION_DAY3_POST_ID } from './insta-comment-choices'
 import type { FriendStory } from './friend-story-viewer'
 import type { UserProfileData } from './user-profile'
 
@@ -56,8 +57,12 @@ function profile(person: { id: string; name: string }, followers: number, follow
     avatar: avatarOf(person),
     followers,
     following,
-    tiles: posts.map((post) => ({ src: post.images[0].src, alt: post.images[0].alt, multiple: post.images.length > 1 })),
+    tiles: tilesOf(posts),
   }
+}
+
+export function tilesOf(posts: Post[]): UserProfileData['tiles'] {
+  return posts.map((post) => ({ src: post.images[0].src, alt: post.images[0].alt, multiple: post.images.length > 1 }))
 }
 
 function story(
@@ -78,7 +83,8 @@ function story(
   }
 }
 
-export type StoryItem = { handle: string; src: string; story?: FriendStory }
+/** afterWork: 그날 데이트(업무) 전환이 끝난 뒤에만 보이는 스토리 */
+export type StoryItem = { handle: string; src: string; story?: FriendStory; afterWork?: boolean }
 
 /**
  * 날짜별 스토리. 스토리는 매일 초기화되며, 해당 날짜에 목록에 없는 사람은 스토리 링이 표시되지 않습니다.
@@ -86,9 +92,22 @@ export type StoryItem = { handle: string; src: string; story?: FriendStory }
  */
 export const STORIES_BY_DAY: Record<number, StoryItem[]> = {}
 
-export function storiesForDay(day: number): StoryItem[] {
-  return STORIES_BY_DAY[day] ?? []
+export function storiesForDay(day: number, workEnded = true): StoryItem[] {
+  return (STORIES_BY_DAY[day] ?? []).filter((item) => !item.afterWork || workEnded)
 }
+
+/** 3일 차: 데이트 끝나고 시온이 올린 지하철 스토리 */
+STORIES_BY_DAY[3] = [
+  {
+    ...story(sion, '방금', {
+      images: [
+        { src: '/stories/sion-day3-1.jpg', alt: '녹사평역 승강장 유리에 비친 시온의 거울 셀카, 손에 쇼핑백' },
+        { src: '/stories/sion-day3-2.jpg', alt: '지하철 안에서 쇼핑백을 든 채 휴대폰을 보는 시온' },
+      ],
+    }),
+    afterWork: true,
+  },
+]
 
 /** 1일차 기준 상대 시간("2시간 전", "1일 전", "1주")을 경과 일수만큼 뒤로 민 표기로 바꿉니다. */
 export function shiftTime(time: string, elapsedDays: number): string {
@@ -127,6 +146,16 @@ export type Post = {
   likedBy?: string[]
   comments: PostComment[]
   commentsDisabled?: boolean
+  /** 이 일차부터 피드에 노출 (없으면 항상 노출). time 은 이 일차 기준 */
+  day?: number
+  /** true 면 day 당일엔 데이트(업무) 전환이 끝난 뒤에 노출 */
+  afterWork?: boolean
+}
+
+export function isPostVisible(post: Post, day: number, workEnded: boolean) {
+  if (!post.day) return true
+  if (day < post.day) return false
+  return !(day === post.day && post.afterWork && !workEnded)
 }
 
 /** 여주 게시물 handle 토큰. 화면에서는 입력한 이름의 영문 아이디로 자동 치환됩니다. */
@@ -139,6 +168,28 @@ export const MY_POSTS: Post[] = []
 
 /** 홈 타임라인에 노출되는 피드 게시물 템플릿 */
 export const POSTS: Post[] = [
+  {
+    id: SION_DAY3_POST_ID,
+    handle: sion.id,
+    avatar: avatarOf(sion),
+    time: '방금 전',
+    location: '용산',
+    images: [
+      { src: '/posts/sion-day3-1.jpg', alt: '용산에서 찍은 시온 사진 1' },
+      { src: '/posts/sion-day3-2.jpg', alt: '용산에서 찍은 시온 사진 2' },
+      { src: '/posts/sion-day3-3.jpg', alt: '용산에서 찍은 시온 사진 3' },
+      { src: '/posts/sion-day3-4.jpg', alt: '용산에서 찍은 시온 사진 4' },
+      { src: '/posts/sion-day3-5.jpg', alt: '용산에서 찍은 시온 사진 5' },
+      { src: '/posts/sion-day3-6.jpg', alt: '용산에서 찍은 시온 사진 6' },
+      { src: '/posts/sion-day3-7.jpg', alt: '용산에서 찍은 시온 사진 7' },
+    ],
+    caption: '날씨 좋은 날 🍃',
+    likes: 442,
+    likedBy: [riku.id, daeyoung.id],
+    comments: [],
+    day: 3,
+    afterWork: true,
+  },
   {
     id: 'sample-post-a',
     handle: sion.id,
@@ -215,7 +266,7 @@ export const PROFILES: Record<string, UserProfileData> = {
   [riku.id]: profile(riku, 1203, 341, '[리쿠 소개글]'),
   [yushi.id]: profile(yushi, 845, 402, '[유우시 소개글]'),
   [sakuya.id]: profile(sakuya, 730, 388, '[사쿠야 소개글]'),
-  [ryo.id]: profile(ryo, 521, 476, '[료 소개글]'),
+  [ryo.id]: profile(ryo, 521, 476, '[��� 소개글]'),
   [daeyoung.id]: profile(daeyoung, 389, 412, '[김대영 소개글]'),
 }
 

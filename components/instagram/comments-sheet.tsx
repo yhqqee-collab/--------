@@ -56,6 +56,8 @@ export function CommentsSheet({
   ownerInitial,
   ownerAvatar,
   comments,
+  choices,
+  onChoose,
   onAdd,
   onClose,
 }: {
@@ -65,6 +67,9 @@ export function CommentsSheet({
   ownerInitial: string
   ownerAvatar?: string
   comments: PostComment[]
+  /** 있으면 자유 입력 대신 댓글 선택지를 보여줍니다 */
+  choices?: { id: string; comment: string }[]
+  onChoose?: (id: string) => void
   onAdd: (text: string) => void
   onClose: () => void
 }) {
@@ -114,6 +119,27 @@ export function CommentsSheet({
           ))}
         </ul>
 
+        {choices && choices.length > 0 ? (
+          <div className="shrink-0 border-t border-black/[0.08] px-[14px] pb-[30px] pt-[12px]">
+            <p className="pb-[8px] text-[12px] font-semibold text-[#737373]">댓글 선택</p>
+            <ul className="flex flex-col gap-[8px]">
+              {choices.map((choice) => (
+                <li key={choice.id}>
+                  <button
+                    type="button"
+                    onClick={() => onChoose?.(choice.id)}
+                    className="flex w-full items-center gap-[10px] rounded-[14px] border border-black/[0.12] px-[12px] py-[10px] text-left text-[14px] text-black transition-colors active:bg-black/[0.05]"
+                  >
+                    {ownerAvatar ? (
+                      <Image src={ownerAvatar} alt="" width={26} height={26} className="size-[26px] shrink-0 rounded-full object-cover" />
+                    ) : null}
+                    <span className="min-w-0 flex-1 break-words">{choice.comment}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -151,6 +177,7 @@ export function CommentsSheet({
             게시
           </button>
         </form>
+        )}
       </section>
     </div>
   )
