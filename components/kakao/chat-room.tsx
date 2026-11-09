@@ -307,6 +307,28 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     const held = heldBatchRef.current
     if (!held || held.batch.enterNode === holdNode) return
     heldBatchRef.current = null
+    const heldId = held.batch.enterNode
+    // 단톡방 선택으로 플래그가 정해진 뒤에 분기 노드를 다시 판정
+    if (script && heldId && script.nodes[heldId]?.branch) {
+      const resolved = resolveNode(script, heldId, activeFlags)
+      const node = resolved ? script.nodes[resolved] : undefined
+      if (!resolved || !node) {
+        setPendingPhase(false)
+        if (!scriptDoneRef.current) {
+          scriptDoneRef.current = true
+          latest.current.onScriptDone?.()
+        }
+        return
+      }
+      enqueue({
+        ...held.batch,
+        texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
+        enterNode: resolved,
+        dueAt: Date.now() + held.remainingMs,
+        turn: replyTurnRef.current,
+      })
+      return
+    }
     enqueue({ ...held.batch, dueAt: Date.now() + held.remainingMs, turn: replyTurnRef.current })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holdNode])
@@ -387,6 +409,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clockStarted, day])
 
+  const stageChoiceRef = useRef<number | null>(null)
   const stagesPlayedRef = useRef(0)
   const stageDoneRef = useRef(onStageDone)
   stageDoneRef.current = onStageDone
@@ -402,6 +425,12 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       playGroupLines(
         stages[index].messages,
         () => {
+          const stageChoices = stages[index].choices
+          if (stageChoices?.length) {
+            stageChoiceRef.current = index
+            setGroupChoices(stageChoices)
+            return
+          }
           stageDoneRef.current?.(index)
           if (index === stages.length - 1) schedule(2500, () => latest.current.onScriptDone?.())
         },
@@ -415,12 +444,19 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (groupPicked !== null) return
     setGroupPicked(index)
     setNewBadge(false)
+    if (choice.setFlag) flags?.add(choice.setFlag)
     const text = personalizeText(choice.text, owner)
     setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time: nowLabel() }])
     onSent(text)
+    const stageIndex = stageChoiceRef.current
+    stageChoiceRef.current = null
     playGroupLines(choice.reply, () => {
       setGroupChoices(null)
       setGroupPicked(null)
+      if (stageIndex !== null) {
+        stageDoneRef.current?.(stageIndex)
+        if (stageIndex !== (groupScript?.stages?.length ?? 0) - 1) return
+      }
       schedule(2500, () => latest.current.onScriptDone?.())
     })
   }
@@ -536,7 +572,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (waitingRef.current) return
     waitingRef.current = true
     if (choice.setFlag) flags?.add(choice.setFlag)
-    const nextId = script ? resolveNode(script, choice.next, activeFlags) : choice.next
+    const deferBranch = Boolean(choice.next && choice.next === holdNodeRef.current && script?.nodes[choice.next]?.branch)
+    const nextId = script && !deferBranch ? resolveNode(script, choice.next, activeFlags) : choice.next
     pendingNodeRef.current = nextId
     const says = choice.says.map(fillChoice)
     const time = nowLabel()
@@ -553,7 +590,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     setNewBadge(false)
     setPicked(index)
     setWaiting(true)
-    const reachesEnd = !nextId || !script?.nodes[nextId]?.choices.length
+    const reachesEnd = !deferBranch && (!nextId || !script?.nodes[nextId]?.choices.length)
 
     const judging = hasSuspicion && suspicionActive
     let value = suspicion ?? 0
@@ -700,7 +737,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
               <Menu className="size-[22px]" strokeWidth={1.9} aria-hidden />
             </button>
           ) : (
-            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="메뉴" />
+            <Menu className="size-[22px]" strokeWidth={1.9} aria-label="��뉴" />
           )}
         </div>
       </header>

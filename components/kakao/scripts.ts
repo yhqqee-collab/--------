@@ -10,7 +10,7 @@ import type { SuspicionStage } from './suspicion'
 /** 모든 멤버의 '일정 시작 전' 대화가 끝나면 4초간 표시되는 전환 문구 (일차별) */
 const WORK_TRANSITION_TEXTS: Record<number, string> = {
   1: '⏳ [<영화와 현대사회> 수업 듣는 중...] (10:30 ~ 12:00) ⏳',
-  2: '⏳ [2일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
+  2: '⏳ [오후 장보기 및 동방 짐 정리 진행 중...] (14:30 ~ 21:30) ⏳',
   3: '⏳ [3일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   4: '⏳ [4일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   5: '⏳ [5일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
@@ -622,6 +622,88 @@ const SION_DAY1: Record<string, PhaseNode> = {
   },
 }
 
+/** Day 2 단톡방 장보기 팀 선택 플래그 */
+export const FLAG_SHOP_RIKU = 'shop-riku'
+export const FLAG_SHOP_SION = 'shop-sion'
+/** Day 2 밤에 시온을 만나러 나갔는지 (유우시 루트 연동용) */
+export const FLAG_SION_NIGHT_MEET = 'sion-night-meet'
+
+/** 시온 Day 2: 아침 인사 → 단톡방 장보기 분기 → 밤 호출 → 마무리 인사 */
+const SION_DAY2: Record<string, PhaseNode> = {
+  P0_Morning: {
+    preWork: true,
+    message: '여주야 일어났어? ㅋㅋ\n밥 잘 챙겨 먹고 나와',
+    choices: [
+      { id: 'A', text: '웅 방금 일어났어\n보고 싶다 ㅎㅎ', susp: 0, reply: 'ㅋㅋ 응 이따 봐', next: 'Branch_Group' },
+      { id: 'B', text: '지금 씻고 나갈 준비 중!', susp: 0, reply: 'ㅋㅋ 응 이따 봐', next: 'Branch_Group' },
+    ],
+  },
+  // 단톡방 장보기 선택이 끝날 때까지 대기하는 분기 전용 노드
+  Branch_Group: {
+    preWork: true,
+    delay: 10,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_SHOP_RIKU], to: 'P1_Sion_Rejected' },
+      { all: [FLAG_SHOP_SION], to: 'P2_Sion_Alibi' },
+    ],
+  },
+  P1_Sion_Rejected: {
+    preWork: true,
+    message: 'ㅠㅠ 나랑 같이 가지...\n왜 리쿠랑 같이 가 ㅡㅡ\n걸어가면 다리도 아플 텐데',
+    choices: [
+      { id: 'A', text: '나두 다이소에 살 게 있어서 ㅠㅠ\n미안해...', susp: 10, reply: '그래 그럼 ㅋㅋㅋ / 이따 봐', next: 'P3_Night_Start' },
+      { id: 'B', text: '리쿠가 같이 가자고 해서... ㅠㅠ 이따 봐', susp: 15, reply: '아 그래 ㅋㅋ 알겠어', next: 'P3_Night_Start' },
+    ],
+  },
+  P2_Sion_Alibi: {
+    preWork: true,
+    message:
+      '여주야 나 주차 좀 하고 갈 테니까 먼저 마트 들어가 있어 ㅋㅋ\n근데 방금 주차장 쪽에서 수진이 봤는데\n며칠 푹 쉬고 방금 본가에서 올라왔다던데?\n너 수요일 밤에 수진이 자취방에서 과제하며 밤샜다고 하지 않았어?',
+    choices: [
+      { id: 'A', text: '수요일 늦게 내려갔을 걸?\n그전까지 같이 한 거야!', susp: -15, reply: '아 그래? / 알겠어 얼른 들어갈게', next: 'P3_Night_Start' },
+      {
+        id: 'B',
+        text: '아 수진이 아니고 민지였어\n내가 헷갈렸다 ㅎㅎ',
+        susp: 15,
+        reply: '그래? / 동기를 헷갈릴 수도 있나 ㅎㅎ / 일단 알겠어',
+        next: 'P3_Night_Start',
+      },
+    ],
+  },
+  P3_Night_Start: {
+    message: '짐 정리하느라 고생했어 ㅋㅋ\n왜 봐도봐도 보고 싶지\n잠깐 나올래?',
+    choices: [
+      {
+        id: 'A',
+        text: '오! 나갈게 어디야? ㅋㅋ',
+        susp: -10,
+        reply: 'ㅋㅋ 집 앞 편의점 파라솔 쪽이야 천천히 나와',
+        next: 'P4_Goodnight_Meet',
+        setFlag: FLAG_SION_NIGHT_MEET,
+      },
+      {
+        id: 'B',
+        text: '앗 나 방금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
+        susp: 5,
+        reply: '벌써 누웠어? / 알겠어 푹 쉬어',
+        next: 'P4_Goodnight_Reject',
+      },
+    ],
+  },
+  P4_Goodnight_Meet: {
+    delay: 40,
+    message: '오늘 잠깐이라도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
+    choices: [{ id: 'A', text: '나두 잠깐 얼굴 보니까 좋더라 ㅋㅋ 잘 자!', susp: 0, reply: '응 내일 봐 ㅎㅎ', next: 'end' }],
+  },
+  P4_Goodnight_Reject: {
+    delay: 40,
+    message: '오늘 고생했어\n피곤할 텐데 푹 자',
+    choices: [{ id: 'A', text: '웅 오늘 하루 고생했어!\n잘 자 ㅋㅋ', susp: 0, reply: '응 내일 보자 ㅎㅎ❤️', next: 'end' }],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -632,7 +714,7 @@ export const SCRIPTS: Record<string, Script> = {
 /** 일차별 대화. 그날 스크립트가 없는 멤버는 그날 카톡이 오지 않습니다. */
 export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
   1: SCRIPTS,
-  2: sampleDay(),
+  2: { ...sampleDay(), a: fromPhases('P0_Morning', SION_DAY2, SAMPLE_TIMING.a) },
   3: sampleDay(),
   4: sampleDay(),
   5: sampleDay(),
@@ -643,7 +725,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 /* ───────────── 단톡방 이벤트 ───────────── */
 
 export type GroupLine = { sender: string; text: string; delayMs: number }
-export type GroupChoice = { id: string; text: string; reply: GroupLine[] }
+export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
   /** 일차 시작(또는 afterAllChats 달성) 후 첫 메시지까지 (ms) */
   startDelayMs: number
@@ -667,6 +749,8 @@ export type GroupStage = {
   /** 채팅방 id → 이 단계가 끝날 때까지 대기시킬 노드 id */
   holdNodes: Record<string, string>
   messages: GroupLine[]
+  /** 지정하면 메시지 후 플레이어가 고르고, 반응이 끝난 뒤에 대기 중인 카톡이 이어집니다. */
+  choices?: GroupChoice[]
 }
 
 /** 이전 메시지 이후 2~7초 사이의 랜덤 간격 */
@@ -718,9 +802,42 @@ const STAFF_DAY1: GroupScript = {
   ],
 }
 
+/** Day 2 단톡방: 오전 10시 장보기 팀 나누기 (선택 결과가 시온의 분기를 결정) */
+const STAFF_DAY2: GroupScript = {
+  startDelayMs: 3000,
+  messages: [],
+  choices: [],
+  stages: [
+    {
+      holdNodes: { a: 'Branch_Group' },
+      messages: [
+        gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누자 ㅋㅋ'),
+        gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 올게'),
+        gl(G_RIKU, '나는 다이소 가서 앞치마랑 데코 소품 사 올게! 가까우니까 걸어갈 거야 ㅎㅎ'),
+        gl(G_DAEYOUNG, '여주는 어디 따라갈래?'),
+      ],
+      choices: [
+        {
+          id: 'riku',
+          text: '나는 리쿠랑 다이소 갈게!',
+          setFlag: FLAG_SHOP_RIKU,
+          reply: [gl(G_RIKU, '앗싸 ㅎㅎ 이따 정문에서 보자!'), gl(G_DAEYOUNG, '오키 그럼 이마트는 내가 시온이 형이랑 갈게')],
+        },
+        {
+          id: 'sion',
+          text: '나는 시온이랑 이마트 갈게!',
+          setFlag: FLAG_SHOP_SION,
+          reply: [gl(G_SION, 'ㅋㅋ 오키 2시에 정문 앞으로 차 끌고 갈게'), gl(G_SAKUYA, '그럼 다이소는 제가 리쿠 형이랑 갈게여')],
+        },
+      ],
+    },
+  ],
+}
+
 /** 일차별 단톡방 이벤트 (키는 채팅방 id — chat-data.ts 의 단톡방 id 와 일치해야 함) */
 const DAY_GROUP_SCRIPTS: Record<number, Record<string, GroupScript>> = {
   1: { staff: STAFF_DAY1 },
+  2: { staff: STAFF_DAY2 },
   6: { staff: { startDelayMs: 5000, messages: [gl(GROUP_SENDER, '[단톡방 대사를 입력하세요]')], choices: [] } },
 }
 
