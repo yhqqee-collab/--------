@@ -97,6 +97,7 @@ export const STORES: Store[] = [
     deliveryFee: 3000,
     minOrder: 15000,
     tagline: '짬뽕 국물 진한 집',
+    thumbnail: '/images/baemin/hongkong.png',
     menu: [
       { id: 'h1', name: '짬뽕', price: 8500, description: '불맛 가득', popular: true },
       { id: 'h2', name: '짜장면', price: 7000, description: '기본에 충실' },
