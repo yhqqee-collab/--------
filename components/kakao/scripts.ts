@@ -372,7 +372,7 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카���에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
@@ -383,14 +383,14 @@ export const FLAG_YUSHI_EXCUSE_SOLO = 'yushi-excuse-solo'
 const RIKU_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
     preWork: true,
-    message: '잘 잣어??\n학교 일찍 갈까 고민 중...\n12시에 수업 끝나구 나랑 점심 먹자 ❤️',
+    message: '잘 잣어??\n학교 일찍 갈까 고민 중인데...\n수업 끝나구 나랑 점심 먹자 ❤️',
     choices: [
-      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 ㅎㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
+      { id: 'A', text: '좋아!! 수업 끝나고 보자 ㅎㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
       {
         id: 'B',
         text: '1시 수업 발표 준비 때문에 ㅠㅠ 점심 거르고 혼자 대본 보려구...',
         susp: 5,
-        reply: '엥 밥도 안 먹구...? ㅠㅠ / 요즘 나 보기 힘들다... 알겟어 화이팅해!',
+        reply: '엥 밥도 안 먹구...? ㅠㅠ / 요즘 보기 힘들다... / 알겟어 화이팅해!',
         next: 'P2_Safe2_B',
         setFlag: FLAG_RIKU_EXCUSE_SOLO,
       },
@@ -994,7 +994,7 @@ const STAFF_DAY2: GroupScript = {
       choices: [
         {
           id: 'riku',
-          text: '나는 리쿠랑 다이소 갈게!',
+          text: '나는 리쿠랑 다이소 ���게!',
           setFlag: FLAG_SHOP_RIKU,
           reply: [gl(G_RIKU, '앗싸 ㅎㅎ 이따 정문에서 보자!'), gl(G_DAEYOUNG, '오키 그럼 이마트는 내가 시온이 형이랑 갈게')],
         },
