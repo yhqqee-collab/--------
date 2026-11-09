@@ -151,6 +151,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const [pendingPhase, setPendingPhase] = useState(delayedStart)
   const startedRef = useRef(false)
   const gatedNextRef = useRef<string | null>(null)
+  const gatedWaitRef = useRef<{ sync?: string; waitOthers: boolean; delayMs: number } | null>(null)
   const [waiting, setWaiting] = useState(false)
   const [picked, setPicked] = useState<number | null>(null)
   const [typing, setTyping] = useState(false)
@@ -381,6 +382,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     dayRef.current = day
     startedRef.current = false
     gatedNextRef.current = null
+    gatedWaitRef.current = null
     waitNextRef.current = null
     waitSyncRef.current = null
     setSyncText(null)
@@ -506,15 +508,26 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     const gated = gatedNextRef.current
     if (!workEnded || !script || !gated) return
     gatedNextRef.current = null
+    const wait = gatedWaitRef.current
+    gatedWaitRef.current = null
+    // 근무 후 첫 카톡이 다른 이벤트(인스타 댓글 등)를 기다려야 하는 경우
+    if (wait?.sync && !readySyncs.has(wait.sync)) {
+      waitSyncRef.current = { key: wait.sync, next: gated, delayMs: wait.delayMs }
+      return
+    }
     const next = resolveNode(script, gated, activeFlags)
     const node = next ? script.nodes[next] : undefined
     if (!node || !next) {
       setPendingPhase(false)
       return
     }
+    if (wait?.waitOthers && !othersDoneRef.current) {
+      waitNextRef.current = { id: next, delayMs: wait.delayMs }
+      return
+    }
     enqueue({
       texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
-      dueAt: Date.now() + (script.workEndDelayMs ?? 5000),
+      dueAt: Date.now() + (wait ? wait.delayMs : (script.workEndDelayMs ?? 5000)),
       instant: false,
       badge: true,
       turn: replyTurnRef.current,
@@ -655,6 +668,9 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       }
       if (choice.gate) {
         gatedNextRef.current = gatedNext
+        gatedWaitRef.current =
+          choice.sync || choice.waitOthers ? { sync: choice.sync, waitOthers: Boolean(choice.waitOthers), delayMs: choice.nextDelayMs } : null
+        if (choice.sync) onSync?.(choice.sync)
         return
       }
       if (choice.sync) {
@@ -823,7 +839,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       )}
 
       {hasSuspicion && (
-        <div className="bg-[#B2C7DA]/90 px-4 pb-2" role="status" aria-label={`의심도 ${suspicion}퍼센트, ${STAGE_LABEL[getStage(suspicion)]}`}>
+        <div className="bg-[#B2C7DA]/90 px-4 pb-2" role="status" aria-label={`��심도 ${suspicion}퍼센트, ${STAGE_LABEL[getStage(suspicion)]}`}>
           <div className="flex items-center justify-between text-[11px] font-medium text-[#3c4a57]">
             <span>의심도 · {STAGE_LABEL[getStage(suspicion)]}</span>
             <span className="tabular-nums">{`${suspicion}%`}</span>
