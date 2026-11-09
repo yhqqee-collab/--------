@@ -213,7 +213,7 @@ function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming:
  *  - options.text: 주인공이 고를 수 있는 답변
  *  - options.suspicionDelta: 이 답장을 골랐을 때 의심도 변화량 (음수 가능)
  *  - options.nextNodeId: 다음 노드 id, null 이면 대화 종료
- * 가장 긴 경로의 길이가 해당 인물의 '턴 수'가 되고, 모든 인물의 턴을 끝내면 트루엔딩이 발동합니다.
+ * 가장 긴 경로의 길이가 해당 인물의 '턴 수'가 되고, 모든 인물의 턴을 끝내면 트���엔딩이 발동합니다.
  */
 type TreeOption = { text: string; suspicionDelta: number; nextNodeId: string | null }
 type TreeNode = { speakerText: string[]; options: TreeOption[] }
@@ -354,8 +354,6 @@ const YUSHI_LUNCH_BRANCH = (variant: 'B' | 'C'): Branch[] => [
   { all: [FLAG_YUSHI_LUNCH_SEOGA], to: `P2_Safe2_${variant}` },
 ]
 
-const RYO_YUSHI_FINAL_REPLY = '리쿠: ㅋㅋ... / 유우시랑 다 얘기 햇는데 / 양다리 제대로 걸쳣네? / 사람 하나 바보 만들고... / 내가 그렇게 호구 같아 보였어?'
-
 /** 리쿠 Day 1: 수업 전 점심 제안 → 점심 동선 → 동방 시식회 후 밤 카톡 */
 const RIKU_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
@@ -403,45 +401,22 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
   P2_YushiLink_B: {
     message: '여주야 수업 끝낫지??\n대본 보기 전에 뭐라도 먹어 ㅠㅠ 어디서 먹을 거야?',
     branch: YUSHI_LUNCH_BRANCH('B'),
-    choices: [
-      { id: 'A', text: '후문 서가앤쿡 잠깐 들를 것 같아', susp: 10, next: 'P2_Safe2_B' },
-      { id: 'B', text: '정문 쪽 라멘야에서 빨리 먹으려구', susp: 0, next: 'END_RyoYushi_Step1_B' },
-    ],
+    choices: [{ id: 'A', text: '후문 서가앤쿡 잠깐 들를 것 같아', susp: 0, next: 'P2_Safe2_B' }],
   },
   P2_YushiLink_C: {
     message: '여주야 수업 끝낫지??\n동기랑 어디서 먹어?',
     branch: YUSHI_LUNCH_BRANCH('C'),
-    choices: [
-      { id: 'A', text: '후문 서가앤쿡 가기로 했어', susp: 10, next: 'P2_Safe2_C' },
-      { id: 'B', text: '정문 쪽 라멘야 가려구', susp: 0, next: 'END_RyoYushi_Step1_C' },
-    ],
-  },
-  END_RyoYushi_Step1_B: {
-    delay: 8,
-    message: '료가 단톡에 정문 라멘야에서 너랑 유우시 봤다는데?\n둘이 라멘 먹고 있다고\n혼자 대본 본다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
-    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 0, reply: RYO_YUSHI_FINAL_REPLY, next: 'END_RyoYushi_Final' }],
-  },
-  END_RyoYushi_Step1_C: {
-    delay: 8,
-    message: '료가 단톡에 정문 라멘야에서 너랑 유우시 봤다는데?\n둘이 라멘 먹고 있다고\n선약 잇다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
-    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 0, reply: RYO_YUSHI_FINAL_REPLY, next: 'END_RyoYushi_Final' }],
-  },
-  END_RyoYushi_Final: {
-    isGameOver: true,
-    message: '',
-    choices: [],
-    alert:
-      '[단톡방] 료: 어 여주 누나 유우시 형이랑 정문 라멘야 계시네요?! 이따 1시 대중문화 수업 때 봬요!\n료의 목격담으로 리쿠와 유우시가 모든 사실을 알게 되었습니다.',
+    choices: [{ id: 'A', text: '후문 서가앤쿡 가기로 했어', susp: 0, next: 'P2_Safe2_C' }],
   },
   P2_Safe2_B: {
     delay: 20,
     message: '여주야 대본은 다 봣어??\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
-    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 0, next: 'P4_Start' }],
+    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 10, next: 'P4_Start' }],
   },
   P2_Safe2_C: {
     delay: 20,
     message: '여주야 밥은 다 먹엇어??\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
-    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 0, next: 'P4_Start' }],
+    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 10, next: 'P4_Start' }],
   },
   P4_Start: {
     delay: 40,
@@ -607,7 +582,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
   P2_Start: {
     delay: 45,
     message: '여주야 나 셋팅하러 동방 먼저 와 있어 ㅋㅋ\n아직 애들 아무도 안 왔는데\n일찍 올 수 있으면 카페 가자\n어제 그 립밤도 줄 겸 ㅎㅎ',
-    branch: [...RAMEN_EXPOSURE_END, { all: [FLAG_YUSHI_LUNCH_SEOGA], to: 'END_Group_Step1' }],
+    branch: RAMEN_EXPOSURE_END,
     choices: [
       {
         id: 'A',
@@ -624,25 +599,6 @@ const SION_DAY1: Record<string, PhaseNode> = {
         next: 'P3_Start',
       },
     ],
-  },
-  END_Group_Step1: {
-    delay: 8,
-    message: '야 단톡방 뭐야? ㅋㅋ\n점심에 둘이 왜 같이 있어?',
-    choices: [
-      {
-        id: 'A',
-        text: '아 그게...',
-        susp: 0,
-        reply: '애들한테 얘기 다 들었어 / 너 레전드다 진짜...ㅋㅋ / 나중에 얼굴 어떻게 보려고 그래? / 이따가 애들 앞에서 해명할 거지? ㅋㅋ',
-        next: 'END_Group',
-      },
-    ],
-  },
-  END_Group: {
-    isGameOver: true,
-    message: '',
-    choices: [],
-    alert: '[단톡방 목격담 후폭풍]\n단톡방 목격담으로 유우시·리쿠·시온 세 명 모두에게 진실이 밝혀졌습니다.',
   },
   P3_Start: {
     delay: 40,
