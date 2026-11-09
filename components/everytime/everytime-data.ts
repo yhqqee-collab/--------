@@ -98,9 +98,9 @@ const CHARACTERS: Friend[] = [
     starred: true,
     classes: [
       { name: '거시경제학', room: '사회과학관 201호', day: 0, start: 10.5, end: 12 },
-      { name: '경제학원론', room: '사회과학관 101호', day: 1, start: 13, end: 15 },
+      { name: '경제학원론', room: '사회과학관 101호', day: 1, start: 15, end: 17 },
       { name: '거시경제학', room: '사회과학관 201호', day: 3, start: 13, end: 15 },
-      { name: '경제학원론', room: '사회과학관 101호', day: 4, start: 13, end: 15 },
+      { name: '경제학원론', room: '사회과학관 101호', day: 4, start: 15, end: 17 },
     ],
   },
 ]
