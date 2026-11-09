@@ -372,7 +372,7 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카���에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카�����에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
@@ -517,7 +517,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
     choices: [{ id: 'A', text: '웅 고마워! 이따 동방에서 봐', susp: 0, next: 'P4_Start' }],
   },
   P2_Safe1: {
-    message: '서가앤쿡 맛있네 ㅎㅎ\n머리끈 여기 있어 ^_^',
+    message: '서가앤쿡 맛있네 ㅎㅎ\n머리끈 잘 챙겨 ^_^',
     choices: [{ id: 'A', text: '고마워 ㅎㅎ 1시 수업 잘 들어!', susp: 0, next: 'P4_Start' }],
   },
   P2_RikuFlow_B: {
@@ -536,7 +536,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   P4_Start: {
     delay: 40,
     message:
-      '방금 시온이 형이 그러는데 너 지난주 일요일에 비 올 때\n집 밖으로 한 발짝도 안 나가고 집에만 있었다며 ?\n나한테는 본가 다녀왔다고 했잖아',
+      '방금 시온이 형이 얘기했는데 \n 그저께 집에만 있었어? \n 나한테는 본가 다녀왔다고 했잖아',
     choices: [
       {
         id: 'A',
@@ -547,7 +547,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
       },
       {
         id: 'B',
-        text: '본가는 토요일 밤에 잠깐 들렀다가 일요일 아침 일찍 자취방 와서 쉬었어!',
+        text: '아아 일요일 아침 일찍 자취방 와서 쉬었어!',
         susp: 0,
         reply: '아 일요일 아침에 미리 올라왔구나 ㅎㅎ / 난 또 ^_^',
         next: 'P5_Start',
@@ -635,7 +635,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '나 이미 씻고 누웠어 ㅠㅠ',
         susp: 5,
-        reply: '벌써 누웠다고? / 집 바로 옆인데 ㅠㅠ / 알겠어 잘 자',
+        reply: '써 누웠다고? / 집 바로 옆인데 ㅠㅠ / 알겠어 잘 자',
         next: 'end',
       },
     ],
@@ -750,7 +750,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     message: '여주야 잘 잣어?? ㅠㅠ 나 아직 졸려 죽겟어',
     choices: [
       { id: 'A', text: '얼른 일어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
-      { id: 'B', text: '나도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+      { id: 'B', text: '��도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
     ],
   },
   // 단톡방 장보기 선택이 끝날 때까지 대기하는 분기 전용 노드
@@ -1112,7 +1112,7 @@ export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
   ]),
 ]
 
-/** 의심도 100을 찍은 캐릭터부터 순서대로 폭격 일정(시작 정적 이후 기준 ms)을 계산 */
+/** 심도 100을 찍은 캐릭터부터 순서대로 폭격 일정(시작 정적 이후 기준 ms)을 계산 */
 export function buildSpamSchedule(bustedId: string) {
   const order = ['a', 'b', 'c'].sort((x, y) => (x === bustedId ? -1 : y === bustedId ? 1 : 0))
   const schedule: { item: SpamNotification; at: number }[] = []
