@@ -360,7 +360,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     preWork: true,
     message: '잘 잣어??\n학교 일찍 갈까 고민 중...\n12시에 수업 끝나구 나랑 점심 먹자 ❤️',
     choices: [
-      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 ㅎㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
+      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 ���ㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
       {
         id: 'B',
         text: '1시 수업 발표 준비 때문에 ㅠㅠ 점심 거르고 혼자 대본 보려구...',
@@ -574,7 +574,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '�� 립밤 너한테 있었구나 ㅋㅋ 고마워 이따 저녁에 봐!',
         susp: 0,
-        reply: '응 ㅋㅋ / 점심 잘 챙겨 먹고 이따 보자~',
+        reply: '응 ㅋㅋ / 점심 잘 챙겨 먹고 이따 보���~',
         next: 'P2_Start',
       },
     ],
@@ -704,6 +704,71 @@ const SION_DAY2: Record<string, PhaseNode> = {
   },
 }
 
+/** 리쿠 Day 2: 아침 인사 → 단톡방 장보기 분기 → 마무리 인사 */
+const RIKU_DAY2: Record<string, PhaseNode> = {
+  P0_Morning: {
+    preWork: true,
+    message: '여주야 잘 잣어?? ㅠㅠ 나 아직 졸려 죽겟어',
+    choices: [
+      { id: 'A', text: '얼른 일어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+      { id: 'B', text: '나도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+    ],
+  },
+  // 단톡방 장보기 선택이 끝날 때까지 대기하는 분기 전용 노드
+  Branch_Group: {
+    preWork: true,
+    delay: 10,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_SHOP_SION], to: 'P1_Riku_Jealous' },
+      { all: [FLAG_SHOP_RIKU], to: 'P2_Riku_Daiso' },
+    ],
+  },
+  P1_Riku_Jealous: {
+    preWork: true,
+    message: '나랑 같이 다이소 가지 ㅠㅠ\n시온이 형 차 타는 게 더 조앗어?\n흥',
+    choices: [
+      { id: 'A', text: '미아내 ㅠㅠ\n마트에 살 거 있어서... ㅠㅠ', susp: 15, reply: '알겟어 ㅠㅠ 이따 동방에서 봥', next: 'P3_Night' },
+      { id: 'B', text: '다이소 걸어가야 하니까... ㅜㅜ\n쏘리 ...', susp: 20, reply: '치사해 진짜 ㅠㅠ', next: 'P3_Night' },
+    ],
+  },
+  P2_Riku_Daiso: {
+    preWork: true,
+    message:
+      '여주야 나 1층에서 종이컵 좀 찾고 올라갈게!!\n근데 아까 동방에서 료가 그러는데\n그저께 밤에 시온이 형네 자취방 골목 쪽에서 너 봣다던데...?\n너 그때 어머니 만나고 일찍 뻗엇다구 하지 안앗어...?',
+    choices: [
+      {
+        id: 'A',
+        text: '아! 엄마랑 밥 먹고 배불러서 산책 겸 그쪽으로 걸어갔다가 료랑 잠깐 스친 거야!',
+        susp: -5,
+        reply: '아아 산책한 거엿구낭! 알겟어 얼른 올라갈겡 ㅎㅎ',
+        next: 'P3_Night',
+      },
+      {
+        id: 'B',
+        text: '어? 료가 사람 잘못 본 거 아니야? 나 진짜 집에 있었는데!',
+        susp: 5,
+        reply: '엥 구랭? 료가 사람 잘못 봣나 보네... / 일단 알겟엉',
+        next: 'P3_Night',
+      },
+    ],
+  },
+  P3_Night: {
+    message: '오늘 짐 나르느라 넘 힘드럿어 ㅠㅠ\n여주도 피곤하지? ㅠㅠ',
+    choices: [
+      {
+        id: 'A',
+        text: '웅 완전 기절 직전이야 ㅋㅋㅋㅋ 오늘 고생 많았어 리쿠!',
+        susp: -5,
+        reply: '웅웅 여주도 푹 자구 낼 봥 ㅎㅎ ❤️',
+        next: 'end',
+      },
+      { id: 'B', text: '나 씻고 이제 누웠어 ㅎㅎ 낼 보자', susp: 0, reply: '잘 자 여주야 ㅎㅎ', next: 'end' },
+    ],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -714,7 +779,11 @@ export const SCRIPTS: Record<string, Script> = {
 /** 일차별 대화. 그날 스크립트가 없는 멤버는 그날 카톡이 오지 않습니다. */
 export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
   1: SCRIPTS,
-  2: { ...sampleDay(), a: fromPhases('P0_Morning', SION_DAY2, SAMPLE_TIMING.a) },
+  2: {
+    ...sampleDay(),
+    a: fromPhases('P0_Morning', SION_DAY2, SAMPLE_TIMING.a),
+    b: fromPhases('P0_Morning', RIKU_DAY2, SAMPLE_TIMING.b),
+  },
   3: sampleDay(),
   4: sampleDay(),
   5: sampleDay(),
@@ -784,7 +853,7 @@ const STAFF_DAY1: GroupScript = {
         gl(G_RIKU, '나도 집 앞 마트에서 타코야끼 가루랑 소스 사서 출발햇어 ㅎㅎ'),
         gl(G_RYO, '오 리쿠 형 벌써 기대돼요 ㅋㅋㅋ 저랑 사쿠야는 음료수 사서 갈게요!'),
         gl(G_SAKUYA, '네!! 콜라랑 사이다 사서 올라가겠습니다 ㅎㅎ'),
-        gl(G_DAEYOUNG, '오키 나도 과제 마무리하고 7시 맞춰서 바로 갈게 ㅋㅋ'),
+        gl(G_DAEYOUNG, '오키 나도 과제 마무리하고 7시 맞춰서 바로 ��게 ㅋㅋ'),
         gl(G_YUSHI, '응 이따 동방에서 봐 ^_^'),
       ],
     },
@@ -809,7 +878,7 @@ const STAFF_DAY2: GroupScript = {
   choices: [],
   stages: [
     {
-      holdNodes: { a: 'Branch_Group' },
+      holdNodes: { a: 'Branch_Group', b: 'Branch_Group' },
       messages: [
         gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누자 ㅋㅋ'),
         gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 올게'),
