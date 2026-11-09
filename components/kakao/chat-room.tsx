@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, Hash, ImageIcon, Menu, Plus, Search, Smile, X } from 'lucide-react'
+import { NoticeBar } from './notice-bar'
 import { cn } from '@/lib/utils'
 import { PERSON_AVATARS } from '@/lib/template-config'
 import { Avatar } from './avatar'
@@ -654,6 +655,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
           )}
         </div>
       </header>
+
+      {chat.notice && <NoticeBar notice={chat.notice} />}
 
       {chat.roster && (
         <div className={cn('absolute inset-0 z-40', rosterOpen ? 'pointer-events-auto' : 'pointer-events-none')}>
