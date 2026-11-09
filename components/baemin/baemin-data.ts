@@ -80,6 +80,7 @@ export const STORES: Store[] = [
     deliveryFee: 2000,
     minOrder: 12000,
     tagline: '싸이버거 세트 할인 중',
+    thumbnail: '/images/baemin/momstouch.png',
     menu: [
       { id: 'm1', name: '싸이버거 세트', price: 8400, description: '싸이버거 + 감자튀김 + 음료', popular: true },
       { id: 'm2', name: '불싸이버거 세트', price: 8900, description: '매콤한 불싸이' },
@@ -132,6 +133,7 @@ export const STORES: Store[] = [
     deliveryFee: 4000,
     minOrder: 20000,
     tagline: '숯불 돼지갈비 배달',
+    thumbnail: '/images/baemin/myeongryun.png',
     menu: [
       { id: 'g1', name: '숯불 돼지갈비 2인', price: 26000, description: '쌈채소 포함', popular: true },
       { id: 'g2', name: '양념 목살 1인', price: 14000, description: '도시락형' },
@@ -148,6 +150,7 @@ export const STORES: Store[] = [
     deliveryFee: 2000,
     minOrder: 12000,
     tagline: '가성비 피자',
+    thumbnail: '/images/baemin/pizzaschool.png',
     menu: [
       { id: 'p1', name: '포테이토 피자 (L)', price: 13900, description: '감자 + 베이컨', popular: true },
       { id: 'p2', name: '페퍼로니 피자 (L)', price: 12900, description: '클래식' },
