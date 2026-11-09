@@ -372,23 +372,12 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지��� 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지����� 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
 export const FLAG_RIKU_EXCUSE_SOLO = 'riku-excuse-solo'
 export const FLAG_YUSHI_EXCUSE_SOLO = 'yushi-excuse-solo'
-
-/** 라멘��� 목격담은 kakao-app 의 ramen-exposure 시퀀스가 진행하므로 해당 남주의 스크립트는 여기서 끝납니다. */
-const RAMEN_EXPOSURE_END: Branch[] = [
-  { all: [FLAG_YUSHI_LUNCH_RAMEN], to: null },
-  { all: [FLAG_RIKU_LUNCH_RAMEN], to: null },
-]
-
-const YUSHI_LUNCH_BRANCH = (variant: 'B' | 'C'): Branch[] => [
-  { all: [FLAG_YUSHI_LUNCH_RAMEN], to: null },
-  { all: [FLAG_YUSHI_LUNCH_SEOGA], to: `P2_Safe2_${variant}` },
-]
 
 /** 리쿠 Day 1: 수업 전 점심 제안 → 점심 동선 → 동방 시식회 후 밤 카톡 */
 const RIKU_DAY1: Record<string, PhaseNode> = {
@@ -402,7 +391,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
         text: '1시 수업 발표 준비 때문에 ㅠㅠ 점심 거르고 혼자 대본 보려구...',
         susp: 5,
         reply: '엥 밥도 안 먹구...? ㅠㅠ / 요즘 나 보기 힘들다... 알겟어 화이팅해!',
-        next: 'P2_YushiLink_B',
+        next: 'P2_Safe2_B',
         setFlag: FLAG_RIKU_EXCUSE_SOLO,
       },
       {
@@ -410,7 +399,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
         text: '미안 ㅠㅠ 오늘 점심에 동기랑 있어 ㅠㅠ',
         susp: 20,
         reply: '아... / 나랑 먹지 아쉽다... / 이따 동방에서 봐',
-        next: 'P2_YushiLink_C',
+        next: 'P2_Safe2_C',
       },
     ],
   },
@@ -425,24 +414,18 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
         text: '라멘야 어때?',
         susp: 0,
         reply: '라멘!! / 완전 조아 ㅎㅎ / 12시에 정문 앞에서 보자!',
-        next: 'end',
+        next: 'P2_Ramen_Safe',
         setFlag: FLAG_RIKU_LUNCH_RAMEN,
       },
     ],
   },
+  P2_Ramen_Safe: {
+    message: '라멘 완전 맛잇엇당 ㅎㅎ\n수업 잘 들어 여주야!',
+    choices: [{ id: 'A', text: '웅 리쿠도 수업 잘 들어!', susp: 0, next: 'P4_Start' }],
+  },
   P2_Safe1: {
     message: '여주랑 점심 먹으니까 넘 행복하당 ㅎㅎ\n일요일에 내 후드티 빌려간 거\n다음에 입고 왕 ㅎㅎ',
     choices: [{ id: 'A', text: '웅 담에 입고 갈게 ㅎㅎ', susp: 0, next: 'P4_Start' }],
-  },
-  P2_YushiLink_B: {
-    message: '',
-    branch: YUSHI_LUNCH_BRANCH('B'),
-    choices: [],
-  },
-  P2_YushiLink_C: {
-    message: '',
-    branch: YUSHI_LUNCH_BRANCH('C'),
-    choices: [],
   },
   P2_Safe2_B: {
     delay: 20,
@@ -524,10 +507,14 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         text: '라멘야 어때?',
         susp: 0,
         reply: '알겠어 / 이따 사물함만 들렀다가 그쪽으로 갈게 ^_^',
-        next: 'end',
+        next: 'P2_Ramen_Safe',
         setFlag: FLAG_YUSHI_LUNCH_RAMEN,
       },
     ],
+  },
+  P2_Ramen_Safe: {
+    message: '라멘 맛있었어 ^_^\n수업 잘 들어',
+    choices: [{ id: 'A', text: '웅 고마워! 이따 동방에서 봐', susp: 0, next: 'P4_Start' }],
   },
   P2_Safe1: {
     message: '서가앤쿡 맛있네 ㅎㅎ\n머리끈 여기 있어 ^_^',
@@ -535,12 +522,10 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   },
   P2_RikuFlow_B: {
     message: '발표 연습 화이팅 !\n이따 연락해',
-    branch: RAMEN_EXPOSURE_END,
     choices: [{ id: 'A', text: '웅 고마워!', susp: 0, next: 'P3_LunchCheck' }],
   },
   P2_RikuFlow_C: {
     message: '수진이랑 맛있게 먹어\n이따 연락해',
-    branch: RAMEN_EXPOSURE_END,
     choices: [{ id: 'A', text: '웅 고마워!', susp: 0, next: 'P3_LunchCheck' }],
   },
   P3_LunchCheck: {
@@ -583,7 +568,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
     choices: [
       {
         id: 'A',
-        text: '오늘은 너무 늦었으니까 ㅠㅠ 주말에 둘이서만 오래 보자!',
+        text: '오늘은 너��� 늦었으니까 ㅠㅠ 주말에 둘이서만 오래 보자!',
         susp: 0,
         reply: '응 약속한 거다 ? / 집 들어가면 연락해 잘 자 여주야 ^_^',
         next: 'end',
@@ -618,7 +603,6 @@ const SION_DAY1: Record<string, PhaseNode> = {
   P2_Start: {
     delay: 45,
     message: '여주야 나 셋팅하러 동방 먼저 와 있어 ㅋㅋ\n아직 애들 아무도 안 왔는데\n일찍 올 수 있으면 카페 가자\n어제 그 립밤도 줄 겸 ㅎㅎ',
-    branch: RAMEN_EXPOSURE_END,
     choices: [
       {
         id: 'A',
@@ -983,7 +967,7 @@ const STAFF_DAY1: GroupScript = {
       // 시식회 종료 후 밤 10시경 해산
       holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
       messages: [
-        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
+        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛��었어요 ㅋㅋㅋ'),
         gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
         gl(G_RIKU, '다들 맛잇게 먹어줘서 고마워 ㅎㅎ 주점 대박 날 듯!!'),
         gl(G_RYO, '오늘 다들 고생하셨어요 조심히 들어가세요~!!'),
