@@ -12,6 +12,8 @@ export type Chat = {
   members?: number
   /** 단톡방 대화상대 목록 (지정하면 ☰ 메뉴에서 볼 수 있음). '나'는 본인으로 표시 */
   roster?: string[]
+  /** 단톡방 상단 고정 공지 (접힌 상태에서는 title, 펼치면 lines 전체) */
+  notice?: { author: string; title: string; lines: string[] }
   avatar?: string
   preview: string
   time: string
@@ -60,6 +62,17 @@ const YUSHI = CHARACTERS.c.name
 const DAEYOUNG = GROUP_MEMBERS.daeyoung.name
 const SAKUYA = GROUP_MEMBERS.sakuya.name
 const RYO = GROUP_MEMBERS.ryo.name
+
+const FESTIVAL_SCHEDULE_TITLE = '[📢 한일문화교류 주점 7일 일정]'
+const FESTIVAL_SCHEDULE = [
+  '• 11/6(금): 주점 메뉴 관련 회의, 시식 (7시 동방)',
+  '• 11/7(토): 주점 물품 및 식자재 장보기',
+  '• 11/8(일): -',
+  '• 11/9(월): 포스터, 배너 제작',
+  '• 11/10(화): 주점 부스 설치 및 테이블 세팅',
+  '• 11/11(수): 주점 운영',
+  '• 11/12(목): 축제 주점 마지막 날 & 전체 뒤풀이',
+]
 
 const STAFF_ROSTER = [ME, SION, RIKU, YUSHI, DAEYOUNG, RYO, SAKUYA]
 
@@ -524,17 +537,46 @@ export const CHATS: Chat[] = [
     name: GROUP_CHAT_NAME,
     members: STAFF_ROSTER.length,
     roster: STAFF_ROSTER,
-    preview: '다들 방학 전에 종강 파티 한 번 하자 ㅋㅋ',
+    notice: {
+      author: SION,
+      title: FESTIVAL_SCHEDULE_TITLE,
+      lines: FESTIVAL_SCHEDULE,
+    },
+    preview: '오 깔끔하다 고생하셨어요 형!',
     time: '어제',
     unread: 0,
     items: [
-      day('2026년 11월 4일 수요일'),
-      ...say(SION, '오후 9:18', '내가 소행론이랑 경제원론 요약본 만들어둔 거 있음', '이따 올려줄게 ㅋㅋ'),
-      ...say(ME, '오후 9:19', '시온이 최고 ㅠㅠ 고마워!!'),
+      day('2026년 11월 2일 월요일'),
+      ...say(SAKUYA, '오후 12:15', '오늘 학생회관 학식 돈까스인데 줄 실화인가요...'),
+      ...say(RYO, '오후 12:16', '엥 언제 갔어'),
+      ...say(DAEYOUNG, '오후 12:17', '학식 포기하고 컵라면 먹는 게 승리자다 ㅋㅋㅋ'),
+      ...say(RIKU, '오후 12:18', '학식 맛없엉 ㅠㅠ 나도 동방에서 과자 먹는 중 ㅎㅎ'),
+      ...say(SION, '오후 12:22', 'ㅋㅋㅋ 아 맞다', '동방 소파 옆에 검은색 우산 두고 간 사람 누구야?'),
+      ...say(ME, '오후 12:25', '어 그거 내 거 같아!! 내일 동방 들러서 챙겨갈게 ㅋㅋ'),
+      ...say(SION, '오후 12:26', '오키 사물함 위에 올려둘게 ~~'),
+
+      day('2026년 11월 3일 화요일'),
+      ...say(RYO, '오후 3:10', '인문관 앞 벤치에 고양이 자고 있어 ㅋㅋㅋㅋ 귀여워'),
+      ...say(SAKUYA, '오후 3:12', '오'),
+      ...say(RYO, '오후 3:13', '배 까고 자는 중 ㅋㅋㅋ'),
+      ...say(ME, '오후 3:15', '헐 미쳤다 나도 이따 수업 끝나고 보러 가야지 ㅠㅠ'),
+      ...say(YUSHI, '오후 3:16', '아까 지나갈 때 봤는데 아직도 자고 있네 ㅎㅎ'),
+      ...say(RIKU, '오후 3:18', '나만 고양이 못 봣어 ㅠㅠ 억울해'),
+      ...say(SION, '오후 3:20', '리쿠 지금 뛰어가면 볼 수 있을걸 ㅋㅋ'),
 
       day('2026년 11월 5일 목요일'),
-      ...say(ME, '오후 1:08', '나도 요약본 덕분에 살았어 ㅋㅋㅋ'),
-      ...say(SION, '오후 1:12', '다들 방학 전에 종강 파티 한 번 하자 ㅋㅋ'),
+      ...say(SION, '오후 2:30', '애들아 방금 회장 형한테 연락 왔는데', '형이 다음 주 면접이랑 졸업 준비 겹쳐서 도저히 축제 주점까지 챙기기 힘들겠다고 하시네 ㅠㅠ'),
+      ...say(SION, '오후 2:31', '그래서 이번 축제 주점은 회장 형 빼고 여기 있는 우리끼리 맡아서 진행하기로 했어!'),
+      ...say(DAEYOUNG, '오후 2:32', '오 재밌겠다'),
+      ...say(SION, '오후 2:33', '우리끼리 메뉴부터 편하게 다 정하면 돼 ㅎㅎ'),
+      ...say(RIKU, '오후 2:34', '재밋겟다!!', '내가 야끼소바랑 타코야끼 기가 막히게 만들 수 잇는데 ㅎㅎ'),
+      ...say(SAKUYA, '오후 2:36', '저랑 료는 서빙 열심히 할게여 ㅎㅎ'),
+      ...say(ME, '오후 2:38', '우리끼리 하면 훨씬 재밌겠다 ㅋㅋ 나도 열심히 도울게!'),
+      ...say(SION, '오후 2:40', '든든하네 ㅋㅋ'),
+      ...say(SION, '오후 2:41', '일주일 이렇게 진행하면 될 듯'),
+      ...say(SION, '오후 2:42', [FESTIVAL_SCHEDULE_TITLE, ...FESTIVAL_SCHEDULE].join('\n')),
+      ...say(YUSHI, '오후 2:43', '정리 고마워 형 ^_^'),
+      ...say(DAEYOUNG, '오후 2:44', '오 깔끔하다 고생하셨어요 형!'),
     ],
   },
 

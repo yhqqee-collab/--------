@@ -9,7 +9,7 @@ export interface EndingScene {
 /** 최종 선택지에 노출되는 이름 */
 export const ENDING_CHOICES: { id: EndingRoute; name: string }[] = [
   { id: 'a', name: '오시온' },
-  { id: 'b', name: '마에다 리쿠' },
+  { id: 'b', name: '리쿠' },
   { id: 'c', name: '유우시' },
 ]
 
