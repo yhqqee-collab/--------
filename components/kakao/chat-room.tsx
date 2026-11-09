@@ -9,7 +9,7 @@ import { PERSON_AVATARS } from '@/lib/template-config'
 import { Avatar } from './avatar'
 import type { Chat, ChatItem } from './chat-data'
 import { personalizeText } from './replies'
-import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
+import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
 import { getStage, STAGE_LABEL, type SuspicionStage } from './suspicion'
 import { SuspicionAlert } from './suspicion-alert'
 
@@ -236,6 +236,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       return
     }
     const text = batch.texts[index]
+    const pause = pauseDuration(text)
     const isLast = index === batch.texts.length - 1
     const finish = () => {
       if (batch.turn !== replyTurnRef.current || epoch !== queueEpochRef.current) return
@@ -243,7 +244,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         const label = batch.dateLabel
         setAdded((prev) => [...prev, { type: 'date', label }])
       }
-      land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time)
+      if (pause === null) land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time)
       if (index === 0 && batch.enterNode) vibrate()
       if (!isLast) return schedule(batch.instant ? 300 : 0, () => playLine(batch, index + 1))
       if (batch.reply) finishReply()
@@ -253,11 +254,19 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       }
       if (batch.gateDone) latest.current.onGateDone?.()
       if (batch.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(batch.gameOverAlert))
+      const enteredNode = batch.enterNode ? script?.nodes[batch.enterNode] : undefined
+      if (enteredNode?.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(enteredNode.gameOverAlert))
       queueRef.current.shift()
       schedule(300, () => playNext(epoch))
     }
 
     if (batch.instant) return finish()
+
+    if (pause !== null) {
+      setTyping(false)
+      schedule(pause, finish)
+      return
+    }
 
     if (index > 0) {
       const nextIsMine = text.startsWith(ME_LINE_PREFIX)

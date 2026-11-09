@@ -78,11 +78,33 @@ export function fillMetName(text: string, flags: ReadonlySet<string>) {
 /** 이 노드에 들어갈 때 flag 가 켜져 있으면 to 노드로 바뀜 (null 이면 대화 종료) */
 export type Redirect = { flag: string; to: string | null }
 
-export type ScriptNode = { lines: string[]; choices: Choice[]; redirect?: Redirect; branch?: Branch[] }
+export type ScriptNode = {
+  lines: string[]
+  choices: Choice[]
+  redirect?: Redirect
+  branch?: Branch[]
+  /** true 면 이 노드의 메시지가 모두 도착한 뒤 선택지 없이 게임 오버 */
+  gameOver?: boolean
+  gameOverAlert?: string
+}
 
 /** 모든 선택지가 게임 오버로 이어지는 노드 (이별 통보 직전) */
 export function isDoomNode(node: ScriptNode | undefined) {
+  if (node?.gameOver) return true
   return Boolean(node?.choices.length) && node!.choices.every((choice) => choice.gameOver)
+}
+
+/** 메시지 중간에 '[[대기:10]]' 줄을 넣으면 그 자리에서 10초 동안 아무 말도 오지 않습니다. */
+export const PAUSE_PREFIX = '\u0002pause:'
+const PAUSE_PATTERN = /^\[\[대기:(\d+(?:\.\d+)?)\]\]$/
+
+export function pauseDuration(text: string) {
+  return text.startsWith(PAUSE_PREFIX) ? Number(text.slice(PAUSE_PREFIX.length)) : null
+}
+
+function toPauseToken(line: string) {
+  const match = line.match(PAUSE_PATTERN)
+  return match ? `${PAUSE_PREFIX}${Number(match[1]) * 1000}` : line
 }
 
 export type Script = {
@@ -123,10 +145,22 @@ type PhaseNode = {
   branch?: Branch[]
   isGameOver?: boolean
   alert?: string
+  /** true 면 메시지가 모두 도착한 뒤 바로 게임 오버 (alert 가 팝업 문구) */
+  gameOver?: boolean
 }
 
+/** Day 2 밤 데이트 수락 플래그 */
+export const FLAG_SION_NIGHT_MEET = 'sion-night-meet'
+export const FLAG_DAY2_SION_MEET = FLAG_SION_NIGHT_MEET
+export const FLAG_DAY2_YUSHI_MEET = 'yushi-night-meet'
+
 /** setGlobal 의 키 → 실제 플래그 */
-const GLOBAL_FLAGS: Record<string, string> = { meetRiku: 'met-riku', meetYushi: 'met-yushi' }
+const GLOBAL_FLAGS: Record<string, string> = {
+  meetRiku: 'met-riku',
+  meetYushi: 'met-yushi',
+  FLAG_DAY2_SION_MEET,
+  FLAG_DAY2_YUSHI_MEET,
+}
 
 function globalFlag(setGlobal: Record<string, boolean> | undefined) {
   if (!setGlobal) return undefined
@@ -178,9 +212,11 @@ function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming:
   const nodes: Record<string, ScriptNode> = {}
   for (const [id, phase] of Object.entries(phases)) {
     nodes[id] = {
-      lines: splitLines(phase.message),
+      lines: splitLines(phase.message).map(toPauseToken),
       redirect: phase.redirect,
       branch: phase.branch,
+      gameOver: phase.gameOver,
+      gameOverAlert: phase.gameOver ? phase.alert : undefined,
       choices: phase.choices.map((choice) => {
         const reply = choice.reply ?? choice.alert
         const nextPhase = phases[choice.next]
@@ -360,7 +396,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     preWork: true,
     message: '잘 잣어??\n학교 일찍 갈까 고민 중...\n12시에 수업 끝나구 나랑 점심 먹자 ❤️',
     choices: [
-      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 ���ㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
+      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 �����ㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
       {
         id: 'B',
         text: '1시 수업 발표 준비 때문에 ㅠㅠ 점심 거르고 혼자 대본 보려구...',
@@ -625,8 +661,9 @@ const SION_DAY1: Record<string, PhaseNode> = {
 /** Day 2 단톡방 장보기 팀 선택 플래그 */
 export const FLAG_SHOP_RIKU = 'shop-riku'
 export const FLAG_SHOP_SION = 'shop-sion'
-/** Day 2 밤에 시온을 만나러 나갔는지 (유우시 루트 연동용) */
-export const FLAG_SION_NIGHT_MEET = 'sion-night-meet'
+
+/** 시온·유우시의 밤 데이트 답장을 모두 받은 뒤 삼자대면 여부를 판정 */
+const SYNC_DAY2_NIGHT = 'day2-night'
 
 /** 시온 Day 2: 아침 인사 → 단톡방 장보기 분기 → 밤 호출 → 마무리 인사 */
 const SION_DAY2: Record<string, PhaseNode> = {
@@ -673,6 +710,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
     ],
   },
   P3_Night_Start: {
+    nextCheckGlobal: SYNC_DAY2_NIGHT,
     message: '짐 정리하느라 고생했어 ㅋㅋ\n왜 봐도봐도 보고 싶지\n잠깐 나올래?',
     choices: [
       {
@@ -769,6 +807,72 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
   },
 }
 
+/** 유우시 Day 2: 늦참 인사 → (장보기 생략) → 밤 기습 데이트 → 삼자대면 분기 → 마무리 인사 */
+const YUSHI_DAY2: Record<string, PhaseNode> = {
+  P0_Morning: {
+    preWork: true,
+    message: '여주야 잘 잤어 ?\n오늘 일정 때문에 늦을 것 같네\n형한테는 말해뒀어',
+    choices: [
+      { id: 'A', text: '헉 그렇구나 ㅠㅠ\n보고 싶어서 어떡해...', susp: -5, reply: '응 이따가 갈 때 연락할게 ^_^', next: 'P3_Night' },
+      { id: 'B', text: '알겠어! 이따 짐 정리할 때 봐', susp: 0, reply: '그래 이따 봐', next: 'P3_Night' },
+    ],
+  },
+  P3_Night: {
+    nextCheckGlobal: SYNC_DAY2_NIGHT,
+    message: '오늘 짧게 봐서 아쉬웠다\n그치\n지금 잠깐 여주 집 앞으로 가도 돼 ? ^_^\n얼굴 보고 싶어서 ㅎㅎ',
+    choices: [
+      {
+        id: 'A',
+        text: '헐 진짜?? ㅋㅋㅋㅋ\n알겠어\n지금 바로 나갈게!',
+        susp: -10,
+        reply: '응 금방 갈게\n천천히 나와 ^_^',
+        next: 'Branch_DoubleBooking',
+        setGlobal: { FLAG_DAY2_YUSHI_MEET: true },
+      },
+      {
+        id: 'B',
+        text: '앗 나 방금 씻고 누워서...\n오늘은 좀 힘들 것 같아 ㅠㅠ',
+        susp: 15,
+        reply: '아쉬워라...\n알겠어 푹 쉬어 ^_^',
+        next: 'P4_Reject',
+      },
+    ],
+  },
+  // 시온과 유우시를 둘 다 수락했으면 삼자대면, 아니면 정상 마무리
+  Branch_DoubleBooking: {
+    delay: 16,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY2_SION_MEET, FLAG_DAY2_YUSHI_MEET], to: 'P35_Caught' },
+      { all: [FLAG_DAY2_YUSHI_MEET], to: 'P4_Meet' },
+    ],
+  },
+  P35_Caught: {
+    gameOver: true,
+    alert: '양다리 현장이 발각되었습니다.',
+    message:
+      '여주야\n시온이 형도 여기 있는데?\n뭐야?\n[[대기:10]]\n야\n형이랑 다 얘기했어\n너 최악이다 진짜 ㅋㅋ...\n나와 봐\n뭐라고 변명할지 궁금하네',
+    choices: [],
+  },
+  P4_Meet: {
+    delay: 40,
+    message: '오늘 잠깐이라도 얼굴 보니까 너무 좋네\n잘 자',
+    choices: [
+      { id: 'A', text: '나도 잠깐 봐서 좋았어 ㅋㅋㅋㅋ\n조심히 가!', susp: -5, reply: '말을 예쁘게 하네 ㅎㅎ', next: 'end' },
+      { id: 'B', text: '웅 얼른 들어가!', susp: 0, reply: '잘 자 ~', next: 'end' },
+    ],
+  },
+  P4_Reject: {
+    delay: 40,
+    message: '많이 피곤했나 보네\n어쩔 수 없지 ㅠㅠ 푹 쉬어',
+    choices: [
+      { id: 'A', text: '웅 ㅠㅠ 너도 오늘 고생했어! 잘 자', susp: 0, reply: '응 내일 보자 ^_^\n사랑해', next: 'end' },
+      { id: 'B', text: '알겠어 내일 봐', susp: 0, reply: '응\n잘 자 ~', next: 'end' },
+    ],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -783,6 +887,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     ...sampleDay(),
     a: fromPhases('P0_Morning', SION_DAY2, SAMPLE_TIMING.a),
     b: fromPhases('P0_Morning', RIKU_DAY2, SAMPLE_TIMING.b),
+    c: fromPhases('P0_Morning', YUSHI_DAY2, SAMPLE_TIMING.c),
   },
   3: sampleDay(),
   4: sampleDay(),
@@ -796,7 +901,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 export type GroupLine = { sender: string; text: string; delayMs: number }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
-  /** 일차 시작(또는 afterAllChats 달성) 후 첫 메시지까지 (ms) */
+  /** ���차 시작(또는 afterAllChats 달성) 후 첫 메시지까지 (ms) */
   startDelayMs: number
   /** true 면 그날 모든 남자와의 대화가 끝난 뒤에 단톡방 이벤트 시작 */
   afterAllChats?: boolean
@@ -971,7 +1076,7 @@ export const SPAM_START_DELAY_MS = 5000
 export const SPAM_INTERVAL_MS = 2000
 /** 한 캐릭터의 마지막 메시지 후 다음 캐릭터까지의 간격 (ms) */
 export const SPAM_SENDER_GAP_MS = 1000
-/** 폭격이 끝난 뒤 게임오버 화면까지의 대기 (ms) */
+/** 폭격이 끝난 뒤 게임오버 화면���지의 대기 (ms) */
 export const SPAM_END_DELAY_MS = 1000
 export const SUSPICION_100_GAME_OVER_TEXT =
   '의심도가 100%에 도달해 상대방이 당신의 바람을 확신했습니다!'
