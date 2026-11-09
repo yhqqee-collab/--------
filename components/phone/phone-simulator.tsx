@@ -173,6 +173,19 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const handlePreWorkDone = useCallback(() => {
     window.setTimeout(() => setWorkPhase((current) => (current === 'before' ? 'working' : current)), 1200)
   }, [])
+  const [interlude, setInterlude] = useState<{ text: string; nonce: number } | null>(null)
+  const interludeDoneRef = useRef<(() => void) | null>(null)
+  const handleInterlude = useCallback((text: string, done: () => void) => {
+    setKakaoNotice(null)
+    interludeDoneRef.current = done
+    setInterlude({ text, nonce: Date.now() })
+  }, [])
+  const finishInterlude = useCallback(() => {
+    const done = interludeDoneRef.current
+    interludeDoneRef.current = null
+    setInterlude(null)
+    done?.()
+  }, [])
   const handleWorkDone = useCallback(() => {
     setWorkPhase('after')
     if (currentDay === 1) setMyStoryDay(currentDay)
@@ -284,6 +297,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         day={currentDay}
         snapshot={resume}
         onDaySnapshot={onDaySnapshot}
+        onInterlude={handleInterlude}
       />
       <CalendarApp open={activeApp === 'calendar'} day={currentDay} />
       <SafariApp open={activeApp === 'safari'} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />
@@ -312,6 +326,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         <DayIntro key={currentDay} day={currentDay} dateLabel={dayLabel(currentDay)} onDone={finishDayIntro} />
       )}
       {workPhase === 'working' && !busted && <WorkTransition key={currentDay} text={workTransitionText(currentDay)} onDone={handleWorkDone} />}
+      {interlude && !busted && <WorkTransition key={interlude.nonce} text={interlude.text} onDone={finishInterlude} />}
       {spams && !busted && <SpamOverlay spams={spams} />}
       {sleepReady && !busted && !spams && (
         <div className="pointer-events-none absolute inset-x-0 bottom-10 z-[86] flex flex-col items-center gap-2 px-6">

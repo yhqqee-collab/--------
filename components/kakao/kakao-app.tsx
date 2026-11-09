@@ -54,9 +54,14 @@ type KakaoAppProps = {
   /** 있으면 이 일차 시작 시점의 상태에서 이어서 시작합니다 */
   snapshot?: DaySnapshot | null
   onDaySnapshot?: (snapshot: DaySnapshot) => void
+  /** 단톡방 단계 사이의 시간 경과 팝업을 띄우고, 닫히면 done 을 호출합니다 */
+  onInterlude?: (text: string, done: () => void) => void
 }
 
-export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, onBusted, onDayComplete, onSpamStart, onSpam, clockStarted = false, workEnded = false, onPreWorkDone, day = 1, snapshot, onDaySnapshot }: KakaoAppProps) {
+export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, onBusted, onDayComplete, onSpamStart, onSpam, clockStarted = false, workEnded = false, onPreWorkDone, day = 1, snapshot, onDaySnapshot, onInterlude }: KakaoAppProps) {
+  const interludeCallbackRef = useRef(onInterlude)
+  interludeCallbackRef.current = onInterlude
+  const interludeShownRef = useRef(new Set<number>())
   const [resume] = useState(() => (snapshot ? cloneSnapshot(snapshot) : null))
   const completedPreWorkRef = useRef(new Set<string>())
   const preWorkFiredRef = useRef(false)
@@ -197,6 +202,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     setHeldAt({})
     setStagesPlayed(0)
     setStageCue(0)
+    interludeShownRef.current = new Set()
   }, [day])
 
   const [heldAt, setHeldAt] = useState<Record<string, string>>({})
@@ -225,7 +231,17 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     }
     const holds = stages[stagesPlayed].holdNodes
     const ready = manIds.every((id) => completedScripts.has(id) || !holds[id] || heldAt[id] === holds[id])
-    if (ready) setStageCue(stagesPlayed + 1)
+    if (!ready) return
+    const stageIndex = stagesPlayed
+    const interlude = stages[stageIndex].interlude
+    const showInterlude = interludeCallbackRef.current
+    if (!interlude || !showInterlude) {
+      setStageCue(stageIndex + 1)
+      return
+    }
+    if (interludeShownRef.current.has(stageIndex)) return
+    interludeShownRef.current.add(stageIndex)
+    showInterlude(interlude, () => setStageCue((current) => Math.max(current, stageIndex + 1)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heldAt, completedScripts, stagesPlayed, stageCue, clockStarted, day, stagedGroupId, stagesSkipped])
 

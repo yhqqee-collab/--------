@@ -116,6 +116,7 @@ export const STORES: Store[] = [
     deliveryFee: 3000,
     minOrder: 15000,
     tagline: '딜리버스 주문 가능',
+    thumbnail: '/images/baemin/sutabucks.png',
     menu: [
       { id: 's1', name: '아이스 아메리카노 (Tall)', price: 4700, description: '진한 에스프레소', popular: true },
       { id: 's2', name: '자몽 허니 블랙 티', price: 5700, description: '상큼한 티 음료' },

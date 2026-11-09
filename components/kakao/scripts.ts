@@ -372,7 +372,7 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카�����에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
@@ -750,7 +750,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     message: '여주야 잘 잣어?? ㅠㅠ 나 아직 졸려 죽겟어',
     choices: [
       { id: 'A', text: '얼른 일어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
-      { id: 'B', text: '��도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+      { id: 'B', text: '나도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
     ],
   },
   // 단톡방 장보기 선택이 끝날 때까지 대기하는 분기 전용 노드
@@ -794,7 +794,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     ],
   },
   P3_Night: {
-    message: '오늘 짐 나르느라 넘 힘드럿어 ㅠㅠ\n여주도 피곤하지? ㅠㅠ',
+    message: '오늘 짐 나르느라 넘 힘들었어 ㅠㅠ\n여주도 피곤하지? ㅠㅠ',
     choices: [
       {
         id: 'A',
@@ -923,6 +923,8 @@ export type GroupScript = {
 export type GroupStage = {
   /** 채팅방 id → 이 단계가 끝날 때까지 대기시킬 노드 id */
   holdNodes: Record<string, string>
+  /** 지정하면 이 단계가 시작되기 직전에 화면 전체 안내 팝업을 띄웁니다 (시간 경과 연출) */
+  interlude?: string
   messages: GroupLine[]
   /** 지정하면 메시지 후 플레이어가 고르고, 반응이 끝난 뒤에 대기 중인 카톡이 이어집니다. */
   choices?: GroupChoice[]
@@ -964,8 +966,9 @@ const STAFF_DAY1: GroupScript = {
       ],
     },
     {
-      // 시식회 종료 후 밤 10시경 해산
+      // 19:00 ~ 21:30 동아리 회의 및 시식회 종료 후 해산
       holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
+      interlude: '19:00 ~ 21:30\n동아리방에서 주점 메뉴 회의 중...',
       messages: [
         gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
         gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
@@ -994,7 +997,7 @@ const STAFF_DAY2: GroupScript = {
       choices: [
         {
           id: 'riku',
-          text: '나는 리쿠랑 다이소 ���게!',
+          text: '나는 리쿠랑 다이소 갈게!',
           setFlag: FLAG_SHOP_RIKU,
           reply: [gl(G_RIKU, '앗싸 ㅎㅎ 이따 정문에서 보자!'), gl(G_DAEYOUNG, '오키 그럼 이마트는 내가 시온이 형이랑 갈게')],
         },
