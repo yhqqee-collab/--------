@@ -13,10 +13,9 @@ import {
   groupScriptsForDay,
   preWorkIds,
   scriptsForDay,
-  SPAM_END_DELAY_MS,
-  SPAM_INTERVAL_MS,
+  buildSpamSchedule,
+  SPAM_START_DELAY_MS,
   SUSPICION_100_GAME_OVER_TEXT,
-  SUSPICION_100_SPAM_LIST,
   syncMembers,
   type SpamNotification,
 } from './scripts'
@@ -130,21 +129,19 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     setSuspicion(suspicionRef.current)
     if (after >= 100 && !bustedRef.current) {
       bustedRef.current = true
+      const { schedule, end } = buildSpamSchedule(id)
       window.setTimeout(() => {
         callbacksRef.current.onSpamStart?.()
-        SUSPICION_100_SPAM_LIST.forEach((item, index) => {
+        schedule.forEach(({ item, at }) => {
           window.setTimeout(() => {
             const spam = { ...item, senderName: item.senderName.trim(), text: replaceUserName(item.text, owner) }
             const roomId = spam.senderId === 'group' ? 'staff' : spam.senderId
             deliver(roomId, [spam.text], { instant: true, badge: true, urgent: true })
             callbacksRef.current.onSpam?.(spam)
-          }, index * SPAM_INTERVAL_MS)
+          }, at)
         })
-        window.setTimeout(
-          () => callbacksRef.current.onBusted?.(SUSPICION_100_GAME_OVER_TEXT),
-          SUSPICION_100_SPAM_LIST.length * SPAM_INTERVAL_MS + SPAM_END_DELAY_MS,
-        )
-      }, 1200)
+        window.setTimeout(() => callbacksRef.current.onBusted?.(SUSPICION_100_GAME_OVER_TEXT), end)
+      }, SPAM_START_DELAY_MS)
     }
     return after
   }, [deliver, owner])

@@ -572,7 +572,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
       },
       {
         id: 'B',
-        text: '오 립밤 너한테 있었구나 ㅋㅋ 고마워 이따 저녁에 봐!',
+        text: '�� 립밤 너한테 있었구나 ㅋㅋ 고마워 이따 저녁에 봐!',
         susp: 0,
         reply: '응 ㅋㅋ / 점심 잘 챙겨 먹고 이따 보자~',
         next: 'P2_Start',
@@ -724,17 +724,60 @@ export interface SpamNotification {
   text: string
 }
 
-/** 알림이 하나씩 도착하는 간격 (ms) */
-export const SPAM_INTERVAL_MS = 150
+/** 의심도 100 돌파 후 폭격 시작 전 정적 (ms) */
+export const SPAM_START_DELAY_MS = 5000
+/** 같은 캐릭터의 메시지가 하나씩 도착하는 간격 (ms) */
+export const SPAM_INTERVAL_MS = 2000
+/** 한 캐릭터의 마지막 메시지 후 다음 캐릭터까지의 간격 (ms) */
+export const SPAM_SENDER_GAP_MS = 1000
 /** 폭격이 끝난 뒤 게임오버 화면까지의 대기 (ms) */
-export const SPAM_END_DELAY_MS = 800
+export const SPAM_END_DELAY_MS = 1000
 export const SUSPICION_100_GAME_OVER_TEXT =
-  '의심도가 100%를 초과했습니다!\n거짓말이 모두 들통나 멤버들에게 연락이 폭주하며 양다리가 발각되었습니다.'
+  '의심도가 100%에 도달해 상대방이 당신의 바람을 확신했습니다!'
+
+const spam = (senderId: 'a' | 'b' | 'c', texts: string[]): SpamNotification[] =>
+  texts.map((text) => ({ senderId, senderName: CHARACTERS[senderId].name, text }))
 
 /** 의심도 100 돌파 시 쏟아지는 알림 폭격 목록 */
-/** 의심도 100 돌파 시 쏟아지는 알림 폭격 목록 */
 export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
-  { senderId: 'a', senderName: CHARACTERS.a.name, text: '[캐릭터 A 폭격 메시지]' },
-  { senderId: 'b', senderName: CHARACTERS.b.name, text: '[캐릭터 B 폭격 메시지]' },
-  { senderId: 'c', senderName: CHARACTERS.c.name, text: '[캐릭터 C 폭격 메시지]' },
+  ...spam('a', [
+    '여주야',
+    '나 말고 딴 새끼 만나지? ㅋㅋ',
+    '어쩐지 요즘 연락도 그렇고 앞뒤가 하나도 안 맞더라',
+    '나 두고 바람피우니까 재밌어?',
+    '사람 하나 제대로 병신 만들었네',
+    '읽씹하지 말고 전화 받아',
+  ]),
+  ...spam('b', [
+    '여주야 너 혹시 나 말고 다른 사람 만나...?',
+    '아니라고 하지 마',
+    '거짓말하는 거 이제 다 보여',
+    '나 혼자만 바보처럼 너 좋아하고 속고 잇엇던 거네 ㅋㅋ',
+    '너 진짜 최악이다',
+  ]),
+  ...spam('c', [
+    '여주야',
+    '나 말고 또 누구 만나고 있어 ?',
+    '거짓말할 생각 하지 마',
+    '다른 남자 있는 거 다 티 나니까',
+    '나한테만 그렇게 웃어준 게 아니었구나 ?',
+    '이런 앤지 몰랐네... ㅋㅋ',
+  ]),
 ]
+
+/** 의심도 100을 찍은 캐릭터부터 순서대로 폭격 일정(시작 정적 이후 기준 ms)을 계산 */
+export function buildSpamSchedule(bustedId: string) {
+  const order = ['a', 'b', 'c'].sort((x, y) => (x === bustedId ? -1 : y === bustedId ? 1 : 0))
+  const schedule: { item: SpamNotification; at: number }[] = []
+  let cursor = 0
+  order.forEach((senderId, senderIndex) => {
+    const items = SUSPICION_100_SPAM_LIST.filter((item) => item.senderId === senderId)
+    if (!items.length) return
+    if (senderIndex > 0 && schedule.length) cursor += SPAM_SENDER_GAP_MS
+    items.forEach((item, index) => {
+      if (index > 0) cursor += SPAM_INTERVAL_MS
+      schedule.push({ item, at: cursor })
+    })
+  })
+  return { schedule, end: cursor + SPAM_END_DELAY_MS }
+}
