@@ -6,9 +6,9 @@ import { useEffect, useRef, useState, type MutableRefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import {
-  CAMPUS,
-  CAMPUS_BUILDINGS,
-  CAMPUS_ROADS,
+  CAMPUS_BAKED_IDS,
+  CAMPUS_BAKED_ZOOM,
+  CAMPUS_IMAGE,
   DEFAULT_ZOOM,
   ICON_ZOOM,
   KOREA_BOUNDS,
@@ -108,59 +108,16 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
       syncNeighborhood()
       map.on('zoomend', syncNeighborhood)
 
-      L.polygon(
-        CAMPUS.points.map(([x, y]) => toLatLng(x, y)),
-        { color: '#B7CAEA', weight: 1, fillColor: '#DCE6F7', fillOpacity: 0.9, interactive: false },
+      // Own pane keeps the campus art above the canvas-rendered neighborhood blocks.
+      map.createPane('campus').style.zIndex = '450'
+      L.imageOverlay(
+        CAMPUS_IMAGE.src,
+        L.latLngBounds(
+          toLatLng(CAMPUS_IMAGE.west, CAMPUS_IMAGE.south),
+          toLatLng(CAMPUS_IMAGE.east, CAMPUS_IMAGE.north),
+        ),
+        { pane: 'campus', interactive: false, alt: '소원대학교 캠퍼스 지도' },
       ).addTo(map)
-
-      const roadMap = map
-      const roadStyle = { lineCap: 'round', lineJoin: 'round', interactive: false } as const
-      const roadLines = CAMPUS_ROADS.map((road) => ({
-        width: road.width,
-        latLngs: road.points.map(([x, y]) => toLatLng(x, y)),
-      }))
-      // Draw every border before any white fill so junctions merge without seams.
-      const roadEdges = roadLines.map((road) =>
-        L.polyline(road.latLngs, { ...roadStyle, color: '#C3D1EA', opacity: 1 }).addTo(roadMap),
-      )
-      const roadLayers = roadLines.map((road, index) => ({
-        width: road.width,
-        edge: roadEdges[index],
-        fill: L.polyline(road.latLngs, { ...roadStyle, color: '#FFFFFF', opacity: 1 }).addTo(roadMap),
-      }))
-      const syncRoadWidths = () => {
-        if (!map) return
-        const metersPerPixel = (156543.03 * Math.cos((map.getCenter().lat * Math.PI) / 180)) / 2 ** map.getZoom()
-        for (const road of roadLayers) {
-          const weight = road.width / metersPerPixel
-          road.fill.setStyle({ weight })
-          road.edge.setStyle({ weight: weight > 1.5 ? weight + 3 : 0 })
-        }
-      }
-      syncRoadWidths()
-      map.on('zoomend', syncRoadWidths)
-
-      for (const building of CAMPUS_BUILDINGS) {
-        const halfW = building.w / 2
-        const halfH = building.h / 2
-        const corners: Point[] = [
-          [building.x - halfW, building.y - halfH],
-          [building.x + halfW, building.y - halfH],
-          [building.x + halfW, building.y + halfH],
-          [building.x - halfW, building.y + halfH],
-        ]
-        const isField = building.kind === 'field'
-        L.polygon(
-          corners.map(([x, y]) => toLatLng(x, y)),
-          {
-            color: isField ? '#9FCF9A' : '#A9B6CC',
-            weight: 1,
-            fillColor: isField ? '#CDE8C5' : '#EEF1F6',
-            fillOpacity: 1,
-            interactive: false,
-          },
-        ).addTo(map)
-      }
 
       const nextElements: Record<string, HTMLElement> = {}
       for (const place of PLACES) {
@@ -283,6 +240,19 @@ function Pin({ place, zoom, selected, hidden, onSelect }: PinProps) {
   if (!showIcon) return null
   const showLabel = selected || zoom >= LABEL_ZOOM || (place.kind === 'school' && zoom >= ICON_ZOOM) || (isUnion && zoom >= 13)
   const label = isUnion && zoom < ICON_ZOOM ? '소원대학교' : place.name
+
+  if (!selected && zoom >= CAMPUS_BAKED_ZOOM && CAMPUS_BAKED_IDS.has(place.id)) {
+    return (
+      <button
+        type="button"
+        data-poi
+        aria-label={`${place.name} (${place.dong})`}
+        onClick={() => onSelect(place.id)}
+        style={{ pointerEvents: 'auto' }}
+        className="absolute left-0 top-0 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full"
+      />
+    )
+  }
 
   return (
     <button
