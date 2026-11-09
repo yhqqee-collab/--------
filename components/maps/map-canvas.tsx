@@ -119,7 +119,7 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
         const style = { lineCap: 'round', lineJoin: 'round', interactive: false } as const
         return {
           width: road.width,
-          edge: L.polyline(latLngs, { ...style, color: '#C3D0E6' }).addTo(roadMap),
+          edge: L.polyline(latLngs, { ...style, color: '#C9D6EC', opacity: 0.7 }).addTo(roadMap),
           fill: L.polyline(latLngs, { ...style, color: '#FFFFFF' }).addTo(roadMap),
         }
       })
@@ -129,7 +129,7 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
         for (const road of roadLayers) {
           const weight = road.width / metersPerPixel
           road.fill.setStyle({ weight })
-          road.edge.setStyle({ weight: weight > 1.5 ? weight + 2 : 0 })
+          road.edge.setStyle({ weight: weight > 1.5 ? weight + 3 : 0 })
         }
       }
       syncRoadWidths()
