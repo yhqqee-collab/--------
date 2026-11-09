@@ -9,7 +9,7 @@ import type { SuspicionStage } from './suspicion'
 
 /** 모든 멤버의 '일정 시작 전' 대화가 끝나면 4초간 표시되는 전환 문구 (일차별) */
 const WORK_TRANSITION_TEXTS: Record<number, string> = {
-  1: '⏳ [1일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
+  1: '⏳ [<영화와 현대사회> 수업 듣는 중...] (10:30 ~ 12:00) ⏳',
   2: '⏳ [2일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   3: '⏳ [3일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   4: '⏳ [4일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
@@ -332,7 +332,141 @@ function sampleDay(): Record<string, Script> {
   }
 }
 
-export const SCRIPTS: Record<string, Script> = sampleDay()
+/** 유우시 카톡에서 점심 장소를 고르면 켜지는 플래그 (켜져 있으면 리쿠의 12:00 분기가 자동으로 결정됨) */
+export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
+export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
+
+const YUSHI_LUNCH_BRANCH = (variant: 'B' | 'C'): Branch[] => [
+  { all: [FLAG_YUSHI_LUNCH_SEOGA], to: `END_Sakuya_Step1_${variant}` },
+  { all: [FLAG_YUSHI_LUNCH_RAMEN], to: `P2_Safe2_${variant}` },
+]
+
+const SAKUYA_FINAL_REPLY = '리쿠: ㅋㅋ... / 유우시랑 다 얘기 햇는데 / 양다리 제대로 걸쳣네? / 사람 하나 바보 만들고... / 내가 그렇게 호구 같아 보였어?'
+
+/** 리쿠 Day 1: 수업 전 점심 제안 → 점심 동선 → 동방 시식회 후 밤 카톡 */
+const RIKU_DAY1: Record<string, PhaseNode> = {
+  P1_Start: {
+    preWork: true,
+    message: '잘 잣어??\n학교 일찍 갈까 고민 중...\n12시에 수업 끝나구 나랑 점심 먹자 ❤️',
+    choices: [
+      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 ㅎㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
+      {
+        id: 'B',
+        text: '1시 수업 발표 준비 때문에 ㅠㅠ 점심 거르고 혼자 대본 보려구...',
+        susp: 5,
+        reply: '엥 밥도 안 먹구...? ㅠㅠ / 요즘 나 보기 힘들다... 알겟어 화이팅해!',
+        next: 'P2_YushiLink_B',
+      },
+      {
+        id: 'C',
+        text: '미안 ㅠㅠ 오늘 점심에 동기랑 있어 ㅠㅠ',
+        susp: 20,
+        reply: '아... / 나랑 먹지 아쉽다... / 이따 동방에서 봐',
+        next: 'P2_YushiLink_C',
+      },
+    ],
+  },
+  P2_RikuFlow: {
+    preWork: true,
+    delay: 12,
+    message: '여주야 수업 들어가기 전이지??\n이따 우리 뭐 먹을까?',
+    choices: [
+      { id: 'A', text: '서가앤쿡 가자!', susp: 0, reply: '오 서가앤쿡 조아 ㅎㅎ / 수업 끝나구 후문 쪽으로 와!', next: 'P2_Safe1' },
+      { id: 'B', text: '라멘야 어때?', susp: 0, reply: '라멘!! / 완전 조아 ㅎㅎ / 12시에 정문 앞에서 보자!', next: 'P2_Ryo' },
+    ],
+  },
+  P2_Safe1: {
+    message: '여주랑 점심 먹으니까 넘 행복하당 ㅎㅎ\n일요일에 내 후드티 빌려간 거\n다음에 입고 왕 ㅎㅎ',
+    choices: [{ id: 'A', text: '웅 담에 입고 갈게 ㅎㅎ', susp: 0, next: 'P4_Start' }],
+  },
+  P2_Ryo: {
+    message: '여주야 나 정문 앞이야!\n라멘야 줄 별로 없다 ㅎㅎ',
+    choices: [
+      {
+        id: 'A',
+        text: '거의 다 왔어!',
+        susp: 0,
+        reply: '리쿠: 헉 료가 단톡에 우리 라멘야 있는 거 올렸어 ㅋㅋㅋ',
+        next: 'END_Yushi',
+      },
+    ],
+  },
+  END_Yushi: {
+    isGameOver: true,
+    message: '',
+    choices: [],
+    alert:
+      '[단톡방] 료: 어 여주 누나 리쿠 형이랑 정문 라멘야 계시네요?! 이따 1시 대중문화 수업 때 봬요!\n정문 라멘야에서 료에게 목격되어 유우시에게 양다리가 발각되었습니다.',
+  },
+  P2_YushiLink_B: {
+    message: '여주야 수업 끝낫지??\n대본 보기 전에 뭐라도 먹어 ㅠㅠ 어디서 먹을 거야?',
+    branch: YUSHI_LUNCH_BRANCH('B'),
+    choices: [
+      { id: 'A', text: '후문 서가앤쿡 잠깐 들를 것 같아', susp: 0, next: 'END_Sakuya_Step1_B' },
+      { id: 'B', text: '정문 쪽 라멘야에서 빨리 먹으려구', susp: 10, next: 'P2_Safe2_B' },
+    ],
+  },
+  P2_YushiLink_C: {
+    message: '여주야 수업 끝낫지??\n동기랑 어디서 먹어?',
+    branch: YUSHI_LUNCH_BRANCH('C'),
+    choices: [
+      { id: 'A', text: '후문 서가앤쿡 가기로 했어', susp: 0, next: 'END_Sakuya_Step1_C' },
+      { id: 'B', text: '정문 쪽 라멘야 가려구', susp: 10, next: 'P2_Safe2_C' },
+    ],
+  },
+  END_Sakuya_Step1_B: {
+    delay: 8,
+    message: '사쿠야가 단톡에 사회과학관 길목에서 너랑 유우시 봤다는데?\n둘이 서가앤쿡 간다고\n혼자 대본 본다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
+    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 100, reply: SAKUYA_FINAL_REPLY, next: 'END_Sakuya_Final' }],
+  },
+  END_Sakuya_Step1_C: {
+    delay: 8,
+    message: '사쿠야가 단톡에 사회과학관 길목에서 너랑 유우시 봤다는데?\n둘이 서가앤쿡 간다고\n선약 잇다더니 유우시랑 밥 먹어??\n나한테 왜 거짓말햇어...?',
+    choices: [{ id: 'A', text: '내가 다 설명할게', susp: 100, reply: SAKUYA_FINAL_REPLY, next: 'END_Sakuya_Final' }],
+  },
+  END_Sakuya_Final: {
+    isGameOver: true,
+    message: '',
+    choices: [],
+    alert:
+      '[단톡방] 사쿠야: 어 방금 사회과학관 길목에서 유우시 형이랑 여주 누나 봤어요 ㅋㅋㅋ 두 분 서가앤쿡 가세요?!\n사쿠야의 목격담으로 리쿠와 유우시가 모든 사실을 알게 되었습니다.',
+  },
+  P2_Safe2_B: {
+    delay: 20,
+    message: '여주야 대본은 다 봣어??\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
+    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 0, next: 'P4_Start' }],
+  },
+  P2_Safe2_C: {
+    delay: 20,
+    message: '여주야 밥은 다 먹엇어??\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
+    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 0, next: 'P4_Start' }],
+  },
+  P4_Start: {
+    delay: 40,
+    message: '여주야 오늘 내가 만든 거 맛잇엇어?? ㅎㅎ\n사람들 만아서\n여주 옆에 못 앉아서 넘 아쉬웟다구 ㅠㅠ\n우리집 들럿다 갈랭??',
+    choices: [
+      {
+        id: 'A',
+        text: '오늘은 늦었으니까 ㅠㅠ 주말에 집데이트하자 ❤️',
+        susp: 0,
+        reply: '헤헤 / 주말에 꼭 우리 집 오기다?? / 약속!! / 조심히 들어가구 잘 자 / 여주야 사랑해 ❤️',
+        next: 'end',
+      },
+      {
+        id: 'B',
+        text: '응 맛있더라! ㅎㅎ 나 오늘은 집 바로 들어가려구 ㅠㅠ',
+        susp: 5,
+        reply: '웅... 알겟엉 / 조심히 들어가',
+        next: 'end',
+      },
+    ],
+  },
+}
+
+export const SCRIPTS: Record<string, Script> = {
+  ...sampleDay(),
+  b: fromPhases('P1_Start', RIKU_DAY1, SAMPLE_TIMING.b),
+}
 
 /** 일차별 대화. 그날 스크립트가 없는 멤버는 그날 카톡이 오지 않습니다. */
 export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {

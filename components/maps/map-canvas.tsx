@@ -113,13 +113,14 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
         { color: '#B7CAEA', weight: 1, fillColor: '#DCE6F7', fillOpacity: 0.9, interactive: false },
       ).addTo(map)
 
+      const roadMap = map
       const roadLayers = CAMPUS_ROADS.map((road) => {
         const latLngs = road.points.map(([x, y]) => toLatLng(x, y))
         const style = { lineCap: 'round', lineJoin: 'round', interactive: false } as const
         return {
           width: road.width,
-          edge: L.polyline(latLngs, { ...style, color: '#C3D0E6' }).addTo(map),
-          fill: L.polyline(latLngs, { ...style, color: '#FFFFFF' }).addTo(map),
+          edge: L.polyline(latLngs, { ...style, color: '#C3D0E6' }).addTo(roadMap),
+          fill: L.polyline(latLngs, { ...style, color: '#FFFFFF' }).addTo(roadMap),
         }
       })
       const syncRoadWidths = () => {
