@@ -249,7 +249,7 @@ function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming:
  *  - options.text: 주인공이 고를 수 있는 답변
  *  - options.suspicionDelta: 이 답장을 골랐을 때 의심도 변화량 (음수 가능)
  *  - options.nextNodeId: 다음 노드 id, null 이면 대화 종료
- * 가장 긴 경로의 길이가 해당 인물의 '턴 수'가 되고, 모든 인물의 턴을 끝내면 ������엔딩이 발동합니다.
+ * 가장 긴 경로의 길이가 해당 인물의 '턴 수'가 되고, 모든 인물의 턴을 끝내면 엔딩이 발동합니다.
  */
 type TreeOption = { text: string; suspicionDelta: number; nextNodeId: string | null }
 type TreeNode = { speakerText: string[]; options: TreeOption[] }
@@ -372,7 +372,7 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지����� 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
@@ -385,7 +385,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     preWork: true,
     message: '잘 잣어??\n학교 일찍 갈까 고민 중...\n12시에 수업 끝나구 나랑 점심 먹자 ❤️',
     choices: [
-      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 �����ㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
+      { id: 'A', text: '좋아!! 12시에 수업 끝나고 보자 ㅎㅎ', susp: 0, reply: '앗싸 ㅎㅎ 그럼 나 지금 준비하구 나갈게!', next: 'P2_RikuFlow' },
       {
         id: 'B',
         text: '1시 수업 발표 준비 때문에 ㅠㅠ 점심 거르고 혼자 대본 보려구...',
@@ -568,7 +568,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
     choices: [
       {
         id: 'A',
-        text: '오늘은 너��� 늦었으니까 ㅠㅠ 주말에 둘이서만 오래 보자!',
+        text: '오늘은 너무 늦었으니까 ㅠㅠ 주말에 둘이서만 오래 보자!',
         susp: 0,
         reply: '응 약속한 거다 ? / 집 들어가면 연락해 잘 자 여주야 ^_^',
         next: 'end',
@@ -593,9 +593,9 @@ const SION_DAY1: Record<string, PhaseNode> = {
       },
       {
         id: 'B',
-        text: '�� 립밤 너한테 있었구나 ㅋㅋ 고마워 이따 저녁에 봐!',
+        text: '앗 립밤 너한테 있었구나 ㅋㅋ 고마워 이따 저녁에 봐!',
         susp: 0,
-        reply: '응 ㅋㅋ / 점심 잘 챙겨 먹고 이따 보���~',
+        reply: '응 ㅋㅋ / 점심 잘 챙겨 먹고 이따 보자~',
         next: 'P2_Start',
       },
     ],
@@ -902,7 +902,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 export type GroupLine = { sender: string; text: string; delayMs: number }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
-  /** ���차 시작(또는 afterAllChats 달성) 후 첫 메시지까지 (ms) */
+  /** 일차 시작(또는 afterAllChats 달성) 후 첫 메시지까지 (ms) */
   startDelayMs: number
   /** true 면 그날 모든 남자와의 대화가 끝난 뒤에 단톡방 이벤트 시작 */
   afterAllChats?: boolean
@@ -959,7 +959,7 @@ const STAFF_DAY1: GroupScript = {
         gl(G_RIKU, '나도 집 앞 마트에서 타코야끼 가루랑 소스 사서 출발햇어 ㅎㅎ'),
         gl(G_RYO, '오 리쿠 형 벌써 기대돼요 ㅋㅋㅋ 저랑 사쿠야는 음료수 사서 갈게요!'),
         gl(G_SAKUYA, '네!! 콜라랑 사이다 사서 올라가겠습니다 ㅎㅎ'),
-        gl(G_DAEYOUNG, '오키 나도 과제 마무리하고 7시 맞춰서 바로 ��게 ㅋㅋ'),
+        gl(G_DAEYOUNG, '오키 나도 과제 마무리하고 7시 맞춰서 바로 갈게 ㅋㅋ'),
         gl(G_YUSHI, '응 이따 동방에서 봐 ^_^'),
       ],
     },
@@ -967,7 +967,7 @@ const STAFF_DAY1: GroupScript = {
       // 시식회 종료 후 밤 10시경 해산
       holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
       messages: [
-        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛��었어요 ㅋㅋㅋ'),
+        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
         gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
         gl(G_RIKU, '다들 맛잇게 먹어줘서 고마워 ㅎㅎ 주점 대박 날 듯!!'),
         gl(G_RYO, '오늘 다들 고생하셨어요 조심히 들어가세요~!!'),
@@ -1077,7 +1077,7 @@ export const SPAM_START_DELAY_MS = 5000
 export const SPAM_INTERVAL_MS = 2000
 /** 한 캐릭터의 마지막 메시지 후 다음 캐릭터까지의 간격 (ms) */
 export const SPAM_SENDER_GAP_MS = 1000
-/** 폭격이 끝난 뒤 게임오버 화면���지의 대기 (ms) */
+/** 폭격이 끝난 뒤 게임오버 화면까지의 대기 (ms) */
 export const SPAM_END_DELAY_MS = 1000
 export const SUSPICION_100_GAME_OVER_TEXT =
   '의심도가 100%에 도달해 상대방이 당신의 바람을 확신했습니다!'
@@ -1107,7 +1107,7 @@ export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
     '나 말고 또 누구 만나고 있어 ?',
     '거짓말할 생각 하지 마',
     '다른 남자 있는 거 다 티 나니까',
-    '나한테만 그렇게 웃어준 게 ���니었구나 ?',
+    '나한테만 그렇게 웃어준 게 아니었구나 ?',
     '이런 앤지 몰랐네... ㅋㅋ',
   ]),
 ]
