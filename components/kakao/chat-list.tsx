@@ -105,7 +105,7 @@ export function ChatList({ chats, owner, onOpen }: ChatListProps) {
         {BACKGROUND_CHATS.map((chat) => (
           <li key={chat.name}>
             <div className="flex w-full items-center gap-3 px-5 py-[9px]">
-              <Avatar name={chat.name} size={48} style={{ backgroundColor: chat.color }} />
+              <Avatar src={chat.avatar} name={chat.name} size={48} style={{ backgroundColor: chat.color }} />
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-1">
                   <span className="truncate text-[15px] font-semibold tracking-[-0.01em]">{chat.name}</span>

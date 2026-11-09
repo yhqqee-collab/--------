@@ -14,10 +14,12 @@ import { SuspicionAlert } from './suspicion-alert'
 
 type Message = Extract<ChatItem, { type: 'msg' }>
 
-export type Delivery = { id: number; texts: string[]; instant?: boolean; badge?: boolean; urgent?: boolean }
+export type Delivery = { id: number; texts: string[]; instant?: boolean; badge?: boolean; urgent?: boolean; sender?: string; time?: string }
 
 type Batch = {
   texts: string[]
+  sender?: string
+  time?: string
   dueAt: number
   instant: boolean
   badge: boolean
@@ -64,6 +66,9 @@ type ChatRoomProps = {
   onDoomed?: () => void
   initialAdded?: ChatItem[]
   onAddedChange?: (items: ChatItem[]) => void
+  /** 스크립트 밖에서 띄우는 단일 답장 선택지 */
+  forcedChoice?: string | null
+  onForcedChoice?: () => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -102,7 +107,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -191,19 +196,19 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     setWaiting(false)
   }
 
-  function land(text: string, badge: boolean, nudge: boolean) {
+  function land(text: string, badge: boolean, nudge: boolean, sender?: string, time = nowLabel()) {
     setTyping(false)
     if (text.startsWith(ME_LINE_PREFIX)) {
       const mine = text.slice(ME_LINE_PREFIX.length)
-      setAdded((prev) => [...prev, { type: 'msg', from: 'me', text: mine, time: nowLabel() }])
+      setAdded((prev) => [...prev, { type: 'msg', from: 'me', text: mine, time }])
       return
     }
-    setAdded((prev) => [...prev, { type: 'msg', from: 'them', text, time: nowLabel() }])
+    setAdded((prev) => [...prev, { type: 'msg', from: 'them', text, time, ...(sender ? { sender } : {}) }])
     if (!nudge || readAtRef.current === null) {
       readAtRef.current = latest.current.active ? Date.now() : null
     }
     awaitingRef.current = true
-    latest.current.onIncoming(text)
+    latest.current.onIncoming(sender ? `${sender}: ${text}` : text)
     if (badge && latest.current.active) {
       setNewBadge(true)
       window.clearTimeout(badgeTimerRef.current)
@@ -226,7 +231,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         const label = batch.dateLabel
         setAdded((prev) => [...prev, { type: 'date', label }])
       }
-      land(text, batch.badge && index === 0, Boolean(batch.nudge))
+      land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time)
       if (index === 0 && batch.enterNode) vibrate()
       if (!isLast) return schedule(batch.instant ? 300 : 0, () => playLine(batch, index + 1))
       if (batch.reply) finishReply()
@@ -295,7 +300,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         setTyping(false)
         finishReply()
       }
-      enqueue({ texts: delivery.texts, dueAt: Date.now(), instant: Boolean(delivery.instant), badge: Boolean(delivery.badge), turn: replyTurnRef.current })
+      enqueue({ texts: delivery.texts, sender: delivery.sender, time: delivery.time, dueAt: Date.now(), instant: Boolean(delivery.instant), badge: Boolean(delivery.badge), turn: replyTurnRef.current })
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inbox.length])
@@ -870,6 +875,20 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                 {personalizeText(choice.text, owner)}
               </button>
             ))}
+          </fieldset>
+        ) : forcedChoice && !choices ? (
+          <fieldset className="flex flex-col gap-[7px]">
+            <legend className="mb-[7px] text-[11.5px] font-medium text-[#8a8a8a]">답장 선택</legend>
+            <button
+              type="button"
+              onClick={() => {
+                setNewBadge(false)
+                onForcedChoice?.()
+              }}
+              className="w-full rounded-[14px] border border-[#E5E5E5] bg-[#F7F7F7] px-[13px] py-[9px] text-left text-[14px] leading-[1.38] tracking-[-0.01em] transition-colors hover:border-[#FEE500] hover:bg-[#FFFBD6] active:scale-[0.99] active:bg-[#FEE500]"
+            >
+              {forcedChoice}
+            </button>
           </fieldset>
         ) : choices ? (
           <fieldset className="flex flex-col gap-[7px]" disabled={waiting}>

@@ -27,6 +27,7 @@ export type BackgroundChat = {
   preview: string
   time: string
   color: string
+  avatar?: string
   members?: number
   unread?: number
   muted?: boolean
@@ -60,11 +61,7 @@ const DAEYOUNG = GROUP_MEMBERS.daeyoung.name
 const SAKUYA = GROUP_MEMBERS.sakuya.name
 const RYO = GROUP_MEMBERS.ryo.name
 
-const MINWOO = GROUP_MEMBERS.minwoo.name
-const SUJIN = GROUP_MEMBERS.sujin.name
-const YUNA = GROUP_MEMBERS.yuna.name
-
-const STAFF_ROSTER = [ME, SION, MINWOO, SUJIN, YUNA]
+const STAFF_ROSTER = [ME, SION, RIKU, YUSHI, DAEYOUNG, RYO, SAKUYA]
 
 const CLUB_EXTRA_MEMBERS = [
   '강하늘', '김서연', '나카무라 히나', '문지호', '박건우', '송유진', '스즈키 렌', '안다은',
@@ -386,7 +383,7 @@ export const CHATS: Chat[] = [
     ],
   },
 
-  /* ────────���────────────── 3. 토쿠노 유우시 (c) ─────────────────────── */
+  /* ──────────────────────── 3. 토쿠노 유우시 (c) ─────────────────────── */
   {
     id: 'c',
     name: CHARACTERS.c.name,
@@ -395,7 +392,7 @@ export const CHATS: Chat[] = [
     time: '어제',
     unread: 1,
     items: [
-      day('2026년 10월 31일 토���일'),
+      day('2026년 10월 31일 토요일'),
       ...block('오후 8:15', [
         [T, '저녁 먹었어 ?'],
         [T, '주말인데 시험공부하느라 힘들겠다'],
@@ -532,18 +529,11 @@ export const CHATS: Chat[] = [
     unread: 0,
     items: [
       day('2026년 11월 4일 수요일'),
-      ...say(MINWOO, '오후 9:12', '내일 경제원론 시험 범위 7장까지 맞지?', '교수님이 수업 때 6장까지라고 하신 것 같기도 하고...'),
-      ...say(SUJIN, '오후 9:14', '공지 다시 봤는데 7장까지 맞아 ㅠㅠ'),
-      ...say(YUNA, '오후 9:15', '헐 7장 탄력성 계산 문제 나오면 끝인데'),
       ...say(SION, '오후 9:18', '내가 소행론이랑 경제원론 요약본 만들어둔 거 있음', '이따 올려줄게 ㅋㅋ'),
       ...say(ME, '오후 9:19', '시온이 최고 ㅠㅠ 고마워!!'),
-      ...say(MINWOO, '오후 9:20', '오시온 이번 학기 과탑 각이다'),
 
       day('2026년 11월 5일 목요일'),
-      ...say(SUJIN, '오후 1:05', '경제원론 끝!!! 다들 어땠어?'),
-      ...say(YUNA, '오후 1:07', '시온이 요약본에서 거의 다 나왔어 미쳤다'),
       ...say(ME, '오후 1:08', '나도 요약본 덕분에 살았어 ㅋㅋㅋ'),
-      ...say(MINWOO, '오후 1:10', '다음 주 재무관리 팀플 자료조사 분담은 주말에 정하자'),
       ...say(SION, '오후 1:12', '다들 방학 전에 종강 파티 한 번 하자 ㅋㅋ'),
     ],
   },
@@ -562,11 +552,35 @@ export const CHATS: Chat[] = [
       ...say(SION, '오후 6:00', '다들 중간고사 끝났지? 시험 치느라 고생 많았다 ㅋㅋ', '내일 저녁 7시에 동방에서 우리 한일교류동아리 축제 이자카야 주점 1차 메뉴 회의 겸 시식회 있는 거 잊지 말고!'),
       ...say(DAEYOUNG, '오후 6:03', '와 드디어 시험 해방이다 ㅠㅠㅠ', '내일 시식회 야키소바랑 가라아게 먹는 거죠?!'),
       ...say(SAKUYA, '오후 6:05', '리쿠 형 요리 실력 기대하겠습니다 ㅋㅋㅋ'),
-      ...say(RIKU, '오후 6:07', '내일 기대해 다들 ㅎㅎ 맛잇게 해줄게!'),
+      ...say(RIKU, '오후 6:07', '내일 기대해 다들 ㅎㅎ 맛있게 해줄게!'),
       ...say(YUSHI, '오후 6:10', '내일 시식 재료 산 거 영수증은 다 나한테 챙겨줘 예산 정산해야 하니까'),
       ...say(RYO, '오후 6:12', '넵!! 내일 대중문화 수업 끝나고 동방으로 바로 가겠습니다!'),
       ...say(ME, '오후 6:14', '다들 시험 고생했어!! 내일 동방에서 봐 ㅎㅎ'),
       ...say(SION, '오후 6:15', '오케이 내일 7시 동방 늦지 마셈!'),
+    ],
+  },
+
+  /* ─────────────────────── 6. 동기 수진이 (알리바이 단서) ─────────────────────── */
+  {
+    id: 'sujin',
+    name: '동기 수진이',
+    preview: '오키오키 조심히 내려가구 주말에 연락해 ㅋㅋ',
+    time: '11월 4일',
+    unread: 0,
+    items: [
+      day('2026년 11월 3일 화요일'),
+      ...block('오후 2:20', [[T, '야 재무관리 범위 6장까지 맞지?? 나 지금 멘탈 터질 것 같음 ㅠㅠ']]),
+      ...block('오후 2:22', [[M, '응응 6장까지 맞아 ㅋㅋㅋ 내가 정리한 요약본 보내줄까?']]),
+      ...block('오후 2:23', [[T, '헐 여주야 사랑해 복 받을 거야 ㅠㅠㅠ']]),
+
+      day('2026년 11월 4일 수요일'),
+      ...block('오후 1:10', [[T, '아 드디어 시험 끝났다 ㅠㅠㅠ 나 오늘 일찍 본가 내려간다!!']]),
+      ...block('오후 1:15', [[M, '오 벌써?? 언제 다시 올라와? 금요일 수업은 어쩌구?']]),
+      ...block('오후 1:16', [
+        [T, '금요일 수업 휴강 떴잖아 ㅋㅋㅋ'],
+        [T, '어 ㅋㅋ 토요일에 올라갈 듯? 올라오면 주말에 마라탕 먹자!'],
+      ]),
+      ...block('오후 1:20', [[M, '오키오키 조심히 내려가구 주말에 연락해 ㅋㅋ']]),
     ],
   },
 ]
@@ -589,11 +603,6 @@ export const BACKGROUND_CHATS: BackgroundChat[] = [
     preview: '우리 딸 시험 다 끝났어? 주말에 내려오니?',
     time: '11월 3일',
     color: '#f472b6',
-  },
-  {
-    name: '동기 수진이',
-    preview: '야 나 오늘 일찍 본가 내려간다 다음 주에 보자!',
-    time: '11월 4일',
-    color: '#a78bfa',
+    avatar: '/images/kakao/mom.png',
   },
 ]

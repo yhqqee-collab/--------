@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Bike, Check, ChevronLeft, Minus, Plus, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { DELIVERY_ADDRESS, DELIVERY_LABEL, ORDER_STEPS, won, type Store } from './baemin-data'
@@ -75,6 +76,11 @@ export function StoreView({ store, cart, onBack, onChange, onOpenCart }: StoreVi
     <div className="absolute inset-0 z-10 flex flex-col bg-white">
       <TopBar title={store.name} onBack={onBack} />
       <div className="min-h-0 flex-1 overflow-y-auto pb-28">
+        {store.thumbnail && (
+          <div className="relative h-44 w-full bg-[#EEE]">
+            <Image src={store.thumbnail} alt={`${store.name} 대표 메뉴`} fill sizes="400px" className="object-cover" />
+          </div>
+        )}
         <section className="border-b-8 border-[#F5F5F5] px-5 py-5 text-center">
           <h3 className="text-[22px] font-extrabold">{store.name}</h3>
           <p className="mt-1 flex items-center justify-center gap-1 text-[14px]">
