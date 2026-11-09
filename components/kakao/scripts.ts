@@ -372,14 +372,14 @@ function sampleDay(): Record<string, Script> {
 export const FLAG_YUSHI_LUNCH_SEOGA = 'yushi-lunch-seoga'
 export const FLAG_YUSHI_LUNCH_RAMEN = 'yushi-lunch-ramen'
 
-/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지는 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
+/** 리쿠 카톡에서 정문 라멘야를 고르면 켜지��� 플래그 (유우시 쪽 12:40 카톡이 료의 목격담 엔딩으로 바뀜) */
 export const FLAG_RIKU_LUNCH_RAMEN = 'riku-lunch-ramen'
 
 /** 점심을 거절할 때 '혼자 발표 준비'를 핑계로 댔는지 (라멘야 추궁 대사에 사용) */
 export const FLAG_RIKU_EXCUSE_SOLO = 'riku-excuse-solo'
 export const FLAG_YUSHI_EXCUSE_SOLO = 'yushi-excuse-solo'
 
-/** 라멘야 목격담은 kakao-app 의 ramen-exposure 시퀀스가 진행하므로 해당 남주의 스크립트는 여기서 끝납니다. */
+/** 라멘��� 목격담은 kakao-app 의 ramen-exposure 시퀀스가 진행하므로 해당 남주의 스크립트는 여기서 끝납니다. */
 const RAMEN_EXPOSURE_END: Branch[] = [
   { all: [FLAG_YUSHI_LUNCH_RAMEN], to: null },
   { all: [FLAG_RIKU_LUNCH_RAMEN], to: null },
@@ -718,7 +718,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
         text: '오! 나갈게 어디야? ㅋㅋ',
         susp: -10,
         reply: 'ㅋㅋ 집 앞 편의점 파라솔 쪽이야 천천히 나와',
-        next: 'P4_Goodnight_Meet',
+        next: 'Branch_DoubleBooking',
         setFlag: FLAG_SION_NIGHT_MEET,
       },
       {
@@ -729,6 +729,23 @@ const SION_DAY2: Record<string, PhaseNode> = {
         next: 'P4_Goodnight_Reject',
       },
     ],
+  },
+  // 유우시 데이트도 수락했으면 삼자대면 즉사, 아니면 정상 마무리
+  Branch_DoubleBooking: {
+    delay: 8,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY2_SION_MEET, FLAG_DAY2_YUSHI_MEET], to: 'P_Death' },
+      { all: [FLAG_DAY2_SION_MEET], to: 'P4_Goodnight_Meet' },
+    ],
+  },
+  P_Death: {
+    gameOver: true,
+    alert: '양다리 현장이 발각되었습니다.',
+    message:
+      '여주야\n집 앞에서 유우시 만났어 ㅎㅎ\n안 들키게 잘 둘러댈게 ㅎㅎ\n[[대기:15]]\nㅎㅎ 여주야\n유우시랑 다 얘기했어\n사람 갖고 노는 게 재밌나보네\nㅋㅋ...\n당장 나와',
+    choices: [],
   },
   P4_Goodnight_Meet: {
     delay: 40,
