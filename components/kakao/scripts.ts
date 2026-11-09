@@ -762,7 +762,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 잘 잣어?? ㅠㅠ 나 아직 졸려 죽겟어',
     choices: [
-      { id: 'A', text: '얼른 일어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+      { id: 'A', text: '얼른 ���어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
       { id: 'B', text: '나도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
     ],
   },
@@ -788,7 +788,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
   P2_Riku_Daiso: {
     preWork: true,
     message:
-      '여주야 나 1층에서 종이컵 좀 찾고 올라갈게!!\n근데 아까 동방에서 료가 그러는데\n그저께 밤에 시온이 형네 자취방 골목 쪽에서 너 봣다던데...?\n너 그때 어머니 만나고 일찍 뻗엇다구 하지 안앗어...?',
+      '여주야 나 1층에서 종이컵 좀 찾고 올라갈게!!\n근데 아까 동방에서 료가 ���러는데\n그저께 밤에 시온이 형네 자취방 골목 쪽에서 너 봣다던데...?\n너 그때 어머니 만나고 일찍 뻗엇다구 하지 안앗어...?',
     choices: [
       {
         id: 'A',
@@ -924,38 +924,11 @@ const SION_DAY3: Record<string, PhaseNode> = {
     // 이 답장 후 데이트 전환 팝업 (WORK_TRANSITION_TEXTS[3])
     choices: [{ id: 'A', text: '웅 이따 봐!', susp: 0, next: 'P2_Insta' }],
   },
-  // 데이트를 마치고 카페에 앉은 뒤. 댓글 선택에 따라 10초 뒤 유우시 톡방에 카톡 도착
+  // 데이트를 마치고 카페에 앉은 뒤. 실제 댓글 선택지는 인스타 시온 게시물 댓글창에서 뜸
+  // (components/instagram/insta-comment-choices.ts → SION_DAY3_POST_ID)
   P2_Insta: {
     message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산공원에서 논 거랑\n역에서 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
-    choices: [
-      {
-        id: 'A',
-        text: '오키ㅣㅣ\n[댓글] 포토그래퍼 금손이네 🙋‍♀️',
-        susp: 0,
-        next: 'P3_Evening',
-        sendTo: { chat: 'c', message: '집에 있는다며\n형 사진 찍어주고 있었네 ㅋㅋㅋ', delay: 10, susp: 50 },
-      },
-      {
-        id: 'B',
-        text: '오키ㅣㅣ\n[댓글] 와 날씨 좋다 ㅠㅠ 나도 놀러 갈래~',
-        susp: 0,
-        next: 'P3_Evening',
-        sendTo: {
-          chat: 'c',
-          message: '시온이 형 인스타에 댓글 달았네\n솔직히 질투나 ㅋㅋㅋ ㅠㅠ\n다른 남자 인스타에 댓글 달지 마...',
-          delay: 10,
-          susp: 10,
-        },
-      },
-      {
-        id: 'C',
-        text: '오키ㅣㅣ\n[댓글] 옷 예쁘다 ㅋㅋㅋㅋ',
-        susp: 0,
-        reply: '[답글] 저번에 여주가 골라준 거 ㅎㅎ',
-        next: 'P3_Evening',
-        sendTo: { chat: 'c', message: '저번에 형 옷도 골라줬어?', delay: 10, susp: 30 },
-      },
-    ],
+    choices: [{ id: 'A', text: '오키ㅣㅣ', susp: 0, next: 'P3_Evening' }],
   },
   // 유우시 카톡(10초) 이후 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
   P3_Evening: {

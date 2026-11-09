@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { INSTA_CROSS_MESSAGE_EVENT } from '@/components/instagram/insta-comment-choices'
 import { replaceUserName } from '@/lib/korean-name'
 import { OWNER_AVATAR } from '@/lib/template-config'
 import { cn } from '@/lib/utils'
@@ -296,6 +297,12 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     },
     [deliver, changeSuspicion],
   )
+
+  useEffect(() => {
+    const onInstaComment = (event: Event) => handleCrossMessage((event as CustomEvent<CrossMessage>).detail)
+    window.addEventListener(INSTA_CROSS_MESSAGE_EVENT, onInstaComment)
+    return () => window.removeEventListener(INSTA_CROSS_MESSAGE_EVENT, onInstaComment)
+  }, [handleCrossMessage])
 
   const handleIncoming = useCallback((id: string, text: string) => {
     setPreviews((current) => ({ ...current, [id]: text }))

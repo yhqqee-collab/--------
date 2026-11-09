@@ -6,7 +6,16 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { COMMENT_AVATARS, DEFAULT_AVATAR, MY_AVATAR } from './instagram-data'
 
-export type PostComment = { name: string; text: string; time: string; likes: number; mine?: boolean; postedDay?: number }
+export type PostComment = {
+  name: string
+  text: string
+  time: string
+  likes: number
+  mine?: boolean
+  postedDay?: number
+  /** 이 댓글 밑에 달린 답글 */
+  replies?: PostComment[]
+}
 
 function CommentRow({ comment, isAuthor }: { comment: PostComment; isAuthor: boolean }) {
   const [liked, setLiked] = useState(false)
@@ -90,7 +99,18 @@ export function CommentsSheet({
 
         <ul className="min-h-0 flex-1 overflow-y-auto py-[6px] [scrollbar-width:none]">
           {comments.map((comment, i) => (
-            <CommentRow key={`${comment.name}-${i}`} comment={comment} isAuthor={comment.name === author} />
+            <li key={`${comment.name}-${i}`}>
+              <ul>
+                <CommentRow comment={comment} isAuthor={comment.name === author} />
+              </ul>
+              {comment.replies && comment.replies.length > 0 && (
+                <ul className="pl-[46px]">
+                  {comment.replies.map((reply, j) => (
+                    <CommentRow key={`${reply.name}-${j}`} comment={reply} isAuthor={reply.name === author} />
+                  ))}
+                </ul>
+              )}
+            </li>
           ))}
         </ul>
 
