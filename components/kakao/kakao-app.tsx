@@ -179,7 +179,40 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     completedScriptsRef.current = new Set()
     setCompletedScripts(new Set())
     dayCompleteFiredRef.current = false
+    setHeldAt({})
+    setStagesPlayed(0)
+    setStageCue(0)
   }, [day])
+
+  const [heldAt, setHeldAt] = useState<Record<string, string>>({})
+  const [stagesPlayed, setStagesPlayed] = useState(0)
+  const [stageCue, setStageCue] = useState(0)
+  const stagedGroupId = Object.keys(groupScriptsForDay(day)).find((id) => groupScriptsForDay(day)[id].stages)
+  const stagedGroup = stagedGroupId ? groupScriptsForDay(day)[stagedGroupId] : undefined
+  const stages = stagedGroup?.stages ?? []
+  const stagesSkipped = Boolean(stagedGroup?.skipIfFlags?.some((flag) => flagsRef.current.has(flag)))
+
+  const holdNodeFor = (chatId: string) => {
+    if (!stagedGroup || stagesSkipped) return null
+    for (let index = stagesPlayed; index < stages.length; index += 1) {
+      const node = stages[index].holdNodes[chatId]
+      if (node) return node
+    }
+    return null
+  }
+
+  useEffect(() => {
+    if (!stagedGroupId || !clockStarted || stageCue > stagesPlayed || stagesPlayed >= stages.length) return
+    const manIds = Object.keys(scriptsForDay(day))
+    if (stagesSkipped) {
+      if (manIds.every((id) => completedScripts.has(id)) && !completedScripts.has(stagedGroupId)) handleScriptDone(stagedGroupId)
+      return
+    }
+    const holds = stages[stagesPlayed].holdNodes
+    const ready = manIds.every((id) => completedScripts.has(id) || !holds[id] || heldAt[id] === holds[id])
+    if (ready) setStageCue(stagesPlayed + 1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [heldAt, completedScripts, stagesPlayed, stageCue, clockStarted, day, stagedGroupId, stagesSkipped])
 
   const handleSync = useCallback((id: string, key: string) => {
     const answered = syncAnswersRef.current.get(key) ?? new Set<string>()
@@ -248,7 +281,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
         const groupIds = Object.keys(dayGroups)
         const isGroupRoom = groupIds.includes(chat.id)
         const groupsFinished = groupIds
-          .filter((id) => !dayGroups[id].afterAllChats && !dayGroups[id].afterWorkEnd)
+          .filter((id) => !dayGroups[id].afterAllChats && !dayGroups[id].afterWorkEnd && !dayGroups[id].stages)
           .every((id) => completedScripts.has(id))
         const afterWorkGroupsFinished = groupIds
           .filter((id) => dayGroups[id].afterWorkEnd)
@@ -301,6 +334,10 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
                 addedRef.current[chat.id] = items
               }}
               othersDone={Object.keys(scriptsForDay(day)).every((key) => key === chat.id || completedScripts.has(key))}
+              holdNode={holdNodeFor(chat.id)}
+              onHeld={(node) => setHeldAt((current) => ({ ...current, [chat.id]: node }))}
+              stageCue={chat.id === stagedGroupId ? stageCue : 0}
+              onStageDone={(index) => setStagesPlayed((current) => Math.max(current, index + 1))}
             />
           </div>
         )

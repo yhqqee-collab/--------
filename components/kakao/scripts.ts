@@ -213,7 +213,7 @@ function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming:
  *  - options.text: 주인공이 고를 수 있는 답변
  *  - options.suspicionDelta: 이 답장을 골랐을 때 의심도 변화량 (음수 가능)
  *  - options.nextNodeId: 다음 노드 id, null 이면 대화 종료
- * 가장 긴 경로의 길이가 해당 인물의 '턴 수'가 되고, 모든 인물의 턴을 끝내면 트���엔딩이 발동합니다.
+ * 가장 긴 경로의 길이가 해당 인물의 '턴 수'가 되고, 모든 인물의 턴을 끝내면 ������엔딩이 발동합니다.
  */
 type TreeOption = { text: string; suspicionDelta: number; nextNodeId: string | null }
 type TreeNode = { speakerText: string[]; options: TreeOption[] }
@@ -399,24 +399,24 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     choices: [{ id: 'A', text: '웅 담에 입고 갈게 ㅎㅎ', susp: 0, next: 'P4_Start' }],
   },
   P2_YushiLink_B: {
-    message: '여주야 수업 끝낫지??\n대본 보기 전에 뭐라도 먹어 ㅠㅠ 어디서 먹을 거야?',
+    message: '',
     branch: YUSHI_LUNCH_BRANCH('B'),
-    choices: [{ id: 'A', text: '후문 서가앤쿡 잠깐 들를 것 같아', susp: 0, next: 'P2_Safe2_B' }],
+    choices: [],
   },
   P2_YushiLink_C: {
-    message: '여주야 수업 끝낫지??\n동기랑 어디서 먹어?',
+    message: '',
     branch: YUSHI_LUNCH_BRANCH('C'),
-    choices: [{ id: 'A', text: '후문 서가앤쿡 가기로 했어', susp: 0, next: 'P2_Safe2_C' }],
+    choices: [],
   },
   P2_Safe2_B: {
     delay: 20,
-    message: '여주야 대본은 다 봣어??\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
-    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 10, next: 'P4_Start' }],
+    message: '여주야 수업 끝낫지??\n대본 보기 전에 뭐라도 먹어 ㅠㅠ 어디서 먹을 거야?\n...\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
+    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 폰을 못 봤네 ㅠㅠ 이따 동방에서 봐!', susp: 10, next: 'P4_Start' }],
   },
   P2_Safe2_C: {
     delay: 20,
-    message: '여주야 밥은 다 먹엇어??\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
-    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 이따 동방에서 봐!', susp: 10, next: 'P4_Start' }],
+    message: '여주야 수업 끝낫지??\n동기랑 어디서 먹어?\n...\n답장이 없네 ㅠㅠ 1시 수업 잘 들어!',
+    choices: [{ id: 'A', text: '웅 고마워 ㅎㅎ 폰을 못 봤네 ㅠㅠ 이따 동방에서 봐!', susp: 10, next: 'P4_Start' }],
   },
   P4_Start: {
     delay: 40,
@@ -653,19 +653,74 @@ export type GroupScript = {
   afterWorkEnd?: boolean
   messages: GroupLine[]
   choices: GroupChoice[]
+  /**
+   * 지정하면 messages 대신 단계별로 진행합니다.
+   * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시작되고,
+   * 해당 노드의 카톡은 그 단계의 단톡방 대화가 끝난 뒤에 도착합니다.
+   */
+  stages?: GroupStage[]
+  /** 이 플래그 중 하나라도 켜져 있으면 stages 단톡방 대화가 나오지 않습니다. */
+  skipIfFlags?: string[]
 }
 
-/** 이전 메시지 이후 2~9초 사이의 랜덤 간격 */
-const randomGap = () => Math.floor(Math.random() * 7000) + 2000
+export type GroupStage = {
+  /** 채팅방 id → 이 단계가 끝날 때까지 대기시킬 노드 id */
+  holdNodes: Record<string, string>
+  messages: GroupLine[]
+}
+
+/** 이전 메시지 이후 2~7초 사이의 랜덤 간격 */
+const randomGap = () => Math.floor(Math.random() * 5000) + 2000
 
 const gl = (sender: string, text: string): GroupLine => ({ sender, text, delayMs: randomGap() })
 
 /** 단톡방 발신자 (lib/template-config.ts 의 GROUP_MEMBERS 에서 이름 변경) */
 const GROUP_SENDER = GROUP_MEMBERS.daeyoung.name
 
+const G_SION = CHARACTERS.a.name
+const G_RIKU = CHARACTERS.b.name
+const G_YUSHI = CHARACTERS.c.name
+const G_DAEYOUNG = GROUP_MEMBERS.daeyoung.name
+const G_SAKUYA = GROUP_MEMBERS.sakuya.name
+const G_RYO = GROUP_MEMBERS.ryo.name
+
+/** Day 1 단톡방: 시식회 전 대화 → 시식회 후 해산 대화 (라멘야 목격담 엔딩이면 나오지 않음) */
+const STAFF_DAY1: GroupScript = {
+  startDelayMs: 5000,
+  messages: [],
+  choices: [],
+  skipIfFlags: [FLAG_RIKU_LUNCH_RAMEN, FLAG_YUSHI_LUNCH_RAMEN],
+  stages: [
+    {
+      // 오후 수업이 끝나고 시식회 시작 전
+      holdNodes: { a: 'P2_Start', b: 'P4_Start', c: 'P4_Start' },
+      messages: [
+        gl(G_SION, '애들아 오늘 저녁 7시 동방에서 주점 메뉴 관련 회의랑 시식 있는 거 안 잊었지? ㅋㅋ'),
+        gl(G_SION, '나 지금 일찍 가서 동방 테이블 먼저 세팅해 둘게~'),
+        gl(G_RIKU, '나도 집 앞 마트에서 타코야끼 가루랑 소스 사서 출발햇어 ㅎㅎ'),
+        gl(G_RYO, '오 리쿠 형 벌써 기대돼요 ㅋㅋㅋ 저랑 사쿠야는 음료수 사서 갈게요!'),
+        gl(G_SAKUYA, '네!! 콜라랑 사이다 사서 올라가겠습니다 ㅎㅎ'),
+        gl(G_DAEYOUNG, '오키 나도 과제 마무리하고 7시 맞춰서 바로 갈게 ㅋㅋ'),
+        gl(G_YUSHI, '응 이따 동방에서 봐 ^_^'),
+      ],
+    },
+    {
+      // 시식회 종료 후 밤 10시경 해산
+      holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
+      messages: [
+        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
+        gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
+        gl(G_RIKU, '다들 맛잇게 먹어줘서 고마워 ㅎㅎ 주점 대박 날 듯!!'),
+        gl(G_RYO, '오늘 다들 고생하셨어요 조심히 들어가세요~!!'),
+        gl(G_SION, '다들 오늘 고생 많았어 ㅋㅋ 잘 들어가고 내일 주점 장보기 팀은 내일 단톡방에서 나누자!'),
+      ],
+    },
+  ],
+}
+
 /** 일차별 단톡방 이벤트 (키는 채팅방 id — chat-data.ts 의 단톡방 id 와 일치해야 함) */
 const DAY_GROUP_SCRIPTS: Record<number, Record<string, GroupScript>> = {
-  1: { staff: { startDelayMs: 5000, messages: [gl(GROUP_SENDER, '[단톡방 대사를 입력하세요]')], choices: [] } },
+  1: { staff: STAFF_DAY1 },
   6: { staff: { startDelayMs: 5000, messages: [gl(GROUP_SENDER, '[단톡방 대사를 입력하세요]')], choices: [] } },
 }
 
@@ -760,7 +815,7 @@ export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
     '나 말고 또 누구 만나고 있어 ?',
     '거짓말할 생각 하지 마',
     '다른 남자 있는 거 다 티 나니까',
-    '나한테만 그렇게 웃어준 게 아니었구나 ?',
+    '나한테만 그렇게 웃어준 게 ���니었구나 ?',
     '이런 앤지 몰랐네... ㅋㅋ',
   ]),
 ]

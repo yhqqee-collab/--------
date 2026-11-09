@@ -70,6 +70,12 @@ type ChatRoomProps = {
   /** 스크립트 밖에서 띄우는 단일 답장 선택지 */
   forcedChoice?: string | null
   onForcedChoice?: () => void
+  /** 이 노드의 카톡은 도착 직전에 대기시킵니다 (단톡방 단계 대화가 끝날 때까지) */
+  holdNode?: string | null
+  onHeld?: (node: string) => void
+  /** 단톡방 stages 중 재생을 허락받은 단계 수 */
+  stageCue?: number
+  onStageDone?: (stage: number) => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -108,7 +114,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -281,10 +287,29 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     playLine(batch, 0)
   }
 
+  const holdNodeRef = useRef(holdNode)
+  holdNodeRef.current = holdNode
+  const heldBatchRef = useRef<{ batch: Batch; remainingMs: number } | null>(null)
+  const heldCallbackRef = useRef(onHeld)
+  heldCallbackRef.current = onHeld
+
   function enqueue(batch: Batch) {
+    if (batch.enterNode && batch.enterNode === holdNodeRef.current) {
+      heldBatchRef.current = { batch, remainingMs: Math.max(0, batch.dueAt - Date.now()) }
+      heldCallbackRef.current?.(batch.enterNode)
+      return
+    }
     queueRef.current.push(batch)
     if (!playingRef.current) playNext()
   }
+
+  useEffect(() => {
+    const held = heldBatchRef.current
+    if (!held || held.batch.enterNode === holdNode) return
+    heldBatchRef.current = null
+    enqueue({ ...held.batch, dueAt: Date.now() + held.remainingMs, turn: replyTurnRef.current })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [holdNode])
 
   useEffect(() => {
     const fresh = inbox.slice(handledInboxRef.current)
@@ -347,7 +372,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   }
 
   useEffect(() => {
-    if (!clockStarted || !groupScript || groupStartedRef.current) return
+    if (!clockStarted || !groupScript || groupScript.stages || groupStartedRef.current) return
     groupStartedRef.current = true
     schedule(groupScript.startDelayMs, () => {
       playGroupLines(
@@ -361,6 +386,30 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clockStarted, day])
+
+  const stagesPlayedRef = useRef(0)
+  const stageDoneRef = useRef(onStageDone)
+  stageDoneRef.current = onStageDone
+  useEffect(() => {
+    stagesPlayedRef.current = 0
+  }, [day])
+  useEffect(() => {
+    const stages = groupScript?.stages
+    if (!stages || stageCue <= stagesPlayedRef.current || stageCue > stages.length) return
+    const index = stageCue - 1
+    stagesPlayedRef.current = stageCue
+    schedule(index === 0 ? groupScript.startDelayMs : 0, () =>
+      playGroupLines(
+        stages[index].messages,
+        () => {
+          stageDoneRef.current?.(index)
+          if (index === stages.length - 1) schedule(2500, () => latest.current.onScriptDone?.())
+        },
+        index === 0 ? dayDivider(dayRef.current) : undefined,
+      ),
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stageCue])
 
   function chooseGroup(choice: GroupChoice, index: number) {
     if (groupPicked !== null) return
