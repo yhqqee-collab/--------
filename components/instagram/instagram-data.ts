@@ -207,6 +207,20 @@ export const POSTS: Post[] = [
     comments: [],
   },
   {
+    id: 'ryo-post',
+    handle: ryo.id,
+    avatar: avatarOf(ryo),
+    time: '2일 전',
+    images: [
+      { src: '/posts/ryo-1.jpg', alt: '파란 후드를 뒤집어쓰고 거울 셀카를 찍는 료' },
+      { src: '/posts/ryo-2.jpg', alt: '엘리베이터 안에서 캐리어를 잡고 몸을 숙여 웃는 료' },
+    ],
+    caption: '',
+    likes: 318,
+    likedBy: [sakuya.id, yushi.id],
+    comments: [],
+  },
+  {
     id: 'sample-post-a',
     handle: sion.id,
     avatar: avatarOf(sion),
