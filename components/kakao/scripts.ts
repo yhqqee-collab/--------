@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없으면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없���면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -1179,7 +1179,7 @@ const SION_DAY4: Record<string, PhaseNode> = {
     message: '아 그래?\n알겠어~\n이따 동방에서 봐!',
     choices: [{ id: 'A', text: '(수업이 끝났다)', susp: 0, next: 'RESOLVE_AFTER_REJECT_SION' }],
   },
-  // 충돌 팝업·시온 의심도(-10 / +30)는 리쿠 Day 4 스크립트에서 처리 → 여기선 중복 팝업 없이 마무리
+  // 충돌 팝업·시온 의심도(A-2 +15 / B-1 -10 / B-2 +30)는 리쿠 Day 4 스크립트에서 처리 → 여기선 중복 팝업 없이 마무리
   RESOLVE_AFTER_ACCEPT_SION: {
     delay: 6,
     message: '',
@@ -1284,7 +1284,15 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     isSystem: true,
     alert: '시온과 함께 1층 로비로 내려오다\n바닐라라떼를 들고 기다리던 리쿠와\n정면으로 마주쳤습니다!',
     message: '',
-    choices: [{ id: 'A', text: '(어색하게 인사만 나누고 헤어졌다... 망했다 ㅠㅠ)', susp: 0, next: 'P3_Route_B_Susp' }],
+    choices: [
+      {
+        id: 'A',
+        text: '(어색하게 인사만 나누고 헤어졌다... 망했다 ㅠㅠ)',
+        susp: 0,
+        sendTo: { chat: 'a', message: '', delay: 0, susp: 15 },
+        next: 'P3_Route_B_Susp',
+      },
+    ],
   },
   // [B-1] 3층 문 앞 + 시온 승낙 (복도 정면충돌, 시온 의심도 -10)
   P3_Route_B_Popup: {
@@ -1494,7 +1502,7 @@ export type GroupScript = {
   messages: GroupLine[]
   choices: GroupChoice[]
   /**
-   * 지정하면 messages 대신 단계별로 진행합니다.
+   * 지정하면 messages 대신 단계별로 진���합니다.
    * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시작되고,
    * 해당 노드의 카톡은 그 단계의 단톡방 대화가 끝난 뒤에 도착합니다.
    */
