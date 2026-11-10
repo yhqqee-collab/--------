@@ -191,6 +191,22 @@ export const POSTS: Post[] = [
     afterWork: true,
   },
   {
+    id: 'daeyoung-friday-post',
+    handle: daeyoung.id,
+    avatar: avatarOf(daeyoung),
+    time: '3시간 전',
+    images: [
+      { src: '/posts/daeyoung-1.jpg', alt: '라운지에서 전화하며 아이패드를 보는 대영, 앞에 흰 노트북' },
+      { src: '/posts/daeyoung-2.jpg', alt: '맥북 뒤에서 정면을 보는 대영, 민트색 커피컵과 프로틴 음료' },
+      { src: '/posts/daeyoung-3.jpg', alt: '빈백에 기대 앉아 휴대폰을 들고 웃는 대영' },
+      { src: '/posts/daeyoung-4.jpg', alt: '아이패드로 영상통화하며 손을 흔드는 대영의 뒷모습' },
+    ],
+    caption: '다음 학기에는 금공강 하자 제발...',
+    likes: 276,
+    likedBy: [sion.id, riku.id],
+    comments: [],
+  },
+  {
     id: 'sample-post-a',
     handle: sion.id,
     avatar: avatarOf(sion),
