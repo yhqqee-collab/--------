@@ -208,7 +208,7 @@ type PhaseTiming = {
 
 const splitLines = (text: string) => text.split('\n').map((line) => line.trim()).filter(Boolean)
 
-/** 답장 안에서 플레이어(여주)가 보내는 말풍선 표시 */
+/** 답장 안에서 플레이어(여주)가 보내는 말���선 표시 */
 export const ME_LINE_PREFIX = '\u0001me:'
 const PLAYER_SPEAKER = '여주'
 
@@ -365,7 +365,7 @@ function longestPath(script: Script) {
 /* ───────────── 기본 샘플 구조 ─────────────
  * phase1 (preWork: true)  : 일정 시작 전 카톡 → 선택지 A(의심도 0) / B(의심도 +10) → phase2
  * phase2 (preWork: false) : 일정 종료 후 카톡 → 마무리 선택지 A → 'end'
- * 일차·멤버별로 대사를 바꾸려면 아래 DAY_SCRIPTS 에서 sampleNodes() 대신
+ * 일차·멤버별로 대���를 바꾸려면 아래 DAY_SCRIPTS 에서 sampleNodes() 대신
  * 직접 작성한 Record<string, PhaseNode> 를 넘기세요.
  */
 function sampleNodes(): Record<string, PhaseNode> {
@@ -783,7 +783,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
     message: '여주야 잘 잣어?? ㅠㅠ 나 아직 졸려 죽겟어',
     choices: [
       { id: 'A', text: '얼른 �����어나!!\n이따가 얼굴 보겠넹 ㅎㅎ', susp: -5, reply: '웅 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
-      { id: 'B', text: '나도 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
+      { id: 'B', text: '나��� 아직 침대야 ㅠㅠ\n이제 일어나야지...', susp: 0, reply: '지각하면 안 댕 ㅎㅎ 이따 봐!', next: 'Branch_Group' },
     ],
   },
   // 단톡방 장보기 선택이 끝날 때까지 대기하는 분기 전용 노드
@@ -966,7 +966,7 @@ const SION_DAY3: Record<string, PhaseNode> = {
 const YUSHI_DAY3: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
-    message: '일어났어 ?\n나 아침에 계란말이랑 우동 먹었어 ㅎㅎ\n여주는 ?',
+    message: '일어났어 ?\n나 아���에 계란말이랑 우동 먹었어 ㅎㅎ\n여주는 ?',
     choices: [
       { id: 'A', text: '헐 맛있겠다! 나도 해줘 ㅋㅋㅋ', susp: 0, next: 'P1_Reply_A' },
       { id: 'B', text: '오 아침부터 부지런하네~', susp: 0, next: 'P1_Reply_B' },
@@ -1247,7 +1247,7 @@ const STAFF_DAY3: GroupScript = {
   stages: [
     {
       holdNodes: { b: 'P3_Night_Sweet' },
-      interlude: '리쿠의 자취방에서 배달 음식을 먹으며\n오붓한 시간을 보냈습니다...\n\n밤이 깊어 자취방으로 돌아왔습니다',
+      interlude: '리쿠의 자취방에서 배달 음식을 먹으며\n오붓한 시간을 보냈습니다...\n\n밤이 깊어 집으로 돌아왔습니다',
       messages: [],
     },
   ],
@@ -1325,7 +1325,7 @@ export const SPAM_SENDER_GAP_MS = 1000
 /** 폭격이 끝난 뒤 게임오버 화면까지의 대기 (ms) */
 export const SPAM_END_DELAY_MS = 1000
 export const SUSPICION_100_GAME_OVER_TEXT =
-  '의심도가 100%에 도달해 상대방이 당신의 바람을 확신했습니다!'
+  '의심도�� 100%에 도달해 상대방이 당신의 바람을 확신했습니다!'
 
 const spam = (senderId: 'a' | 'b' | 'c', texts: string[]): SpamNotification[] =>
   texts.map((text) => ({ senderId, senderName: CHARACTERS[senderId].name, text }))
