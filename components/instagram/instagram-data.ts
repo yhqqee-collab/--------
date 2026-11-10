@@ -211,7 +211,7 @@ export const POSTS: Post[] = [
       { src: '/posts/daeyoung-3.jpg', alt: '빈백에 기대 앉아 휴대폰을 들고 웃는 대영' },
       { src: '/posts/daeyoung-4.jpg', alt: '아이패드로 영상통화하며 손을 흔드는 대영의 뒷모습' },
     ],
-    caption: '다음 학기에는 금공강 하��� 제발...',
+    caption: '다음 학기에는 금공강 하자 제발...',
     likes: 276,
     likedBy: [sion.id, riku.id],
     comments: [],
@@ -306,7 +306,7 @@ export const PROFILES: Record<string, UserProfileData> = {
   [riku.id]: profile(riku, 1203, 341, '[리쿠 소개글]'),
   [yushi.id]: profile(yushi, 845, 402, '[유우시 소개글]'),
   [sakuya.id]: profile(sakuya, 730, 388, '[사쿠야 소개글]'),
-  [ryo.id]: profile(ryo, 521, 476, '[��� 소개글]'),
+  [ryo.id]: profile(ryo, 521, 476, '[료 소개글]'),
   [daeyoung.id]: profile(daeyoung, 389, 412, '[김대영 소개글]'),
 }
 

@@ -860,7 +860,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       )}
 
       {hasSuspicion && (
-        <div className="bg-[#B2C7DA]/90 px-4 pb-2" role="status" aria-label={`��심도 ${suspicion}퍼센트, ${STAGE_LABEL[getStage(suspicion)]}`}>
+        <div className="bg-[#B2C7DA]/90 px-4 pb-2" role="status" aria-label={`의심도 ${suspicion}퍼센트, ${STAGE_LABEL[getStage(suspicion)]}`}>
           <div className="flex items-center justify-between text-[11px] font-medium text-[#3c4a57]">
             <span>의심도 · {STAGE_LABEL[getStage(suspicion)]}</span>
             <span className="tabular-nums">{`${suspicion}%`}</span>
