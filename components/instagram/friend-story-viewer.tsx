@@ -19,6 +19,8 @@ export type FriendStory = {
   /** 여러 장 스토리일 때 순서대로 넘어가는 이미지들 (없으면 image 한 장) */
   images?: { src: string; alt: string }[]
   reply?: StoryReply
+  /** 스토리에 태그(@멘션)된 아이디 */
+  mention?: string
 }
 
 export function FriendStoryViewer({
@@ -75,6 +77,13 @@ export function FriendStoryViewer({
           <div className="absolute inset-x-0 top-[54px] bottom-[86px] overflow-hidden rounded-[12px]">
             <Image key={current.src} src={current.src} alt={current.alt} fill sizes="400px" className="object-cover" />
             <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
+            {shown.mention && (
+              <span className="pointer-events-none absolute left-1/2 top-[64%] -translate-x-1/2 -rotate-[4deg] rounded-[8px] bg-white px-[12px] py-[6px] shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
+                <span className="bg-gradient-to-r from-[#f58529] via-[#dd2a7b] to-[#8134af] bg-clip-text text-[17px] font-extrabold uppercase tracking-tight text-transparent">
+                  {`@${shown.mention}`}
+                </span>
+              </span>
+            )}
 
             {frames.length > 1 && (
               <div className="absolute inset-x-0 top-[60px] bottom-0 flex">

@@ -25,6 +25,7 @@ import {
   shiftTime,
   storiesForDay,
   tilesOf,
+  yushiTagStory,
   type Post,
 } from './instagram-data'
 
@@ -239,7 +240,13 @@ export function InstagramApp({
   hasMyStory = false,
   day = 1,
   workEnded = true,
+  yushiTagged = false,
+  autoOpenStory,
 }: { 
+  /** 4일 차 유우시가 플레이어를 태그한 스토리를 올렸는지 */
+  yushiTagged?: boolean
+  /** 알림을 눌렀을 때 바로 열 스토리 (nonce 가 바뀔 때마다 다시 열림) */
+  autoOpenStory?: { handle: string; nonce: number } | null
   hasMyStory?: boolean
   day?: number
   /** 그날 데이트(업무) 전환이 끝났는지. afterWork 게시물·스토리 노출에 사용 */
@@ -265,7 +272,9 @@ export function InstagramApp({
       time: shiftTime(comment.time, day - (comment.postedDay ?? 1)),
       replies: comment.replies?.map((reply) => ({ ...reply, time: shiftTime(reply.time, day - (reply.postedDay ?? 1)) })),
     }))
-  const todayStories = storiesForDay(day, workEnded)
+  const todayStories = yushiTagged
+    ? [...storiesForDay(day, workEnded), yushiTagStory(ownerHandle)]
+    : storiesForDay(day, workEnded)
   const visible = (post: Post) => isPostVisible(post, day, workEnded)
   const feedPosts = POSTS.filter(visible)
   const profileFor = (handle: string) => {
@@ -339,6 +348,21 @@ export function InstagramApp({
   useEffect(() => {
     setActiveStory(null)
   }, [day])
+
+  const autoStoryNonce = autoOpenStory?.nonce
+  const [openedStoryNonce, setOpenedStoryNonce] = useState<number | null>(null)
+  useEffect(() => {
+    if (!open || !autoOpenStory || openedStoryNonce === autoOpenStory.nonce) return
+    const story = todayStories.find((item) => item.handle === autoOpenStory.handle)?.story
+    if (!story) return
+    setOpenedStoryNonce(autoOpenStory.nonce)
+    setActivePost(null)
+    setActiveProfile(null)
+    setActiveStory(story)
+    const key = `${day}:${autoOpenStory.handle}`
+    setSeenStories((prev) => (prev.includes(key) ? prev : [...prev, key]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, autoStoryNonce])
 
   return (
     <section

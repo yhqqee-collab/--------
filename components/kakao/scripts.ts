@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없���면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없�����면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -1357,6 +1357,94 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   },
 }
 
+/**
+ * 유우시 Day 4 (월): 아침 서운함 달래기 → 공강 카페 데이트 → 스토리 태그 허락 여부(시온 점심 추궁 분기)
+ * → (수업) → 리쿠·시온 대화가 모두 끝난 뒤 밤 리쿠 견제 카톡
+ * 스토리 태그 플래그가 수업 전환 전에 정해져야 시온의 CHECK_YUSHI_STORY 가 읽을 수 있으므로 오전 파트는 preWork
+ */
+const YUSHI_DAY4: Record<string, PhaseNode> = {
+  P1_Morning: {
+    preWork: true,
+    message: '일어났어 ?\n몸은 좀 괜찮아 ?',
+    choices: [
+      { id: 'A', text: '웅 유우시가 걱정해 준 덕분에 다 나았지 ㅎㅎ ❤️', susp: 0, next: 'P1_Sulk1' },
+      { id: 'B', text: '응 어제 약 먹고 기절했더니 이제 살 것 같아 ㅠㅠ', susp: 0, next: 'P1_Sulk1' },
+    ],
+  },
+  P1_Sulk1: {
+    preWork: true,
+    delay: 6,
+    message: '다행이네 ...\n요즘 얼굴 보기 힘들다\n나만 보고 싶어 하는 거 같고',
+    choices: [
+      { id: 'A', text: '무슨 소리야\n나도 엄청 보고 싶어 ㅠㅠ\n오전 공강 때 잠깐 볼래?', susp: -5, next: 'P1_Sulk_Good' },
+      { id: 'B', text: '미안해\n요즘 축제 준비랑 과제 때문에 정신없었어 ㅠㅠ', susp: 5, next: 'P1_Sulk_Bad' },
+    ],
+  },
+  P1_Sulk_Good: {
+    preWork: true,
+    delay: 6,
+    message: '무리 안 해도 되는데 ...\n괜찮으면 잠깐 보자 ㅎㅎ',
+    choices: [{ id: 'A', text: '무리 아니야!!\n얼른 준비해서 나갈게 ❤️', susp: 0, next: 'P1_Date_Popup' }],
+  },
+  P1_Sulk_Bad: {
+    preWork: true,
+    delay: 6,
+    message: '바쁜 거 알지 ...\n그냥 그렇다고\n오전에 잠깐만 만나자',
+    choices: [{ id: 'A', text: '웅 미안해 ㅠㅠ\n11시까지 바로 나갈게!!', susp: 0, next: 'P1_Date_Popup' }],
+  },
+  // 11:00 공강 카페 데이트
+  P1_Date_Popup: {
+    preWork: true,
+    delay: 6,
+    isSystem: true,
+    alert: '카페에서 유우시를 만나 애교를 부리며 달래줬습니다.\n유우시도 금방 기분이 풀려\n사진을 찍으며 오붓한 시간을 보냈습니다.',
+    message: '',
+    choices: [{ id: 'A', text: '(수업을 듣기 위해 헤어졌다)', susp: -5, next: 'P2_Story_Ask' }],
+  },
+  // 헤어진 직후 스토리 태그 딜레마 → 허락 시 시온 P2_Lunch_Story 발동
+  P2_Story_Ask: {
+    preWork: true,
+    delay: 10,
+    message: '수업 잘 들어가고 있어 ?\n아까 카페에서 밀크티 찍었는데\n인스타 스토리 올려도 돼 ?\n너 태그해서 ㅎㅎ',
+    choices: [
+      { id: 'A', text: '웅 당연하지!!', susp: -15, setFlag: FLAG_DAY4_YUSHI_STORY_TAG, next: 'P2_Allow_Story' },
+      { id: 'B', text: '헉 태그하면 애들이 다 보는데 ㅠㅠ', susp: 25, next: 'P2_Deny_Story' },
+    ],
+  },
+  P2_Allow_Story: {
+    preWork: true,
+    delay: 6,
+    message: '응 ㅎㅎ\n수업 잘 듣고\n이따 동방에서 봐',
+    choices: [{ id: 'A', text: '(유우시가 여주를 태그한 밀크티 스토리를 올렸다...!)', susp: 0, next: 'P4_Night_Msg' }],
+  },
+  P2_Deny_Story: {
+    preWork: true,
+    delay: 6,
+    message: '애들이 보면 왜 안 되는데 ?\n어제 시온이 형 인스타엔 댓글도 달았잖아\n알았어\n안 올릴게',
+    choices: [{ id: 'A', text: '미안...', susp: 0, next: 'P4_Night_Msg' }],
+  },
+  // 22:00 귀가 후 (동방 작업 팝업은 리쿠 Day 4 P4_Club_Work 가 띄움 → 리쿠·시온 대화가 끝난 뒤 도착)
+  P4_Night_Msg: {
+    waitOthers: true,
+    delay: 16,
+    message: '집 잘 들어갔어 ?\n오늘 고생했네 ~~\n근데 아까 동방에서 리쿠랑 무슨 얘기 했어?\n둘이 계속 웃던데',
+    choices: [
+      { id: 'A', text: '에이 그냥 동방 얘기지 ㅋㅋ\n난 작업 내내 유우시 얼굴만 봤구만 ❤️', susp: -10, next: 'P4_Night_Good' },
+      { id: 'B', text: '다른 애들도 다 같이 있었는데 뭘 ㅠㅠ\n그냥 장난친 거야!', susp: 10, next: 'P4_Night_Bad' },
+    ],
+  },
+  P4_Night_Good: {
+    delay: 6,
+    message: '거짓말\n그래도 기분은 좋네ㅎㅎ\n내일 축제 때 보자\n잘 자 ❤️',
+    choices: [{ id: 'A', text: '웅 유우시도 잘 자 ❤️', susp: 0, next: 'end' }],
+  },
+  P4_Night_Bad: {
+    delay: 6,
+    message: '그냥 장난친 거 치고는 너무 좋아하던데\n알겠어\n피곤할 텐데 쉬어',
+    choices: [{ id: 'A', text: '(아차... 괜히 변명만 한 꼴이 됐네 ㅠㅠ)', susp: 0, next: 'end' }],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -1381,6 +1469,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
   4: {
     a: fromPhases('P1_Morning', SION_DAY4, SAMPLE_TIMING.a),
     b: fromPhases('P1_Morning', RIKU_DAY4, SAMPLE_TIMING.b),
+    c: fromPhases('P1_Morning', YUSHI_DAY4, SAMPLE_TIMING.c),
   },
   5: sampleDay(),
   6: sampleDay(),
@@ -1479,7 +1568,7 @@ const STAFF_DAY2: GroupScript = {
     {
       holdNodes: { a: 'Branch_Group', b: 'Branch_Group' },
       messages: [
-        gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누자 ㅋㅋ'),
+        gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누�� ㅋㅋ'),
         gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 올게'),
         gl(G_RIKU, '나는 다이소 가서 앞치마랑 데코 소품 사 올게! 가까우니까 걸어갈 거야 ㅎㅎ'),
         gl(G_DAEYOUNG, '여주는 어디 따라갈래?'),
@@ -1495,7 +1584,7 @@ const STAFF_DAY2: GroupScript = {
           id: 'sion',
           text: '나는 시온이랑 이마트 갈게!',
           setFlag: FLAG_SHOP_SION,
-          reply: [gl(G_SION, 'ㅋㅋ 오키 2시에 정문 앞으로 차 끌고 갈게'), gl(G_SAKUYA, '그럼 다이소는 제가 리쿠 형이랑 갈게여')],
+          reply: [gl(G_SION, 'ㅋㅋ 오키 2시에 정문 앞으로 차 끌고 갈게'), gl(G_SAKUYA, '그럼 다이소는 제가 리쿠 형��랑 갈게여')],
         },
       ],
     },

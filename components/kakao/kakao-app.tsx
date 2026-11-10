@@ -60,11 +60,14 @@ type KakaoAppProps = {
   onDaySnapshot?: (snapshot: DaySnapshot) => void
   /** 단톡방 단계 사이의 시간 경과 팝업을 띄우고, 닫히면 done 을 호출합니다 */
   onInterlude?: (text: string, done: () => void) => void
+  onFlag?: (flag: string) => void
 }
 
-export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, onBusted, onDayComplete, onSpamStart, onSpam, clockStarted = false, workEnded = false, onPreWorkDone, day = 1, snapshot, onDaySnapshot, onInterlude }: KakaoAppProps) {
+export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, onBusted, onDayComplete, onSpamStart, onSpam, clockStarted = false, workEnded = false, onPreWorkDone, day = 1, snapshot, onDaySnapshot, onInterlude, onFlag }: KakaoAppProps) {
   const interludeCallbackRef = useRef(onInterlude)
   interludeCallbackRef.current = onInterlude
+  const flagCallbackRef = useRef(onFlag)
+  flagCallbackRef.current = onFlag
   const interludeShownRef = useRef(new Set<number>())
   const [resume] = useState(() => (snapshot ? cloneSnapshot(snapshot) : null))
   const completedPreWorkRef = useRef(new Set<string>())
@@ -400,6 +403,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
               onReply={() => markReplied(chat.id)}
               onCrossMessage={handleCrossMessage}
+              onFlag={(flag) => flagCallbackRef.current?.(flag)}
               onInterlude={(text, done) => (interludeCallbackRef.current ? interludeCallbackRef.current(text, done) : done())}
             />
           </div>

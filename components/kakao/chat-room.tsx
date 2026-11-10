@@ -84,6 +84,8 @@ type ChatRoomProps = {
   onReply?: () => void
   onCrossMessage?: (message: CrossMessage) => void
   onInterlude?: (text: string, done: () => void) => void
+  /** 선택지가 setFlag 를 켰을 때 (폰 전체 연출용) */
+  onFlag?: (flag: string) => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -129,7 +131,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage, onInterlude }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage, onInterlude, onFlag }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -480,7 +482,10 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (groupPicked !== null) return
     setGroupPicked(index)
     setNewBadge(false)
-    if (choice.setFlag) flags?.add(choice.setFlag)
+    if (choice.setFlag) {
+      flags?.add(choice.setFlag)
+      onFlag?.(choice.setFlag)
+    }
     const text = personalizeText(choice.text, owner)
     setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time: nowLabel() }])
     onSent(text)
@@ -619,7 +624,10 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (waitingRef.current) return
     waitingRef.current = true
     latest.current.onReply?.()
-    if (choice.setFlag) flags?.add(choice.setFlag)
+    if (choice.setFlag) {
+      flags?.add(choice.setFlag)
+      onFlag?.(choice.setFlag)
+    }
     if (choice.crossMessage) latest.current.onCrossMessage?.(choice.crossMessage)
     const deferBranch = Boolean(choice.next && choice.next === holdNodeRef.current && script?.nodes[choice.next]?.branch)
     const nextId = script && !deferBranch ? resolveNode(script, choice.next, activeFlags) : choice.next

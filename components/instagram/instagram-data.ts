@@ -109,6 +109,16 @@ STORIES_BY_DAY[3] = [
   },
 ]
 
+/** 4일 차: 유우시 스토리 태그를 허락하면 5초 뒤 올라오는 밀크티 스토리 (플레이어 아이디 멘션) */
+export const YUSHI_ID = yushi.id
+
+export function yushiTagStory(ownerHandle: string): StoryItem {
+  const item = story(yushi, '방금', {
+    image: { src: '/stories/yushi-day4-milktea.jpg', alt: '카페 대리석 테이블 위 꽃무늬 잔에 담긴 밀크티' },
+  })
+  return { ...item, story: { ...item.story, mention: ownerHandle } }
+}
+
 /** 1일차 기준 상대 시간("2시간 전", "1일 전", "1주")을 경과 일수만큼 뒤로 민 표기로 바꿉니다. */
 export function shiftTime(time: string, elapsedDays: number): string {
   if (elapsedDays <= 0) return time
@@ -201,7 +211,7 @@ export const POSTS: Post[] = [
       { src: '/posts/daeyoung-3.jpg', alt: '빈백에 기대 앉아 휴대폰을 들고 웃는 대영' },
       { src: '/posts/daeyoung-4.jpg', alt: '아이패드로 영상통화하며 손을 흔드는 대영의 뒷모습' },
     ],
-    caption: '다음 학기에는 금공강 하자 제발...',
+    caption: '다음 학기에는 금공강 하��� 제발...',
     likes: 276,
     likedBy: [sion.id, riku.id],
     comments: [],
