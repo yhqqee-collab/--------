@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없�����면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없�������면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -962,7 +962,7 @@ const SION_DAY3: Record<string, PhaseNode> = {
     message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산공원에서 논 거랑\n역에서 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
     choices: [{ id: 'A', text: '오키ㅣㅣ', susp: 0, next: 'P3_Evening' }],
   },
-  // 인스타 댓글 → 유우시 카톡이 도착한 뒤 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
+  // 인���타 댓글 → 유우시 카톡이 도착한 뒤 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
   P3_Evening: {
     delay: 30,
     message: '오늘 진짜 재밌었어 ㅋㅋ 피곤할 텐데 얼른 들어가서 쉬어!\n도착하면 톡 하고❤️',
@@ -1352,7 +1352,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Bad: {
     delay: 6,
-    message: '어떻게 신경을 안 써...\n나 진짜 질투 난단 말이야...ㅠ',
+    message: '어떻게 신���을 안 써...\n나 진짜 질투 난단 말이야...ㅠ',
     choices: [{ id: 'A', text: '(조금 더 다정하게 말해줄걸 그랬나 보다...)', susp: 0, next: 'end' }],
   },
 }
@@ -1476,7 +1476,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
   7: sampleDay(),
 }
 
-/* ───────────── 단톡방 이벤트 ───────────── */
+/* ───────���───── 단톡방 이벤트 ───────────── */
 
 export type GroupLine = { sender: string; text: string; delayMs: number }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
@@ -1491,7 +1491,7 @@ export type GroupScript = {
   choices: GroupChoice[]
   /**
    * 지정하면 messages 대신 단계별로 진행합니다.
-   * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시작되고,
+   * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시��되고,
    * 해당 노드의 카톡은 그 단계의 단톡방 대화가 끝난 뒤에 도착합니다.
    */
   stages?: GroupStage[]
@@ -1605,11 +1605,49 @@ const STAFF_DAY3: GroupScript = {
   ],
 }
 
+const gl2 = (sender: string, text: string): GroupLine => ({ sender, text, delayMs: 2000 })
+
+/** Day 4 단톡방: 17:40 동방 모이기 직전 저녁 메뉴 투표 (리쿠의 18:00 동방 작업 팝업 직전에 진행) */
+const STAFF_DAY4: GroupScript = {
+  startDelayMs: 3000,
+  messages: [],
+  choices: [],
+  stages: [
+    {
+      holdNodes: { b: 'P4_Club_Work' },
+      messages: [
+        gl(G_SAKUYA, '저 너무 배고파여...'),
+        gl2(G_RYO, '좀만 참아 어차피 다 같이 저녁 시켜 먹을 거잖아 ㅋㅋㅋ'),
+        gl2(G_DAEYOUNG, '깔끔하게 치킨이나 피자 어때'),
+        gl2(G_RIKU, '오 치킨 조타!!'),
+        gl2(G_SION, '내가 가는 길에 콜라 큰 거 사 갈게 ㅋㅋ 여주는 뭐 먹고 싶어?'),
+      ],
+      choices: [
+        {
+          id: 'A',
+          text: '나도 치킨 완전 찬성!!',
+          reply: [
+            gl2(G_YUSHI, '그럼 치킨 시키자 내가 배민으로 주문 넣어둘게'),
+            gl2(G_SAKUYA, '오 치킨이면 인정이지 ㅎㅎ 사이드로 치즈볼도 추가해 주세용'),
+            gl2(G_RYO, 'ㅋㅋㅋㅋ 돼지야'),
+          ],
+        },
+      ],
+    },
+    {
+      holdNodes: { b: 'P4_Club_Work' },
+      messages: [],
+      choices: [{ id: 'A', text: 'ㅋㅋㅋㅋ 얼른 갈게 이따 동방에서 봐!!', reply: [] }],
+    },
+  ],
+}
+
 /** 일차별 단톡방 이벤트 (키는 채팅방 id — chat-data.ts 의 단톡방 id 와 일치해야 함) */
 const DAY_GROUP_SCRIPTS: Record<number, Record<string, GroupScript>> = {
   1: { staff: STAFF_DAY1 },
   2: { staff: STAFF_DAY2 },
   3: { staff: STAFF_DAY3 },
+  4: { staff: STAFF_DAY4 },
   6: { staff: { startDelayMs: 5000, messages: [gl(GROUP_SENDER, '[단톡방 대사를 입력하세요]')], choices: [] } },
 }
 
