@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없으면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없���면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -1112,6 +1112,117 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
 export const FLAG_DAY4_SION_ACCEPT = 'day4-sion-accept'
 /** Day 4: 리쿠·시온의 16:40 카톡 답장을 모두 받은 뒤 분기 판정 */
 export const SYNC_DAY4_CLASS = 'day4-class'
+/** Day 4: 리쿠 16:40 카톡에서 고른 답 (A: 1층 로비, B: 3층 문 앞, C: 동방 핑계 → 플래그 없음) */
+export const FLAG_DAY4_RIKU_A = 'day4-riku-a'
+export const FLAG_DAY4_RIKU_B = 'day4-riku-b'
+/** Day 4: 유우시 인스타 스토리 태그를 허락하면 켜짐 (유우시 Day 4 / 인스타에서 setFlag 예정) */
+export const FLAG_DAY4_YUSHI_STORY_TAG = 'day4-yushi-story-tag'
+
+/** 시온 Day 4 (월): 아침 안부 → (유우시 스토리 태그 시 점심 추궁) → 16:40 동방 같이 가자 → 리쿠 선택과 조합해 분기 → 종료 */
+const SION_DAY4: Record<string, PhaseNode> = {
+  P1_Morning: {
+    preWork: true,
+    message: '여주야 잘 잤어? ㅎㅎ\n오늘 월요일이라 피곤하겠다 ㅠㅠ\n이따 수업 때 보겠네 ㅎㅎ',
+    choices: [
+      { id: 'A', text: '웅!! 옆자리 맡아놔 ㅋㅋ', susp: 0, next: 'P1_Morning_End' },
+      { id: 'B', text: '월요병 살려줘 ㅠㅠ', susp: 0, next: 'P1_Morning_End' },
+    ],
+  },
+  P1_Morning_End: {
+    preWork: true,
+    delay: 6,
+    message: 'ㅋㅋㅋㅋㅋㅋ\n천천히 와 ❤️',
+    // 이 답장 후 수업 전환 팝업 (WORK_TRANSITION_TEXTS[4])
+    choices: [{ id: 'A', text: '이따 보자 ㅎㅎ', susp: 0, next: 'CHECK_YUSHI_STORY' }],
+  },
+  CHECK_YUSHI_STORY: {
+    delay: 5,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY4_YUSHI_STORY_TAG], to: 'P2_Lunch_Story' },
+      { none: [FLAG_DAY4_YUSHI_STORY_TAG], to: 'P3_Class_Start' },
+    ],
+  },
+  // 13:10 유우시 인스타 스토리 태그를 허락했을 때만
+  P2_Lunch_Story: {
+    delay: 10,
+    message: '여주야\n방금 유우시 스토리 봤는데\n오전에 유우시랑 카페 갔었어?',
+    choices: [{ id: 'A', text: '아 전공책 빌린다고 잠깐 본 거야 ㅠㅠ', susp: 10, next: 'P2_Lunch_Res' }],
+  },
+  P2_Lunch_Res: {
+    delay: 6,
+    message: '아 그래?\n유우시는 친구 없대? ㅎㅎ\n왜 너한테 빌리지',
+    choices: [{ id: 'A', text: '(아차... 시온이 말에 뼈가 있다 ㅠㅠ)', susp: 0, next: 'P3_Class_Start' }],
+  },
+  // 16:40 소행론 수업 마치기 10분 전 (리쿠 카톡과 동시에 도착)
+  P3_Class_Start: {
+    delay: 5,
+    nextCheckGlobal: SYNC_DAY4_CLASS,
+    message: '오늘따라 수업 너무 지루하네 ㅠㅠ\n수업 끝나고 동방 바로 갈 거지?\n커피 사서 같이 가자 ㅎㅎ',
+    choices: [
+      { id: 'A', text: '웅 좋아~~', susp: 0, setFlag: FLAG_DAY4_SION_ACCEPT, next: 'P3_Accept_Sion' },
+      { id: 'B', text: '헉\n친구가 잠깐 로비에서 보자고 해서...', susp: 0, next: 'P3_Reject_Sion' },
+    ],
+  },
+  P3_Accept_Sion: {
+    delay: 6,
+    message: '오키 ㅎㅎ 끝나고 같이 나가자!',
+    choices: [{ id: 'A', text: '(수업이 끝났다)', susp: 0, next: 'RESOLVE_AFTER_ACCEPT_SION' }],
+  },
+  P3_Reject_Sion: {
+    delay: 6,
+    message: '아 그래?\n알겠어~\n이따 동방에서 봐!',
+    choices: [{ id: 'A', text: '(수업이 끝났다)', susp: 0, next: 'RESOLVE_AFTER_REJECT_SION' }],
+  },
+  // 충돌 팝업·시온 의심도(-10 / +30)는 리쿠 Day 4 스크립트에서 처리 → 여기선 중복 팝업 없이 마무리
+  RESOLVE_AFTER_ACCEPT_SION: {
+    delay: 6,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY4_RIKU_A], to: 'P3_Accept_Clash_A' },
+      { all: [FLAG_DAY4_RIKU_B], to: 'P3_Safe_B' },
+      { none: [FLAG_DAY4_RIKU_A, FLAG_DAY4_RIKU_B], to: null },
+    ],
+  },
+  RESOLVE_AFTER_REJECT_SION: {
+    delay: 6,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY4_RIKU_A], to: 'P3_Susp_A' },
+      { all: [FLAG_DAY4_RIKU_B], to: 'P3_Reject_Odd_B' },
+      { none: [FLAG_DAY4_RIKU_A, FLAG_DAY4_RIKU_B], to: null },
+    ],
+  },
+  // 승낙 + 리쿠 B (복도 마주침)
+  P3_Safe_B: {
+    message: '',
+    choices: [{ id: 'A', text: '(동아리방으로 이동하자)', susp: 0, next: 'end' }],
+  },
+  // 승낙 + 리쿠 A (1층 로비 정면충돌)
+  P3_Accept_Clash_A: {
+    message: '',
+    choices: [{ id: 'A', text: '(동아리방으로 이동하자)', susp: 0, next: 'end' }],
+  },
+  // 거절 + 리쿠 B (3층 문 앞 목격)
+  P3_Reject_Odd_B: {
+    message: '',
+    choices: [{ id: 'A', text: '(시온이 눈빛이 너무 무섭다...)', susp: 0, next: 'end' }],
+  },
+  // 거절 + 리쿠 A (17:05 로비 목격 추궁)
+  P3_Susp_A: {
+    delay: 20,
+    message: '친구 만난다더니\n친구가 리쿠였어?\n말을 하지',
+    choices: [{ id: 'A', text: '아 내려가다가 우연히 마주쳐서 인사만 한 거야 ㅠㅠ', susp: 20, next: 'P3_Res_A' }],
+  },
+  P3_Res_A: {
+    delay: 6,
+    message: '우연히 마주쳤는데\n커피는 어디서 났을까 ㅎㅎ\n이따 동아리방에서 봐',
+    choices: [{ id: 'A', text: '(시온이가 다 봤나 보다... 이따 동방 가기 무섭네 ㅠㅠ)', susp: 0, next: 'end' }],
+  },
+}
 
 /** 리쿠 Day 4 (월): 아침 인사 → (수업) → 16:40 경영관 방문 → 시온 선택에 따라 분기 → 동방 작업 후 밤 카톡 */
 const RIKU_DAY4: Record<string, PhaseNode> = {
@@ -1130,14 +1241,14 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     // 이 답장 후 수업 전환 팝업 (WORK_TRANSITION_TEXTS[4])
     choices: [{ id: 'A', text: '웅 이따 봐!! ㅎㅎ', susp: 0, next: 'P3_Class_Visit' }],
   },
-  // 16:40 소행론 수업 마치기 10분 전 (시온 카톡과 동시에 도착)
+  // 16:40 소행론 수업 마치기 10분 전 (시��� 카톡과 동시에 도착)
   P3_Class_Visit: {
     delay: 5,
     nextCheckGlobal: SYNC_DAY4_CLASS,
     message: '여주야 나 오늘 수업 일찍 마쳣어 ㅎㅎ\n여주 보고 시퍼서 바닐라라떼 사 들고 경영관 3층 올라가는 중!!\n소행론 강의실 앞이징?? ❤️',
     choices: [
-      { id: 'A', text: '헐 3층 오지 마!!\n사람 너무 많아 ㅠㅠ\n1층 로비에 있으면 내가 내려갈게', susp: 0, next: 'CHECK_SION_FOR_RIKU_A' },
-      { id: 'B', text: '헉 지금 올라오는 중이야?!\n알겠어 문 앞에서 보장', susp: 0, next: 'CHECK_SION_FOR_RIKU_B' },
+      { id: 'A', text: '헐 3층 오지 마!!\n사람 너무 많아 ㅠㅠ\n1층 로비에 있으면 내가 내려갈게', susp: 0, setFlag: FLAG_DAY4_RIKU_A, next: 'CHECK_SION_FOR_RIKU_A' },
+      { id: 'B', text: '헉 지금 올라오는 중이야?!\n알겠어 문 앞에서 보장', susp: 0, setFlag: FLAG_DAY4_RIKU_B, next: 'CHECK_SION_FOR_RIKU_B' },
       { id: 'C', text: '나 동방 바로 가야할 것 같은데...ㅠ', susp: -5, next: 'P3_Route_C_Clear' },
     ],
   },
@@ -1268,6 +1379,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     c: fromPhases('P1_Morning', YUSHI_DAY3, SAMPLE_TIMING.c),
   },
   4: {
+    a: fromPhases('P1_Morning', SION_DAY4, SAMPLE_TIMING.a),
     b: fromPhases('P1_Morning', RIKU_DAY4, SAMPLE_TIMING.b),
   },
   5: sampleDay(),
@@ -1304,7 +1416,7 @@ export type GroupStage = {
   /** 지정하면 이 단계가 시작되기 직전에 화면 전체 안내 팝업을 띄웁니다 (시간 경과 연출) */
   interlude?: string
   messages: GroupLine[]
-  /** 지정하면 메시지 후 플레이어가 고르고, 반응이 끝난 뒤에 대기 중인 카톡이 이어집니다. */
+  /** 지정하면 메시지 후 플레이어가 고르고, 반응이 끝��� 뒤에 대기 중인 카톡이 이어집니다. */
   choices?: GroupChoice[]
 }
 
@@ -1485,7 +1597,7 @@ const spam = (senderId: 'a' | 'b' | 'c', texts: string[]): SpamNotification[] =>
 export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
   ...spam('a', [
     '여주야',
-    '나 말고 딴 새끼 만나지? ㅋㅋ',
+    '나 말고 딴 새끼 만나���? ㅋㅋ',
     '어쩐지 요즘 연락도 그렇고 앞뒤가 하나도 안 맞더라',
     '나 두고 바람피우니까 재밌어?',
     '사람 하나 제대로 병신 만들었네',
@@ -1508,7 +1620,7 @@ export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
   ]),
 ]
 
-/** 심도 100을 찍은 캐릭터부터 순서대로 폭격 일정(시작 정적 이후 기준 ms)을 계산 */
+/** 심도 100을 찍은 캐릭터부터 순서대로 ��격 일정(시작 정적 이후 기준 ms)을 계산 */
 export function buildSpamSchedule(bustedId: string) {
   const order = ['a', 'b', 'c'].sort((x, y) => (x === bustedId ? -1 : y === bustedId ? 1 : 0))
   const schedule: { item: SpamNotification; at: number }[] = []
