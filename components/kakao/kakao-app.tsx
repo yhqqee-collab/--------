@@ -400,6 +400,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
               onReply={() => markReplied(chat.id)}
               onCrossMessage={handleCrossMessage}
+              onInterlude={(text, done) => (interludeCallbackRef.current ? interludeCallbackRef.current(text, done) : done())}
             />
           </div>
         )

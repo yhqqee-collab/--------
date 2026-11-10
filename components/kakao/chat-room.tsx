@@ -9,7 +9,7 @@ import { PERSON_AVATARS } from '@/lib/template-config'
 import { Avatar } from './avatar'
 import type { Chat, ChatItem } from './chat-data'
 import { personalizeText } from './replies'
-import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type CrossMessage, type GroupChoice, type GroupLine } from './scripts'
+import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isActionText, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type CrossMessage, type GroupChoice, type GroupLine } from './scripts'
 import { getStage, STAGE_LABEL, type SuspicionStage } from './suspicion'
 import { SuspicionAlert } from './suspicion-alert'
 
@@ -32,6 +32,7 @@ type Batch = {
   dateLabel?: string
   gameOver?: boolean
   gameOverAlert?: string
+  interludeShown?: boolean
 }
 
 const NO_SYNCS: ReadonlySet<string> = new Set()
@@ -82,6 +83,7 @@ type ChatRoomProps = {
   gatedStartMs?: number
   onReply?: () => void
   onCrossMessage?: (message: CrossMessage) => void
+  onInterlude?: (text: string, done: () => void) => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -127,7 +129,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage, onInterlude }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -181,8 +183,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const pendingNodeRef = useRef<string | null>(null)
 
   const scriptDoneRef = useRef(false)
-  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage })
-  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage }
+  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude })
+  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude }
 
   const hasSuspicion = suspicion !== undefined
   const items: ChatItem[] = [...chat.items, ...added]
@@ -320,6 +322,16 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (batch.enterNode && batch.enterNode === holdNodeRef.current) {
       heldBatchRef.current = { batch, remainingMs: Math.max(0, batch.dueAt - Date.now()) }
       heldCallbackRef.current?.(batch.enterNode)
+      return
+    }
+    const interlude = batch.enterNode && !batch.interludeShown ? script?.nodes[batch.enterNode]?.interlude : undefined
+    if (interlude) {
+      schedule(Math.max(0, batch.dueAt - Date.now()), () => {
+        const resume = () => enqueue({ ...batch, interludeShown: true, dueAt: Date.now() + 400 })
+        const show = latest.current.onInterlude
+        if (show) show(interlude, resume)
+        else resume()
+      })
       return
     }
     queueRef.current.push(batch)
@@ -617,6 +629,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     let sendOffset = 0
     says.forEach((text, i) => {
       const send = () => {
+        if (isActionText(text)) return
         setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time }])
         if (i === says.length - 1) onSent(text)
       }
