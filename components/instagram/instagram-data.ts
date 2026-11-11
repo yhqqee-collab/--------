@@ -314,12 +314,12 @@ export function postsOf(handle: string): Post[] {
 }
 
 export const PROFILES: Record<string, UserProfileData> = {
-  [sion.id]: profile(sion, 612, 298, '[오시온 소개글]'),
-  [riku.id]: profile(riku, 1203, 341, '[리쿠 소개글]'),
-  [yushi.id]: profile(yushi, 845, 402, '[유우시 소개글]'),
-  [sakuya.id]: profile(sakuya, 730, 388, '[사쿠야 소개글]'),
-  [ryo.id]: profile(ryo, 521, 476, '[료 소개글]'),
-  [daeyoung.id]: profile(daeyoung, 389, 412, '[김대영 소개글]'),
+  [sion.id]: profile(sion, 612, 298, ''),
+  [riku.id]: profile(riku, 1203, 341, ''),
+  [yushi.id]: profile(yushi, 845, 402, ''),
+  [sakuya.id]: profile(sakuya, 730, 388, ''),
+  [ryo.id]: profile(ryo, 521, 476, ''),
+  [daeyoung.id]: profile(daeyoung, 389, 412, ''),
 }
 
 /**
