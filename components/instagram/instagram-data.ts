@@ -243,6 +243,19 @@ export const POSTS: Post[] = [
     comments: [],
   },
   {
+    id: 'sion-boat-post',
+    handle: sion.id,
+    avatar: avatarOf(sion),
+    time: '4일 전',
+    images: [
+      { src: '/posts/sion-feed-boat.jpg', alt: '선글라스를 머리에 얹고 보트 위에서 셀카를 찍는 시온, 뒤로 노을빛 물결' },
+    ],
+    caption: 'ㅎㅎ',
+    likes: 503,
+    likedBy: [riku.id, yushi.id],
+    comments: [],
+  },
+  {
     id: 'sample-post-a',
     handle: sion.id,
     avatar: avatarOf(sion),
