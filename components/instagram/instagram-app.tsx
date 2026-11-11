@@ -272,9 +272,10 @@ export function InstagramApp({
       time: shiftTime(comment.time, day - (comment.postedDay ?? 1)),
       replies: comment.replies?.map((reply) => ({ ...reply, time: shiftTime(reply.time, day - (reply.postedDay ?? 1)) })),
     }))
-  const todayStories = yushiTagged
-    ? [...storiesForDay(day, workEnded), yushiTagStory(ownerHandle)]
-    : storiesForDay(day, workEnded)
+  const dayStories = storiesForDay(day, workEnded).map((item) =>
+    item.mentionOwner && item.story ? { ...item, story: { ...item.story, mention: ownerHandle } } : item,
+  )
+  const todayStories = yushiTagged ? [...dayStories, yushiTagStory(ownerHandle)] : dayStories
   const visible = (post: Post) => isPostVisible(post, day, workEnded)
   const feedPosts = POSTS.filter(visible)
   const profileFor = (handle: string) => {

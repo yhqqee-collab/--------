@@ -157,13 +157,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const finishDayIntro = useCallback(() => {
     setIntroDoneDay(currentDay)
     if (WORK_FIRST_DAYS.has(currentDay)) setWorkPhase('working')
-    if (currentDay === DAEYOUNG_TAG_DAY) {
-      window.setTimeout(
-        () => showTagNotice(DAEYOUNG_ID, `@${DAEYOUNG_ID}님이 스토리에 회원님을 태그했습니다.`),
-        DAEYOUNG_TAG_DELAY_MS,
-      )
-    }
-  }, [currentDay, showTagNotice])
+  }, [currentDay])
   const handleDayComplete = useCallback(
     (suspicion: Record<string, number>) => {
       if (currentDay === FINAL_DAY) {
@@ -207,7 +201,14 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const handleWorkDone = useCallback(() => {
     setWorkPhase('after')
     if (currentDay === 1) setMyStoryDay(currentDay)
-  }, [currentDay])
+    // 대영 국밥집 스토리는 afterWork 라서 전환이 끝난 뒤에 태그 알림을 띄움
+    if (currentDay === DAEYOUNG_TAG_DAY) {
+      window.setTimeout(
+        () => showTagNotice(DAEYOUNG_ID, `@${DAEYOUNG_ID}님이 스토리에 회원님을 태그했습니다.`),
+        DAEYOUNG_TAG_DELAY_MS,
+      )
+    }
+  }, [currentDay, showTagNotice])
 
   const [yushiTagDay, setYushiTagDay] = useState<number | null>(null)
   const [autoOpenStory, setAutoOpenStory] = useState<{ handle: string; nonce: number } | null>(null)

@@ -49,7 +49,8 @@ export const COMMENT_AVATARS: Record<string, string> = Object.fromEntries(
 )
 
 function profile(person: { id: string; name: string }, followers: number, following: number, bio: string): UserProfileData {
-  const posts = postsOf(person.id)
+  // 일차 지정 게시물은 앱에서 isPostVisible 로 걸러 붙이므로 기본 격자에는 넣지 않음 (스포일러 방지)
+  const posts = postsOf(person.id).filter((post) => !post.day)
   return {
     handle: person.id,
     name: person.name,
@@ -83,8 +84,11 @@ function story(
   }
 }
 
-/** afterWork: 그날 데이트(업무) 전환이 끝난 뒤에만 보이는 스토리 */
-export type StoryItem = { handle: string; src: string; story?: FriendStory; afterWork?: boolean }
+/**
+ * afterWork: 그날 데이트(업무) 전환이 끝난 뒤에만 보이는 스토리
+ * mentionOwner: 플레이어 아이디를 스토리에 멘션 (화면에서 입력한 아이디로 치환)
+ */
+export type StoryItem = { handle: string; src: string; story?: FriendStory; afterWork?: boolean; mentionOwner?: boolean }
 
 /**
  * 날짜별 스토리. 스토리는 매일 초기화되며, 해당 날짜에 목록에 없는 사람은 스토리 링이 표시되지 않습니다.
@@ -113,12 +117,16 @@ STORIES_BY_DAY[3] = [
 export const DAEYOUNG_ID = daeyoung.id
 export const DAEYOUNG_TAG_DAY = 5
 STORIES_BY_DAY[DAEYOUNG_TAG_DAY] = [
-  story(daeyoung, '1시간', {
-    images: [
-      { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집에서 숟가락을 문 채 정면을 보는 대영, "여주 누나가 찍어줌" 문구' },
-      { src: '/stories/daeyoung-day5-2.jpg', alt: '국밥집 메뉴판 아래에서 숟가락을 물고 옆을 보는 대영' },
-    ],
-  }),
+  {
+    ...story(daeyoung, '1시간', {
+      images: [
+        { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집에서 숟가락을 문 채 정면을 보는 대영, "여주 누나가 찍어줌" 문구' },
+        { src: '/stories/daeyoung-day5-2.jpg', alt: '국밥집 메뉴판 아래에서 숟가락을 물고 옆을 보는 대영' },
+      ],
+    }),
+    afterWork: true,
+    mentionOwner: true,
+  },
 ]
 
 /** 4일 차: 유우시 스토리 태그를 허락하면 5초 뒤 올라오는 밀크티 스토리 (플레이어 아이디 멘션) */

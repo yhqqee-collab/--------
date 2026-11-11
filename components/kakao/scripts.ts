@@ -12,8 +12,8 @@ const WORK_TRANSITION_TEXTS: Record<number, string> = {
   1: '⏳ [<영화와 현대사회> 수업 듣는 중...] (10:30 ~ 12:00) ⏳',
   2: '⏳ [오후 장보기 및 동방 짐 정리 진행 중...] (14:30 ~ 21:30) ⏳',
   3: '⏳ [시온과 용산공원에서 피크닉 데이트 중...] (13:00 ~ 17:00) ⏳',
-  4: '⏳ [월요일 수업 듣는 중...] (10:30 ~ 16:40) ⏳',
-  5: '⏳ [축제 첫날 주점 부스 세팅 중...] (12:00 ~ 15:00) ⏳',
+  4: '⏳ [월요일 수업 듣는 중...] (13:00 ~ 16:40) ⏳',
+  5: '⏳ [점심 식사 후 주점 부스 세팅 중...] (12:30 ~ 15:10) ⏳',
   6: '⏳ [6일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   7: '⏳ [7일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
 }
@@ -472,7 +472,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     choices: [{ id: 'A', text: '웅 리쿠도 수업 잘 들어!', susp: 0, next: 'P4_Start' }],
   },
   P2_Safe1: {
-    message: '여주랑 점심 먹으니까 넘 행복하당 ㅎㅎ\n일요일에 내 후드티 빌려간 거\n다음에 입고 왕 ㅎㅎ',
+    message: '여주랑 점심 먹으니까 넘 행복하당 ㅎㅎ\n일요일에 내 후드집업 빌려간 거\n다음에 입고 왕 ㅎㅎ',
     choices: [{ id: 'A', text: '웅 담에 입고 갈게 ㅎㅎ', susp: 0, next: 'P4_Start' }],
   },
   P2_Safe2_B: {
@@ -612,7 +612,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   P5_Start: {
     delay: 30,
     message:
-      '오늘 사람들 많아서 얼굴만 보고 얘기도 제대로 못 했네\n아까 동방 앞에서 몰래 손잡은 거 설렜어 ㅎㅎ\n집 들어가기 전에 우리 집 잠깐 들렀다 갈래 ?',
+      '오늘 사람들 많아서 얼굴만 보고 얘기도 제대로 못 했네\n아까 동방 앞에서 몰래 손잡은 거 설렜어 ㅎㅎ\n집 들어가기 전에 우리 ��� 잠깐 들렀다 갈래 ?',
     choices: [
       {
         id: 'A',
@@ -757,7 +757,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
         id: 'B',
         text: '앗 나 방금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
         susp: 5,
-        reply: '벌써 누웠어? / 알겠어 푹 쉬어',
+        reply: '벌�� 누웠어? / 알겠어 푹 쉬어',
         next: 'P4_Goodnight_Reject',
       },
     ],
@@ -781,7 +781,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
   },
   P4_Goodnight_Meet: {
     delay: 40,
-    message: '오늘 잠깐이라도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
+    message: '오늘 잠깐이��도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
     choices: [{ id: 'A', text: '나두 잠깐 얼굴 보니까 좋더라 ㅋㅋ 잘 자!', susp: 0, reply: '응 내일 봐 ㅎㅎ', next: 'end' }],
   },
   P4_Goodnight_Reject: {
@@ -1486,7 +1486,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
     choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
   },
-  // 쇼핑 플래그가 없으면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
+  // 쇼핑 플래그가 없으면(입고 감 / 리쿠 스크립�� 미작성) 입고 온 루트
   CHECK_RIKU_HOODIE: {
     delay: 5,
     message: '',
@@ -1586,7 +1586,7 @@ export const FLAG_DAY5_RIKU_VISIT = 'day5-riku-visit'
 const RIKU_DAY5: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
-    message: '여주야 일어낫어?? ㅎㅎ\n오늘 바람 좀 불던데\n저번에 여주 집에 두고 간 후드집업\n오늘 입고 오면 안 돼?? ㅎㅎ\n여주가 입은 거 보고 시퍼 ❤️',
+    message: '여주야 일어낫어?? ㅎㅎ\n오늘 바람 좀 불던데\n저번에 빌려준 내 후드집업\n오늘 입고 오면 안 돼?? ㅎㅎ\n여주가 입은 거 보고 시퍼 ❤️',
     choices: [
       { id: 'A', text: '웅 알겠어\n리쿠 옷 입고 나갈게 ㅎㅎ ❤️', susp: -15, setFlag: FLAG_DAY5_RIKU_HOODIE_WEAR, next: 'P1_Wear_Yes' },
       {
@@ -1778,7 +1778,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 
 /* ──────────── 단톡방 이벤트 ───────────── */
 
-/** unread: 말풍선 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이전 말풍선 숫자도 함께 줄어듭니다 (읽음 연출) */
+/** unread: 말풍선 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이전 말��선 숫자도 함께 줄어듭니다 (읽음 연출) */
 export type GroupLine = { sender: string; text: string; delayMs: number; unread?: number }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
