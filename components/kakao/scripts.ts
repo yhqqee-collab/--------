@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (���). 없으면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (�����). 없으면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -963,7 +963,7 @@ const SION_DAY3: Record<string, PhaseNode> = {
   // (components/instagram/insta-comment-choices.ts → SION_DAY3_POST_ID)
   P2_Insta: {
     nextCheckGlobal: SYNC_DAY3_EVENING,
-    message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산공원에서 논 거랑\n역에서 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
+    message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산공원에서 논 거랑\n역에��� 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
     choices: [{ id: 'A', text: '오키ㅣㅣ', susp: 0, next: 'P3_Evening' }],
   },
   // 인스타 댓글 → 유우시 카톡이 도착한 뒤 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
@@ -1312,7 +1312,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   // [B-2] 3층 문 앞 + 시온 거절 (먼저 나온 시온과 리쿠가 마주침, 리쿠 -10 / 시온 +30)
   P3_Route_B_Odd: {
     isSystem: true,
-    alert: '혼자 먼저 나온 시온과\n문 앞의 리쿠가 마주쳤습니다!\n\n로비에 간다던 여주를 기다리는 리쿠를 보며\n시온의 눈빛이 싸늘해집니다...',
+    alert: '혼자 먼저 나온 시���과\n문 앞의 리쿠가 마주쳤습니다!\n\n로비에 간다던 여주를 기다리는 리쿠를 보며\n시온의 눈빛이 싸늘해집니다...',
     message: '',
     choices: [
       {
@@ -1467,7 +1467,7 @@ export const SYNC_DAY5_PUB = 'day5-pub'
 
 /**
  * 유우시 Day 5 (축제 첫날): 모닝톡 → (부스 세팅) → 리쿠 후드집업 선택에 따라 15:15 추궁 / 즉사 지뢰
- * → 주점 종료 → (단톡방 번따 폭로) → 23:35 질투 카톡
+ * → 주점 종료 → (��톡방 번따 폭로) → 23:35 질투 카톡
  */
 const YUSHI_DAY5: Record<string, PhaseNode> = {
   P1_Morning: {
@@ -1486,7 +1486,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
     choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
   },
-  // 쇼핑 플래그가 없으면(입고 감 / 리쿠 스크립�� 미작성) 입고 온 루트
+  // 쇼핑 플래그가 ���으면(입고 감 / 리쿠 스크립�� 미작성) 입고 온 루트
   CHECK_RIKU_HOODIE: {
     delay: 5,
     message: '',
@@ -1668,8 +1668,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
     choices: [{ id: 'A', text: '나도 사랑해 조심히 들어가 ❤️', susp: -10, next: 'end' }],
   },
   P4_Dead_Clash: {
-    isSystem: true,
-    isGameOver: true,
+    gameOver: true,
     alert:
       "현관문을 열고 나가자\n아이스크림 봉투를 든 리쿠와\n야식 봉투를 든 시온이\n정면으로 마주친 채 얼어붙어 있습니다...\n\n리쿠: '...시온이 형? 형이 왜 이 시간에 여주 집 앞에 잇어?'\n\n(세다리 발각 - GAME OVER)",
     message: '',
@@ -1815,7 +1814,7 @@ export type GroupStage = {
   /** 지정하면 이 단계가 시작되기 직전에 화면 전체 안내 팝업을 띄웁니다 (시간 경과 연출) */
   interlude?: string
   messages: GroupLine[]
-  /** 지정하면 메시지 후 플레이어가 고르고, 반응이 끝난 뒤에 대기 중인 카톡이 이어집니다. */
+  /** 지정하면 메시지 후 플레이어가 고르고, 반응이 끝난 뒤에 대�� 중인 카톡이 이어집니다. */
   choices?: GroupChoice[]
 }
 
