@@ -298,6 +298,32 @@ export const POSTS: Post[] = [
 /** 홈 타임라인에는 뜨지 않고 프로필 피드에만 보이는 게시물 템플릿 (최신순) */
 export const PROFILE_ONLY_POSTS: Post[] = [
   {
+    id: 'sakuya-bench-post',
+    handle: sakuya.id,
+    avatar: avatarOf(sakuya),
+    time: '3일 전',
+    images: [
+      { src: '/posts/sakuya-feed-bench.jpg', alt: '노을 지는 산책로 벤치에 기대 앉아 뒤돌아보는 사쿠야' },
+    ],
+    caption: '',
+    likes: 412,
+    likedBy: [ryo.id, yushi.id],
+    comments: [],
+  },
+  {
+    id: 'sakuya-gelato-post',
+    handle: sakuya.id,
+    avatar: avatarOf(sakuya),
+    time: '1주 전',
+    images: [
+      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹는 분홍 티셔츠의 사쿠야' },
+    ],
+    caption: '',
+    likes: 389,
+    likedBy: [riku.id, sion.id],
+    comments: [],
+  },
+  {
     id: 'profile-only-sample',
     handle: sion.id,
     avatar: avatarOf(sion),
