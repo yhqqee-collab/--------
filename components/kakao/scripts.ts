@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없으면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (���). 없으면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -554,7 +554,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '라멘야 어때?',
         susp: 0,
-        reply: '알겠어 / 이따 사물함만 들렀다가 그쪽으로 갈게 ^_^',
+        reply: '알겠어 / 이따 사물함만 들렀다가 그쪽으��� 갈게 ^_^',
         next: 'P2_Ramen_Safe',
         setFlag: FLAG_YUSHI_LUNCH_RAMEN,
       },
@@ -781,7 +781,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
   },
   P4_Goodnight_Meet: {
     delay: 40,
-    message: '오늘 잠깐이��도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
+    message: '��늘 잠깐이��도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
     choices: [{ id: 'A', text: '나두 잠깐 얼굴 보니까 좋더라 ㅋㅋ 잘 자!', susp: 0, reply: '응 내일 봐 ㅎㅎ', next: 'end' }],
   },
   P4_Goodnight_Reject: {
@@ -1107,7 +1107,7 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
     message: '여주야 집 잘 들어갓어??\n여주 왜 이렇게 자꾸 좋아지지 ㅠㅠ ❤️\n미치겟당 ㅎㅎ',
     choices: [
       { id: 'A', text: '나도 오늘 너무 좋았어 ㅎㅎ\n내일 봐 리쿠야 ❤️', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
-      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나잇~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
+      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나���~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
     ],
   },
 }
@@ -1682,6 +1682,15 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
  * → 밤 야식 방문 제안 (리쿠 방문과 겹치면 리쿠 방에서 즉사 판정)
  */
 const SION_DAY5: Record<string, PhaseNode> = {
+  // 대영이 국밥 스토리(afterWork)가 부스 세팅 이후에 올라오므로, 시온은 출근 전 모닝톡으로 먼저 시작
+  P1_Morning: {
+    preWork: true,
+    message: '여주야 잘 잤어??\n오늘 축제 첫날이라며\n바쁘겠다 ㅠㅠ 무리하지 마',
+    choices: [
+      { id: 'A', text: '웅 ㅠㅠ 오늘 하루종일 정신없을 듯\n틈틈이 연락할게 ❤️', susp: 0, next: 'P1_Insta_Jealous' },
+      { id: 'B', text: '괜찮아 ㅎㅎ\n끝나고 연락할게!!', susp: 0, next: 'P1_Insta_Jealous' },
+    ],
+  },
   P1_Insta_Jealous: {
     delay: 3,
     message: '대영이 스토리 봤는데\n점심 대영이랑 먹었네?\n나한테는 밥 먹자는 말도 없더니 ㅎㅎ',
@@ -1768,7 +1777,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     c: fromPhases('P1_Morning', YUSHI_DAY4, SAMPLE_TIMING.c),
   },
   5: {
-    a: fromPhases('P1_Insta_Jealous', SION_DAY5, SAMPLE_TIMING.a),
+    a: fromPhases('P1_Morning', SION_DAY5, SAMPLE_TIMING.a),
     b: fromPhases('P1_Morning', RIKU_DAY5, SAMPLE_TIMING.b),
     c: fromPhases('P1_Morning', YUSHI_DAY5, SAMPLE_TIMING.c),
   },
@@ -1778,7 +1787,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 
 /* ──────────── 단톡방 이벤트 ───────────── */
 
-/** unread: 말풍선 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이전 말��선 숫자도 함께 줄어듭니다 (읽음 연출) */
+/** unread: 말풍선 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이��� 말��선 숫자도 함께 줄어듭니다 (읽음 연출) */
 export type GroupLine = { sender: string; text: string; delayMs: number; unread?: number }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
