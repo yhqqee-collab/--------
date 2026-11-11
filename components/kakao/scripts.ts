@@ -1107,7 +1107,7 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
     message: '여주야 집 잘 들어갓어??\n여주 왜 이렇게 자꾸 좋아지지 ㅠㅠ ❤️\n미치겟당 ㅎㅎ',
     choices: [
       { id: 'A', text: '나도 오늘 너무 좋았어 ㅎㅎ\n내일 봐 리쿠야 ❤️', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
-      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나잇~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
+      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나��~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
     ],
   },
 }
@@ -1447,7 +1447,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Good: {
     delay: 6,
-    message: '거짓말\n그래도 기분은 좋네ㅎ��\n내일 축제 때 보자\n잘 자 ❤️',
+    message: '거짓말\n그래도 기분��� 좋네ㅎ��\n내일 축제 때 보자\n잘 자 ❤️',
     choices: [{ id: 'A', text: '웅 유우시도 잘 자 ❤️', susp: 0, next: 'end' }],
   },
   P4_Night_Bad: {
@@ -1462,6 +1462,8 @@ export const FLAG_DAY5_RIKU_HOODIE_WEAR = 'day5-riku-hoodie-wear'
 export const FLAG_DAY5_RIKU_HOODIE_BAG = 'day5-riku-hoodie-bag'
 /** Day 5: 리쿠 오전 후드집업 선택이 끝난 뒤 유우시 15:15 분기 판정 (리쿠 Day 5 의 해당 페이즈에도 같은 키를 달아주세요) */
 export const SYNC_DAY5_HOODIE = 'day5-hoodie'
+/** Day 5: 주점 종료 팝업(유우시 P3_Pub_Skip) 뒤에 리쿠 밤 카톡이 오도록 동기화 */
+export const SYNC_DAY5_PUB = 'day5-pub'
 
 /**
  * 유우시 Day 5 (축제 첫날): 모닝톡 → (부스 세팅) → 리쿠 후드집업 선택에 따라 15:15 추궁 / 즉사 지뢰
@@ -1544,6 +1546,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
   P3_Pub_Skip: {
     delay: 10,
     isSystem: true,
+    nextCheckGlobal: SYNC_DAY5_PUB,
     alert: '18:00 ~ 23:00\n정신없이 바빴던 축제 주점이 끝나고\n뒷정리 후 집으로 돌아왔습니다',
     message: '',
     choices: [{ id: 'A', text: '(동아리 단톡방 알림이 울린다)', susp: 0, next: 'P4_Night_Msg' }],
@@ -1566,6 +1569,109 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     delay: 6,
     message: '잘했어\n내일도 사람 많을 텐데 내 옆에서 일해\n피곤할 텐데 얼른 자\n사랑해',
     choices: [{ id: 'A', text: '웅 내일 봐!!', susp: 0, next: 'end' }],
+  },
+}
+
+/** Day 5: 밤 방문 제안 교차 판정 (시온 Day 5 의 방문 제안 페이즈에도 같은 키를 달아주세요) */
+export const SYNC_DAY5_NIGHT = 'day5-night'
+/** Day 5: 시온의 밤 방문 제안을 승낙하면 켜짐 (시온 Day 5 스크립트에서 setFlag 예정) */
+export const FLAG_DAY5_SION_VISIT = 'day5-sion-visit'
+
+/**
+ * 리쿠 Day 5 (축제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
+ * → 밤 질투 & 기습 방문 (시온 방문과 겹치면 즉사)
+ */
+const RIKU_DAY5: Record<string, PhaseNode> = {
+  P1_Morning: {
+    preWork: true,
+    message: '여주야 일어낫어?? ㅎㅎ\n오늘 바람 좀 불던데\n저번에 여주 집에 두고 간 후드집업\n오늘 입고 오면 안 돼?? ㅎㅎ\n여주가 입은 거 보고 시퍼 ❤️',
+    choices: [
+      { id: 'A', text: '웅 알겠어\n리쿠 옷 입고 나갈게 ㅎㅎ ❤️', susp: -15, setFlag: FLAG_DAY5_RIKU_HOODIE_WEAR, next: 'P1_Wear_Yes' },
+      {
+        id: 'B',
+        text: '입고 가면 일하다 더러워질까 봐 ㅠㅠ\n쇼핑백에 접어서 들고 갈게!',
+        susp: 0,
+        setFlag: FLAG_DAY5_RIKU_HOODIE_BAG,
+        next: 'P1_Bring_Bag',
+      },
+    ],
+  },
+  P1_Wear_Yes: {
+    preWork: true,
+    delay: 6,
+    nextCheckGlobal: SYNC_DAY5_HOODIE,
+    message: '헐 진짜?!?!\n귀엽겟당...ㅎㅎ\n이따 보자 ❤️',
+    choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'P2_Afternoon_Wear' }],
+  },
+  P1_Bring_Bag: {
+    preWork: true,
+    delay: 6,
+    nextCheckGlobal: SYNC_DAY5_HOODIE,
+    message: '에이\n입은 거 보고 시펏는데 아쉽다 ㅠㅠ\n그롬 이따 몰래 나한테 전달해 줘 ㅎㅎ\n이따 봐 ❤️',
+    choices: [{ id: 'A', text: '(쇼핑백을 챙겨 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'P2_Afternoon_Bag' }],
+  },
+  // 15:10 부스 세팅 중 [입고 간 경우] (유우시 방 P2_Wear_Msg 와 동시 진행)
+  P2_Afternoon_Wear: {
+    delay: 3,
+    nextCheckGlobal: SYNC_DAY5_PUB,
+    message: '여주야 내 옷 입으니까 진짜 완전 귀엽다 ㅠㅠ\n소매 남는 거 기여웡\n자꾸 표정관리가 안 되넹 ㅜ',
+    choices: [{ id: 'A', text: '티 내지 마 ㅋㅋㅋㅋ\n애들 다 보잖아 ㅎㅎ', susp: 0, next: 'P4_Night_Jealous' }],
+  },
+  // 15:10 부스 세팅 중 [쇼핑백에 들고 간 경우] → 직후 유우시 방 P2_Bag_Bomb 추궁 (오답 시 유우시 방에서 게임오버)
+  P2_Afternoon_Bag: {
+    delay: 3,
+    nextCheckGlobal: SYNC_DAY5_PUB,
+    message: '여주야 쇼핑백 어디 둿어??\n애들 안 볼 때 내가 얼른 챙길게 ㅎㅎ',
+    choices: [{ id: 'A', text: '어 잠깐만 테이블 밑에 뒀는데...', susp: 0, next: 'P4_Night_Jealous' }],
+  },
+  // 23:35 주점 종료 팝업(유우시 방) 뒤 질투 & 기습 방문
+  P4_Night_Jealous: {
+    delay: 4,
+    message: '여주야 단톡방 얘기 뭐야??\n아까 번호 물어본 남자 누구야 진짜 안 줫지?!?! ㅠㅠ\n내가 옆에 계속 붙어 잇엇어야 햇는데 짜증 나...',
+    choices: [{ id: 'A', text: '당연히 안 줬지!! 일하느라 바로 거절했어 ㅠㅠ', susp: 0, next: 'P4_Night_Visit' }],
+  },
+  P4_Night_Visit: {
+    delay: 3,
+    nextCheckGlobal: SYNC_DAY5_NIGHT,
+    message: '안 되겟어\n단둘이서 잠깐이라도 봐야 맘 놓일 거 같아 ㅠㅠ\n아이스크림 사서 여주 집 갈랭\n잠깐만 나와조 ❤️',
+    choices: [
+      { id: 'A', text: '웅 고마워 ㅠㅠ\n집 앞에서 잠깐 보자 ❤️', susp: 0, next: 'CHECK_SION_VISIT_CLASH' },
+      { id: 'B', text: '헉\n나 지금 씻고 누워서 못 나가 ㅠㅠ\n마음만 받을게\n미아내용 ㅜ', susp: 10, next: 'P4_Reject_Riku' },
+    ],
+  },
+  // 시온 방문도 승낙했으면 즉사, 아니면 리쿠 단독 만남
+  CHECK_SION_VISIT_CLASH: {
+    delay: 4,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY5_SION_VISIT], to: 'P4_Dead_Clash' },
+      { none: [FLAG_DAY5_SION_VISIT], to: 'P4_Safe_Riku' },
+    ],
+  },
+  P4_Reject_Riku: {
+    delay: 6,
+    message: '헐\n벌써 누웟어...?\n그롬 어쩔 수 없징...\n푹 자 여주야',
+    choices: [{ id: 'A', text: '고마워 리쿠도 얼른 쉬어 ❤️', susp: 0, next: 'end' }],
+  },
+  P4_Safe_Riku: {
+    isSystem: true,
+    alert: '집 앞에서 리쿠를 만나\n달래줬습니다!',
+    message: '',
+    choices: [{ id: 'A', text: '(리쿠를 배웅하고 집으로 들어왔다)', susp: 0, next: 'P4_Safe_Riku_After' }],
+  },
+  P4_Safe_Riku_After: {
+    delay: 6,
+    message: '얼굴 보니까 이제 살 거 같아 ㅎㅎ\n잘 자\n사랑해애애❤️',
+    choices: [{ id: 'A', text: '나도 사랑해 조심히 들어가 ❤️', susp: -10, next: 'end' }],
+  },
+  P4_Dead_Clash: {
+    isSystem: true,
+    isGameOver: true,
+    alert:
+      "현관문을 열고 나가자\n아이스크림 봉투를 든 리쿠와\n야식 봉투를 든 시온이\n정면으로 마주친 채 얼어붙어 있습니다...\n\n리쿠: '...시온이 형? 형이 왜 이 시간에 여주 집 앞에 잇어?'\n\n(세다리 발각 - GAME OVER)",
+    message: '',
+    choices: [],
   },
 }
 
@@ -1596,6 +1702,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     c: fromPhases('P1_Morning', YUSHI_DAY4, SAMPLE_TIMING.c),
   },
   5: {
+    b: fromPhases('P1_Morning', RIKU_DAY5, SAMPLE_TIMING.b),
     c: fromPhases('P1_Morning', YUSHI_DAY5, SAMPLE_TIMING.c),
   },
   6: sampleDay(),
@@ -1802,7 +1909,7 @@ export function resolveNode(script: Script, id: string | null, flags: ReadonlySe
       (rule) => (rule.all ?? []).every((flag) => flags.has(flag)) && (rule.none ?? []).every((flag) => !flags.has(flag)),
     )
     if (match) return resolveNode(script, match.to, flags)
-    // 내용이 있는 노드는 조건에 안 걸리면 그대로 진행, 빈 분기용 노드는 종료
+    // 내용이 있는 노드는 조건에 안 걸리면 ��대로 진행, 빈 분기용 노드는 종료
     return node.lines.length > 0 ? id : null
   }
   return id
