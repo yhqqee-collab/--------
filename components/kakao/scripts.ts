@@ -13,7 +13,7 @@ const WORK_TRANSITION_TEXTS: Record<number, string> = {
   2: '⏳ [오후 장보기 및 동방 짐 정리 진행 중...] (14:30 ~ 21:30) ⏳',
   3: '⏳ [시온과 용산공원에서 피크닉 데이트 중...] (13:00 ~ 17:00) ⏳',
   4: '⏳ [월요일 수업 듣는 중...] (10:30 ~ 16:40) ⏳',
-  5: '⏳ [5일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
+  5: '⏳ [축제 첫날 주점 부스 세팅 중...] (12:00 ~ 15:00) ⏳',
   6: '⏳ [6일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
   7: '⏳ [7일 차 메인 일정 진행 중...] (00:00 ~ 00:00) ⏳',
 }
@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없���면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없�����면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -757,7 +757,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
         id: 'B',
         text: '앗 나 방금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
         susp: 5,
-        reply: '벌써 누웠어? / 알겠어 푹 쉬어',
+        reply: '벌써 누��어? / 알겠어 푹 쉬어',
         next: 'P4_Goodnight_Reject',
       },
     ],
@@ -781,7 +781,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
   },
   P4_Goodnight_Meet: {
     delay: 40,
-    message: '오늘 잠깐이라도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
+    message: '오늘 잠깐이���도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
     choices: [{ id: 'A', text: '나두 잠깐 얼굴 보니까 좋더라 ㅋㅋ 잘 자!', susp: 0, reply: '응 내일 봐 ㅎㅎ', next: 'end' }],
   },
   P4_Goodnight_Reject: {
@@ -1447,13 +1447,125 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Good: {
     delay: 6,
-    message: '거짓말\n그래도 기분은 좋네ㅎㅎ\n내일 축제 때 보자\n잘 자 ❤️',
+    message: '거짓말\n그래도 기분은 좋네ㅎ��\n내일 축제 때 보자\n잘 자 ❤️',
     choices: [{ id: 'A', text: '웅 유우시도 잘 자 ❤️', susp: 0, next: 'end' }],
   },
   P4_Night_Bad: {
     delay: 6,
     message: '그냥 장난친 거 치고는 너무 좋아하던데\n알겠어\n피곤할 텐데 쉬어',
     choices: [{ id: 'A', text: '(아차... 괜히 변명만 한 꼴이 됐네 ㅠㅠ)', susp: 0, next: 'end' }],
+  },
+}
+
+/** Day 5: 리쿠 Day 5 오전에 후드집업을 '입고 가기' / '쇼핑백에 들고 가기' 고르면 켜짐 (리쿠 Day 5 스크립트에서 setFlag) */
+export const FLAG_DAY5_RIKU_HOODIE_WEAR = 'day5-riku-hoodie-wear'
+export const FLAG_DAY5_RIKU_HOODIE_BAG = 'day5-riku-hoodie-bag'
+/** Day 5: 리쿠 오전 후드집업 선택이 끝난 뒤 유우시 15:15 분기 판정 (리쿠 Day 5 의 해당 페이즈에도 같은 키를 달아주세요) */
+export const SYNC_DAY5_HOODIE = 'day5-hoodie'
+
+/**
+ * 유우시 Day 5 (축제 첫날): 모닝톡 → (부스 세팅) → 리쿠 후드집업 선택에 따라 15:15 추궁 / 즉사 지뢰
+ * → 주점 종료 → (단톡방 번따 폭로) → 23:35 질투 카톡
+ */
+const YUSHI_DAY5: Record<string, PhaseNode> = {
+  P1_Morning: {
+    preWork: true,
+    message: '일어났어 ?\n오늘 주점 첫날이네\n벌써 기빨리네',
+    choices: [
+      { id: 'A', text: 'ㅋㅋㅋ 오늘 사람 많을 텐데 파이팅하자 ❤️', susp: 0, next: 'P1_Morning_End' },
+      { id: 'B', text: '아침 잘 챙겨 먹고 와 ㅋㅋㅋ 이따 봐', susp: 0, next: 'P1_Morning_End' },
+    ],
+  },
+  P1_Morning_End: {
+    preWork: true,
+    delay: 6,
+    nextCheckGlobal: SYNC_DAY5_HOODIE,
+    message: '응 ㅎㅎ\n밤에 추우니까 겉옷 따뜻하게 챙겨 와',
+    // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
+    choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
+  },
+  // 쇼핑백 플래그가 없으면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
+  CHECK_RIKU_HOODIE: {
+    delay: 5,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY5_RIKU_HOODIE_BAG], to: 'P2_Bag_Bomb' },
+      { none: [FLAG_DAY5_RIKU_HOODIE_BAG], to: 'P2_Wear_Msg' },
+    ],
+  },
+  // 15:15 [입고 온 경우] 후드집업 눈치
+  P2_Wear_Msg: {
+    delay: 5,
+    message: '여주야\n후드집업 못보던 건데\n그거 리쿠 거 아냐?',
+    choices: [{ id: 'A', text: '아\n흔한 거라 겹쳤나 봐 ㅋㅋ 내 거야!', susp: 10, next: 'P2_Wear_Safe' }],
+  },
+  P2_Wear_Safe: {
+    delay: 6,
+    message: '그래 ?\n사이즈가 좀 커 보여서\n이따 주점 시작하면 옆으로 와',
+    choices: [{ id: 'A', text: '오키', susp: 0, next: 'P3_Pub_Skip' }],
+  },
+  // 15:15 [쇼핑백에 들고 온 경우] 즉사 지뢰
+  P2_Bag_Bomb: {
+    delay: 5,
+    message: '아까 테이블 밑에 치우다가 봤는데\n네 쇼핑백 안에 든 후드집업 리쿠 거 아니야 ?\n리쿠 옷이 왜 네 가방에 있어',
+    choices: [
+      {
+        id: 'A',
+        text: '아 저번 시험기간에 도서관 추워서 빌렸던 거야!\n깜빡하고 있다가 오늘 돌려주려고 챙겼어 ㅠㅠ',
+        susp: 15,
+        next: 'P2_Bag_Survive',
+      },
+      { id: 'B', text: '어제 집 갈 때 추워서 잠깐 빌렸어 ㅎㅎ\n오늘 주려고 가져왔어', susp: 0, next: 'P2_Bag_Dead' },
+    ],
+  },
+  P2_Bag_Survive: {
+    delay: 6,
+    message: '시험기간 때 ?\n나한테 빌리지\n왜 리쿠한테 빌려...',
+    // 유우시 답장 없이(읽씹) 바로 주점 종료로
+    choices: [
+      { id: 'A', text: '미안 ㅠㅠ', susp: 0, next: 'P3_Pub_Skip' },
+      { id: 'B', text: '옆에 리쿠가 있어서... ㅜㅜ', susp: 0, next: 'P3_Pub_Skip' },
+    ],
+  },
+  P2_Bag_Dead: {
+    delay: 6,
+    message: '어젯밤 ?\n어제 동방 회의 끝나고 다 같이 헤어졌는데\n밤에 리쿠랑 따로 만났어 ?',
+    choices: [{ id: 'A', text: '어...? 아니 그게 아니라...', susp: 0, next: 'P2_Dead_End' }],
+  },
+  P2_Dead_End: {
+    isGameOver: true,
+    alert:
+      '유우시가 말없이 휴대폰을 끄고\n테이블 밑의 쇼핑백을 집어 든 채\n부스 안의 리쿠에게 성큼성큼 걸어갑니다.\n\n둘이 이야기를 나누더니\n표정이 딱딱하게 굳어졌습니다.\n\n(세다리 발각 - GAME OVER)',
+    message: '',
+    choices: [],
+  },
+  // 18:00 주점 → 뒷정리 후 귀가
+  P3_Pub_Skip: {
+    delay: 10,
+    isSystem: true,
+    alert: '18:00 ~ 23:00\n정신없이 바빴던 축제 주점이 끝나고\n뒷정리 후 집으로 돌아왔습니다',
+    message: '',
+    choices: [{ id: 'A', text: '(동아리 단톡방 알림이 울린다)', susp: 0, next: 'P4_Night_Msg' }],
+  },
+  // 23:35 번따 사건 직후 (Day 5 단톡방 스크립트가 생기면 holdNodes { c: 'P4_Night_Msg' } 로 단톡방 뒤에 도착)
+  P4_Night_Msg: {
+    delay: 12,
+    message: '단톡방 얘기 뭐야 ?\n아까 번호 물어봤던 테이블 어디야\n안 줬지 ?',
+    choices: [
+      { id: 'A', text: '당연히 안 줬지!!\n내 눈에 유우시밖에 안 보이거든 ❤️', susp: -10, next: 'P4_Night_Good' },
+      { id: 'B', text: '바빠 죽겠는데 무슨 번호야 ㅋㅋ\n바로 거절했어!', susp: 0, next: 'P4_Night_Normal' },
+    ],
+  },
+  P4_Night_Good: {
+    delay: 6,
+    message: '다행이네 ..\n아까 내내 신경 쓰여서 죽는 줄 알았네\n내일은 내 옆에 붙어 있어 ~~',
+    choices: [{ id: 'A', text: '웅 유우시도 잘 자 ❤️', susp: 0, next: 'end' }],
+  },
+  P4_Night_Normal: {
+    delay: 6,
+    message: '잘했어\n내일도 사람 많을 텐데 내 옆에서 일해\n피곤할 텐데 얼른 자\n사랑해',
+    choices: [{ id: 'A', text: '웅 내일 봐!!', susp: 0, next: 'end' }],
   },
 }
 
@@ -1483,7 +1595,9 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     b: fromPhases('P1_Morning', RIKU_DAY4, SAMPLE_TIMING.b),
     c: fromPhases('P1_Morning', YUSHI_DAY4, SAMPLE_TIMING.c),
   },
-  5: sampleDay(),
+  5: {
+    c: fromPhases('P1_Morning', YUSHI_DAY5, SAMPLE_TIMING.c),
+  },
   6: sampleDay(),
   7: sampleDay(),
 }
@@ -1497,7 +1611,7 @@ export type GroupScript = {
   startDelayMs: number
   /** true 면 그날 모든 남자와의 대화가 끝난 뒤에 단톡방 이벤트 시작 */
   afterAllChats?: boolean
-  /** true 면 근무 종료 직후 시작하고, 남자들의 근무 후 카톡은 이 이벤트가 끝난 뒤에 도착 */
+  /** true 면 근무 종료 직후 시작하고, 남자들의 근무 후 카톡은 이 이벤트가 끝난 뒤에 ���착 */
   afterWorkEnd?: boolean
   messages: GroupLine[]
   choices: GroupChoice[]
