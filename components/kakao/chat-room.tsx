@@ -417,7 +417,18 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         const text = personalizeText(line.text, latest.current.owner)
         if (index === 0 && dateLabel) setAdded((prev) => [...prev, { type: 'date', label: dateLabel }])
         setTyping(false)
-        setAdded((prev) => [...prev, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel() }])
+        const count = line.unread
+        setAdded((prev) => {
+          const lowered =
+            count === undefined
+              ? prev
+              : prev.map((item) =>
+                  item.type === 'msg' && typeof item.unread === 'number' && item.unread > count
+                    ? { ...item, unread: count }
+                    : item,
+                )
+          return [...lowered, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel(), unread: count }]
+        })
         latest.current.onIncoming(`${line.sender}: ${text}`)
         vibrate()
         if (latest.current.active) {
@@ -947,10 +958,13 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                       {item.text}
                     </p>
                     )}
-                    {item.unread && (
+                    {Boolean(item.unread) && (
                       <div className={cn('flex shrink-0 flex-col gap-[2px] self-end pb-[1px]', mine ? 'items-end' : 'items-start')}>
-                        <span className="text-[10.5px] font-bold leading-none text-[#E6B800]" aria-label="읽지 않음">
-                          1
+                        <span
+                          className="text-[10.5px] font-bold leading-none text-[#E6B800]"
+                          aria-label={`읽지 않은 사람 ${typeof item.unread === 'number' ? item.unread : 1}명`}
+                        >
+                          {typeof item.unread === 'number' ? item.unread : 1}
                         </span>
                       </div>
                     )}

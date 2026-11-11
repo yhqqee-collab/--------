@@ -109,6 +109,18 @@ STORIES_BY_DAY[3] = [
   },
 ]
 
+/** 5일 차: 점심에 대영이 여주를 태그해 올린 국밥집 스토리 (글씨 있는 사진이 먼저) */
+export const DAEYOUNG_ID = daeyoung.id
+export const DAEYOUNG_TAG_DAY = 5
+STORIES_BY_DAY[DAEYOUNG_TAG_DAY] = [
+  story(daeyoung, '1시간', {
+    images: [
+      { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집에서 숟가락을 문 채 정면을 보는 대영, "여주 누나가 찍어줌" 문구' },
+      { src: '/stories/daeyoung-day5-2.jpg', alt: '국밥집 메뉴판 아래에서 숟가락을 물고 옆을 보는 대영' },
+    ],
+  }),
+]
+
 /** 4일 차: 유우시 스토리 태그를 허락하면 5초 뒤 올라오는 밀크티 스토리 (플레이어 아이디 멘션) */
 export const YUSHI_ID = yushi.id
 

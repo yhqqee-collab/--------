@@ -164,7 +164,7 @@ type PhaseChoice = {
 }
 /**
  * preWork: true 인 페이즈가 '출근 전' 페이즈. 멤버마다 개수가 달라도 마지막 출근 전 답장 후 동기화됩니다.
- * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없�����면 phaseDelay 사용
+ * delay: 이전 답장 후 이 페이즈가 오기까지 (초). 없으면 phaseDelay 사용
  */
 type PhaseNode = {
   message: string
@@ -757,7 +757,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
         id: 'B',
         text: '앗 나 방금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
         susp: 5,
-        reply: '벌써 누��어? / 알겠어 푹 쉬어',
+        reply: '벌써 누웠어? / 알겠어 푹 쉬어',
         next: 'P4_Goodnight_Reject',
       },
     ],
@@ -781,7 +781,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
   },
   P4_Goodnight_Meet: {
     delay: 40,
-    message: '오늘 잠깐이���도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
+    message: '오늘 잠깐이라도 봐서 좋았어 ㅋㅋ 달 예쁘더라 잘 자',
     choices: [{ id: 'A', text: '나두 잠깐 얼굴 보니까 좋더라 ㅋㅋ 잘 자!', susp: 0, reply: '응 내일 봐 ㅎㅎ', next: 'end' }],
   },
   P4_Goodnight_Reject: {
@@ -1107,7 +1107,7 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
     message: '여주야 집 잘 들어갓어??\n여주 왜 이렇게 자꾸 좋아지지 ㅠㅠ ❤️\n미치겟당 ㅎㅎ',
     choices: [
       { id: 'A', text: '나도 오늘 너무 좋았어 ㅎㅎ\n내일 봐 리쿠야 ❤️', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
-      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나���~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
+      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나잇~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
     ],
   },
 }
@@ -1128,7 +1128,7 @@ const SION_DAY4: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 잘 잤어? ㅎㅎ\n오늘 월요일이라 피곤하겠다 ㅠㅠ\n이따 수업 때 보겠네 ㅎㅎ',
     choices: [
-      { id: 'A', text: '웅!! ���자리 맡아놔 ㅋㅋ', susp: 0, next: 'P1_Morning_End' },
+      { id: 'A', text: '웅!! 옆자리 맡아놔 ㅋㅋ', susp: 0, next: 'P1_Morning_End' },
       { id: 'B', text: '월요병 살려줘 ㅠㅠ', susp: 0, next: 'P1_Morning_End' },
     ],
   },
@@ -1312,7 +1312,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   // [B-2] 3층 문 앞 + 시온 거절 (먼저 나온 시온과 리쿠가 마주침, 리쿠 -10 / 시온 +30)
   P3_Route_B_Odd: {
     isSystem: true,
-    alert: '혼자 먼저 나온 시온과\n문 앞��� 리쿠가 마주쳤습니다!\n\n로비에 간다던 여주를 기다리는 리쿠를 보며\n시온의 눈빛이 싸늘해집니다...',
+    alert: '혼자 먼저 나온 시온과\n문 앞의 리쿠가 마주쳤습니다!\n\n로비에 간다던 여주를 기다리는 리쿠를 보며\n시온의 눈빛이 싸늘해집니다...',
     message: '',
     choices: [
       {
@@ -1447,7 +1447,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Good: {
     delay: 6,
-    message: '거짓말\n그래도 기������ 좋네ㅎ��\n내일 축제 때 보자\n잘 자 ❤️',
+    message: '거짓말\n그래도 기분은 좋네ㅎㅎ\n내일 축제 때 보자\n잘 자 ❤️',
     choices: [{ id: 'A', text: '웅 유우시도 잘 자 ❤️', susp: 0, next: 'end' }],
   },
   P4_Night_Bad: {
@@ -1486,7 +1486,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
     choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
   },
-  // 쇼핑백 플래그가 없��면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
+  // 쇼핑 플래그가 없으면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
   CHECK_RIKU_HOODIE: {
     delay: 5,
     message: '',
@@ -1778,19 +1778,20 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 
 /* ──────────── 단톡방 이벤트 ───────────── */
 
-export type GroupLine = { sender: string; text: string; delayMs: number }
+/** unread: 말풍선 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이전 말풍선 숫자도 함께 줄어듭니다 (읽음 연출) */
+export type GroupLine = { sender: string; text: string; delayMs: number; unread?: number }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
   /** 일차 시작(또는 afterAllChats 달성) 후 첫 메시지까지 (ms) */
   startDelayMs: number
   /** true 면 그날 모든 남자와의 대화가 끝난 뒤에 단톡방 이벤트 시작 */
   afterAllChats?: boolean
-  /** true 면 근무 종료 직후 시작하고, 남자들의 근무 후 카톡은 이 이벤트가 끝난 뒤에 ���착 */
+  /** true 면 근무 종료 직후 시작하고, 남자들의 근무 후 카톡은 이 이벤트가 끝난 뒤에 도착 */
   afterWorkEnd?: boolean
   messages: GroupLine[]
   choices: GroupChoice[]
   /**
-   * 지정하면 messages 대신 단계별로 진���합니다.
+   * 지정하면 messages 대신 단계별로 진행합니다.
    * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시작되고,
    * 해당 노드의 카톡은 그 단계의 단톡방 대화가 끝난 뒤에 도착합니다.
    */
@@ -1942,12 +1943,45 @@ const STAFF_DAY4: GroupScript = {
   ],
 }
 
+const gu = (sender: string, text: string, delaySec: number, unread: number): GroupLine => ({
+  sender,
+  text,
+  delayMs: delaySec * 1000,
+  unread,
+})
+
+/**
+ * Day 5 단톡방: 23:30 주점 마감 후 귀가 → 번따 폭로.
+ * 주점 종료 팝업 뒤, 세 남주의 밤 카톡(시온 P3_Night_Visit / 리쿠 P4_Night_Jealous / 유우시 P4_Night_Msg)보다 먼저 진행됩니다.
+ * 시온·리쿠·유우시는 읽기만 하고 아무 말도 하지 않습니다 (안 읽음 숫자 0 = 싸한 정적).
+ */
+const STAFF_DAY5: GroupScript = {
+  startDelayMs: 0,
+  messages: [],
+  choices: [],
+  stages: [
+    {
+      holdNodes: { a: 'P3_Night_Visit', b: 'P4_Night_Jealous', c: 'P4_Night_Msg' },
+      messages: [
+        gu(G_RYO, '오늘 주점 하얗게 불태웠다 ㅠㅠ', 2, 5),
+        gu(G_RYO, '다들 들어갔어요?', 1, 4),
+        gu(G_DAEYOUNG, '오늘 사람 진짜 많았지...\n다들 일본음식을 좋아하나봐', 2, 3),
+        gu(G_DAEYOUNG, '아 맞다\n아까 여주 누나 서빙하다가 번호 따임 ㅎㅎ', 1.5, 3),
+        gu(G_RYO, '맞아\n나도 봤어\n누나 인기 많다\nㅋㅋㅋㅋㅋ', 1.5, 1),
+        gu(G_SAKUYA, '헐 대박 ㅋㅋㅋ\n그래서 번호 줫어요??', 2, 0),
+      ],
+      choices: [{ id: 'A', text: '아 무슨 소리야 안 줬어 ㅋㅋㅋ\n다들 오늘 고생 많았어 얼른 쉬어!!', reply: [] }],
+    },
+  ],
+}
+
 /** 일차별 단톡방 이벤트 (키는 채팅방 id — chat-data.ts 의 단톡방 id 와 일치해야 함) */
 const DAY_GROUP_SCRIPTS: Record<number, Record<string, GroupScript>> = {
   1: { staff: STAFF_DAY1 },
   2: { staff: STAFF_DAY2 },
   3: { staff: STAFF_DAY3 },
   4: { staff: STAFF_DAY4 },
+  5: { staff: STAFF_DAY5 },
   6: { staff: { startDelayMs: 5000, messages: [gl(GROUP_SENDER, '[단톡방 대사를 입력하세요]')], choices: [] } },
 }
 
@@ -1976,7 +2010,7 @@ export function resolveNode(script: Script, id: string | null, flags: ReadonlySe
       (rule) => (rule.all ?? []).every((flag) => flags.has(flag)) && (rule.none ?? []).every((flag) => !flags.has(flag)),
     )
     if (match) return resolveNode(script, match.to, flags)
-    // 내용이 있는 노드는 조건에 안 걸리면 ��대로 진행, 빈 분기용 노드는 종료
+    // 내용이 있는 노드는 조건에 안 걸리면 그대로 진행, 빈 분기용 노드는 종료
     return node.lines.length > 0 ? id : null
   }
   return id

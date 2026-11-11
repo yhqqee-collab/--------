@@ -3,7 +3,7 @@ import { CHARACTERS, CLUB_CHAT_MEMBERS, CLUB_CHAT_NAME, GROUP_CHAT_NAME, GROUP_M
 export type ChatItem =
   | { type: 'date'; label: string }
   | { type: 'break' }
-  | { type: 'msg'; from: 'me' | 'them'; text: string; time: string; unread?: boolean; sender?: string; image?: boolean | string }
+  | { type: 'msg'; from: 'me' | 'them'; text: string; time: string; unread?: boolean | number; sender?: string; image?: boolean | string }
 
 export type Chat = {
   id: string
