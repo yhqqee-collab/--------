@@ -243,6 +243,20 @@ export const POSTS: Post[] = [
     comments: [],
   },
   {
+    id: 'yushi-weather-post',
+    handle: yushi.id,
+    avatar: avatarOf(yushi),
+    time: '3일 전',
+    images: [
+      { src: '/posts/yushi-feed-1.jpg', alt: '잔디밭에서 검은 재킷을 여미며 카메라를 바라보는 유우시' },
+      { src: '/posts/yushi-feed-2.jpg', alt: '잔디밭에서 검은 재킷 차림으로 옆을 바라보는 유우시' },
+    ],
+    caption: '날씨 조타~~~',
+    likes: 467,
+    likedBy: [sakuya.id, ryo.id],
+    comments: [],
+  },
+  {
     id: 'sion-boat-post',
     handle: sion.id,
     avatar: avatarOf(sion),
