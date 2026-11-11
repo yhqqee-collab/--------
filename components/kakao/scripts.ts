@@ -1107,7 +1107,7 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
     message: '여주야 집 잘 들어갓어??\n여주 왜 이렇게 자꾸 좋아지지 ㅠㅠ ❤️\n미치겟당 ㅎㅎ',
     choices: [
       { id: 'A', text: '나도 오늘 너무 좋았어 ㅎㅎ\n내일 봐 리쿠야 ❤️', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
-      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나��~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
+      { id: 'B', text: '내가 더 좋아하거든!! ㅋㅋ\n얼른 자 굿나���~', susp: 0, reply: '웅 내일 꿈에서 봐 ㅎㅎ 잘 자!!', next: 'end' },
     ],
   },
 }
@@ -1128,7 +1128,7 @@ const SION_DAY4: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 잘 잤어? ㅎㅎ\n오늘 월요일이라 피곤하겠다 ㅠㅠ\n이따 수업 때 보겠네 ㅎㅎ',
     choices: [
-      { id: 'A', text: '웅!! 옆자리 맡아놔 ㅋㅋ', susp: 0, next: 'P1_Morning_End' },
+      { id: 'A', text: '웅!! ���자리 맡아놔 ㅋㅋ', susp: 0, next: 'P1_Morning_End' },
       { id: 'B', text: '월요병 살려줘 ㅠㅠ', susp: 0, next: 'P1_Morning_End' },
     ],
   },
@@ -1312,7 +1312,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   // [B-2] 3층 문 앞 + 시온 거절 (먼저 나온 시온과 리쿠가 마주침, 리쿠 -10 / 시온 +30)
   P3_Route_B_Odd: {
     isSystem: true,
-    alert: '혼자 먼저 나온 시온과\n문 앞의 리쿠가 마주쳤습니다!\n\n로비에 간다던 여주를 기다리는 리쿠를 보며\n시온의 눈빛이 싸늘해집니다...',
+    alert: '혼자 먼저 나온 시온과\n문 앞��� 리쿠가 마주쳤습니다!\n\n로비에 간다던 여주를 기다리는 리쿠를 보며\n시온의 눈빛이 싸늘해집니다...',
     message: '',
     choices: [
       {
@@ -1447,7 +1447,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Good: {
     delay: 6,
-    message: '거짓말\n그래도 기분��� 좋네ㅎ��\n내일 축제 때 보자\n잘 자 ❤️',
+    message: '거짓말\n그래도 기������ 좋네ㅎ��\n내일 축제 때 보자\n잘 자 ❤️',
     choices: [{ id: 'A', text: '웅 유우시도 잘 자 ❤️', susp: 0, next: 'end' }],
   },
   P4_Night_Bad: {
@@ -1486,7 +1486,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
     choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
   },
-  // 쇼핑백 플래그가 없으면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
+  // 쇼핑백 플래그가 없��면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
   CHECK_RIKU_HOODIE: {
     delay: 5,
     message: '',
@@ -1576,6 +1576,8 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
 export const SYNC_DAY5_NIGHT = 'day5-night'
 /** Day 5: 시온의 밤 방문 제안을 승낙하면 켜짐 (시온 Day 5 스크립트에서 setFlag 예정) */
 export const FLAG_DAY5_SION_VISIT = 'day5-sion-visit'
+/** Day 5: 리쿠의 밤 방문 제안을 승낙하면 켜짐 */
+export const FLAG_DAY5_RIKU_VISIT = 'day5-riku-visit'
 
 /**
  * 리쿠 Day 5 (축제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
@@ -1635,7 +1637,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
     nextCheckGlobal: SYNC_DAY5_NIGHT,
     message: '안 되겟어\n단둘이서 잠깐이라도 봐야 맘 놓일 거 같아 ㅠㅠ\n아이스크림 사서 여주 집 갈랭\n잠깐만 나와조 ❤️',
     choices: [
-      { id: 'A', text: '웅 고마워 ㅠㅠ\n집 앞에서 잠깐 보자 ❤️', susp: 0, next: 'CHECK_SION_VISIT_CLASH' },
+      { id: 'A', text: '웅 고마워 ㅠㅠ\n집 앞에서 잠깐 보자 ❤️', susp: 0, setFlag: FLAG_DAY5_RIKU_VISIT, next: 'CHECK_SION_VISIT_CLASH' },
       { id: 'B', text: '헉\n나 지금 씻고 누워서 못 나가 ㅠㅠ\n마음만 받을게\n미아내용 ㅜ', susp: 10, next: 'P4_Reject_Riku' },
     ],
   },
@@ -1675,6 +1677,70 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
   },
 }
 
+/**
+ * 시온 Day 5 (축제 첫날): 대영 스토리 질투 → (주점 종료 팝업은 유우시 방)
+ * → 밤 야식 방문 제안 (리쿠 방문과 겹치면 리쿠 방에서 즉사 판정)
+ */
+const SION_DAY5: Record<string, PhaseNode> = {
+  P1_Insta_Jealous: {
+    delay: 3,
+    message: '대영이 스토리 봤는데\n점심 대영이랑 먹었네?\n나한테는 밥 먹자는 말도 없더니 ㅎㅎ',
+    choices: [
+      { id: 'A', text: '료랑 대영이랑 수업 가기 전에 먹었지 ㅎㅎ\n질투하지 망 ❤️', susp: -5, next: 'P1_Insta_Good' },
+      { id: 'B', text: '수업 전이라 같이 먹었어 ㅎㅎ\n저번에 너 찍어준 게 더 잘나왔는데?', susp: 0, next: 'P1_Insta_Norm' },
+    ],
+  },
+  // 답장 후 주점 종료 팝업(유우시 P3_Pub_Skip)이 끝날 때까지 대기
+  P1_Insta_Good: {
+    delay: 6,
+    nextCheckGlobal: SYNC_DAY5_PUB,
+    message: 'ㅎㅎ 진짜지?\nㅋㅋㅋㅋ 알겠어\n나중에 보자 ❤️',
+    choices: [{ id: 'A', text: '웅 이따 보자!!', susp: 0, next: 'P3_Night_Visit' }],
+  },
+  P1_Insta_Norm: {
+    delay: 6,
+    nextCheckGlobal: SYNC_DAY5_PUB,
+    message: 'ㅋㅋㅋㅋㅋ 그래?\n동생들 너무 잘 챙겨주는 거 아니야? ㅎㅎ\n이따가 봐',
+    choices: [{ id: 'A', text: 'ㅋㅋㅋㅋ 부스에서 봐!', susp: 0, next: 'P3_Night_Visit' }],
+  },
+  // 23:38 리쿠 방문 제안과 동시 진행 (둘 다 답해야 다음으로)
+  P3_Night_Visit: {
+    delay: 5,
+    nextCheckGlobal: SYNC_DAY5_NIGHT,
+    message: '오늘 일하느라 저녁도 제대로 못 먹었지\n먹고 싶은 거 포장해갈까?\n내려올래?\n내가 올라가도 되고 ㅎㅎ\n얼굴 보고 가고 싶어서 ❤️',
+    choices: [
+      { id: 'A', text: '헐 고마워 ㅠㅠ\n곧 나갈게 ❤️', susp: 0, setFlag: FLAG_DAY5_SION_VISIT, next: 'CHECK_RIKU_VISIT_CLASH' },
+      { id: 'B', text: '아 어떡해\n나 벌써 씻고 누웠어 ㅠㅠ', susp: 10, next: 'P3_Reject_Sion' },
+    ],
+  },
+  // 리쿠도 승낙했으면 리쿠 방 P4_Dead_Clash 에서 게임오버 (중복 팝업 방지로 여기선 종료)
+  CHECK_RIKU_VISIT_CLASH: {
+    delay: 4,
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_DAY5_RIKU_VISIT], to: null },
+      { none: [FLAG_DAY5_RIKU_VISIT], to: 'P3_Safe_Sion' },
+    ],
+  },
+  P3_Reject_Sion: {
+    delay: 6,
+    message: '벌써 누웠어?\n아쉽네...\n알겠어 오늘 고생 많았으니까 푹 자',
+    choices: [{ id: 'A', text: '너도 잘 자', susp: 0, next: 'end' }],
+  },
+  P3_Safe_Sion: {
+    isSystem: true,
+    alert: '집 앞에서 시온이 사 온 야식을 받으며\n다정하게 인사를 나눴습니다!',
+    message: '',
+    choices: [{ id: 'A', text: '(시온을 배웅하고 집으로 들어왔다)', susp: 0, next: 'P3_Safe_Sion_After' }],
+  },
+  P3_Safe_Sion_After: {
+    delay: 2,
+    message: '잠깐이라도 얼굴 보니까 피로가 다 풀리네 ㅎㅎ\n맛있게 먹고 푹 자 사랑해 ❤️',
+    choices: [{ id: 'A', text: '고마워 조심히 들어가 사랑해 ❤️', susp: -10, next: 'end' }],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -1702,6 +1768,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     c: fromPhases('P1_Morning', YUSHI_DAY4, SAMPLE_TIMING.c),
   },
   5: {
+    a: fromPhases('P1_Insta_Jealous', SION_DAY5, SAMPLE_TIMING.a),
     b: fromPhases('P1_Morning', RIKU_DAY5, SAMPLE_TIMING.b),
     c: fromPhases('P1_Morning', YUSHI_DAY5, SAMPLE_TIMING.c),
   },
