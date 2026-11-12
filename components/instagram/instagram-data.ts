@@ -154,14 +154,37 @@ export function shiftTime(time: string, elapsedDays: number): string {
   return `${label}${suffix}`
 }
 
-/** 1일 차 기본 스토리 샘플 */
+/** 1일 차 스토리 */
 export const STORIES: StoryItem[] = [
   story(sion, '2시간', {
-    image: { src: PLACEHOLDER_IMAGE, alt: '[스토리 이미지 설명을 입력하세요]' },
+    image: { src: '/stories/sion-day1.jpg', alt: '앞머리를 넘기고 눈썹 위까지만 찍은 시온의 근접 셀카' },
+  }),
+  story(daeyoung, '3시간', {
+    image: { src: '/stories/daeyoung-day1.jpg', alt: '검은 트레이닝복 세트를 입고 거울 셀카를 찍는 대영' },
+  }),
+  story(ryo, '5시간', {
+    image: { src: '/stories/ryo-day1.jpg', alt: '호텔 방 침대 앞에서 흰 데님 재킷을 입고 놀란 표정으로 거울 셀카를 찍는 료' },
+  }),
+  story(riku, '7시간', {
+    image: { src: '/stories/riku-day1.jpg', alt: '밤거리에서 상어 후드를 뒤집어쓰고 옆을 바라보는 리쿠' },
   }),
 ]
 
 STORIES_BY_DAY[1] = STORIES
+
+/** 2일 차: 대영 스토리 */
+STORIES_BY_DAY[2] = [
+  story(daeyoung, '4시간', {
+    image: { src: '/stories/daeyoung-day2.jpg', alt: '나무 그늘 아래 검은 나시 차림으로 앉아 옆을 보는 대영' },
+  }),
+]
+
+/** 4일 차: 대학 강의실 옆자리에서 찍힌 대영 스토리 */
+STORIES_BY_DAY[4] = [
+  story(daeyoung, '2시간', {
+    image: { src: '/stories/daeyoung-day4.jpg', alt: '강의실에서 안경을 쓰고 노트에 낙서하며 옆을 보는 대영' },
+  }),
+]
 
 export type Post = {
   id: string
@@ -337,6 +360,39 @@ export const POSTS: Post[] = [
 
 /** 홈 타임라인에는 뜨지 않고 프로필 피드에만 보이는 게시물 템플릿 (최신순) */
 export const PROFILE_ONLY_POSTS: Post[] = [
+  {
+    id: 'riku-piano-post',
+    handle: riku.id,
+    avatar: avatarOf(riku),
+    time: '2일 전',
+    images: [{ src: '/posts/riku-piano.png', alt: '연습실 피아노 앞 바닥에 앉아 휴대폰을 보는 리쿠' }],
+    caption: '',
+    likes: 1032,
+    likedBy: [sion.id, sakuya.id],
+    comments: [],
+  },
+  {
+    id: 'riku-vintage-post',
+    handle: riku.id,
+    avatar: avatarOf(riku),
+    time: '5일 전',
+    images: [{ src: '/posts/riku-vintage.png', alt: '빈티지 숍 계단 앞에서 안경과 이어폰을 끼고 회색 재킷을 여미는 리쿠' }],
+    caption: '',
+    likes: 987,
+    likedBy: [yushi.id, ryo.id],
+    comments: [],
+  },
+  {
+    id: 'riku-harbor-post',
+    handle: riku.id,
+    avatar: avatarOf(riku),
+    time: '1주 전',
+    images: [{ src: '/posts/riku-harbor.jpg', alt: '항구 앞에 앉아 아이스 아메리카노를 빨대로 마시는 리쿠' }],
+    caption: '',
+    likes: 1104,
+    likedBy: [sion.id, daeyoung.id],
+    comments: [],
+  },
   {
     id: 'sakuya-bench-post',
     handle: sakuya.id,
