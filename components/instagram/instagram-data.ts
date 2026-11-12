@@ -111,6 +111,9 @@ STORIES_BY_DAY[3] = [
     }),
     afterWork: true,
   },
+  story(sakuya, '4시간', {
+    image: { src: '/stories/sakuya-day3.png', alt: '회색 벽 앞에서 크림색 티셔츠를 입고 브이를 하는 사쿠야의 셀카' },
+  }),
 ]
 
 /** 5일 차: 점심에 대영이 여주를 태그해 올린 국밥집 스토리 (글씨 있는 사진이 먼저) */
@@ -130,6 +133,9 @@ STORIES_BY_DAY[DAEYOUNG_TAG_DAY] = [
   },
   story(sion, '3시간', {
     image: { src: '/stories/sion-day5.jpg', alt: '검은 카라 니트를 입고 휴대폰으로 얼굴을 가린 시온의 거울 셀카' },
+  }),
+  story(ryo, '5시간', {
+    image: { src: '/stories/ryo-day5.jpg', alt: '밤거리에서 헤드폰을 목에 걸고 위에서 찍은 료의 흔들린 셀카' },
   }),
 ]
 
@@ -184,12 +190,18 @@ STORIES_BY_DAY[2] = [
   story(daeyoung, '4시간', {
     image: { src: '/stories/daeyoung-day2.jpg', alt: '나무 그늘 아래 검은 나시 차림으로 앉아 옆을 보는 대영' },
   }),
+  story(yushi, '6시간', {
+    image: { src: '/stories/yushi-day2.png', alt: '현관 거울 앞에서 친구와 함께 팔을 들어 거울 셀카를 찍는 유우시' },
+  }),
 ]
 
 /** 4일 차: 대학 강의실 옆자리에서 찍힌 대영 스토리 */
 STORIES_BY_DAY[4] = [
   story(daeyoung, '2시간', {
     image: { src: '/stories/daeyoung-day4.jpg', alt: '강의실에서 안경을 쓰고 노트에 낙서하며 옆을 보는 대영' },
+  }),
+  story(sakuya, '5시간', {
+    image: { src: '/stories/sakuya-day4.png', alt: '거리에서 친구와 함께 흔들리게 찍힌 체크 셔츠 차림의 사쿠야' },
   }),
 ]
 
