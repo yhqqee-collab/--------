@@ -61,12 +61,16 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
           )}
         >
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-xs font-semibold tracking-[0.4em] text-white/50">FINAL CHOICE</p>
-            <h2 className="text-balance text-xl font-bold leading-relaxed">
-              세 사람이 나를 기다리고 있다.
+            <p className="rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-amber-300">
+              {'🍻 [동아리 전체 뒤풀이 진행 중...] (18:00 ~ 22:00) 🍻'}
+            </p>
+            <p className="mt-2 text-xs font-semibold tracking-[0.4em] text-white/50">FINAL CHOICE</p>
+            <h2 className="text-balance text-xl font-bold leading-relaxed">마지막 선택은?</h2>
+            <p className="text-pretty text-sm leading-relaxed text-white/60">
+              뒤풀이가 끝나갈 무렵, 세 사람의 시선이 당신을 향합니다.
               <br />
-              오늘 밤, 누구에게 갈까?
-            </h2>
+              오늘 밤, 누구와 함께 나가시겠습니까?
+            </p>
           </div>
           <ul className="flex w-full max-w-[260px] flex-col gap-3">
             {ENDING_CHOICES.map((choice) => (

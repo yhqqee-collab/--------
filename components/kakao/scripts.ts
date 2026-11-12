@@ -524,7 +524,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '1시 수업 발표 준비 때문에... 점심에 대본 봐야 할 것 같아... ㅠㅠ',
         susp: 15,
-        reply: '아 그래 ? / 수업 늦지 않게 얼른 와 / 옆자리 비워놨어',
+        reply: '아 그래 ? / ���업 늦지 않게 얼른 와 / 옆자리 비워놨어',
         next: 'P2_RikuFlow_B',
         setFlag: FLAG_YUSHI_EXCUSE_SOLO,
       },
@@ -743,7 +743,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
   },
   P3_Night_Start: {
     nextCheckGlobal: SYNC_DAY2_NIGHT,
-    message: '짐 정리하느라 고생했어 ㅋㅋ\n왜 봐도봐도 보고 싶지\n잠깐 나올래?',
+    message: '짐 정리하느라 고생했어 ㅋㅋ\n왜 봐도봐도 보고 싶지\n잠깐 나올���?',
     choices: [
       {
         id: 'A',
@@ -963,7 +963,7 @@ const SION_DAY3: Record<string, PhaseNode> = {
   // (components/instagram/insta-comment-choices.ts → SION_DAY3_POST_ID)
   P2_Insta: {
     nextCheckGlobal: SYNC_DAY3_EVENING,
-    message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용산��원에서 �� 거랑\n역에��� 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
+    message: '나 방금 인스타 올렸어 ㅎㅎ\n아까 용����원에서 �� 거랑\n역에��� 찍은 거 ㅎㅎ\n댓글 달아주면 안 돼?\n이정도는 티 안 날 거야 ㅎㅎ',
     choices: [{ id: 'A', text: '오키ㅣㅣ', susp: 0, next: 'P3_Evening' }],
   },
   // 인스타 댓글 → 유우시 카톡이 도착한 뒤 약 15초 뒤 도착 (delay 는 TIME_SCALE 0.5 적용)
@@ -1354,7 +1354,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n내 착각이지?',
     choices: [
       { id: 'A', text: '시온이 원래 잘 챙겨주잖아\n오늘 내 눈엔 리쿠밖에 안 보였어 ❤️', susp: -10, next: 'P4_Night_Good' },
-      { id: 'B', text: '어차피 다같이 있는데 뭐 ~\n신경쓰지 마 ㅎㅎ', susp: 5, next: 'P4_Night_Bad' },
+      { id: 'B', text: '어차피 다같이 ���는데 뭐 ~\n신경쓰지 마 ㅎㅎ', susp: 5, next: 'P4_Night_Bad' },
     ],
   },
   P4_Night_Good: {
@@ -1641,7 +1641,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
       { id: 'B', text: '헉\n나 지금 씻고 누워서 못 나가 ㅠㅠ\n마음만 받을게\n미아내용 ㅜ', susp: 10, next: 'P4_Reject_Riku' },
     ],
   },
-  // 시온 방문도 승낙했으면 즉사, 아니면 ���쿠 단독 만남
+  // 시온 방문도 승낙했으면 즉사, ��니면 ���쿠 단독 만남
   CHECK_SION_VISIT_CLASH: {
     delay: 4,
     message: '',
@@ -1943,7 +1943,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
     delay: 2,
     nextCheckGlobal: SYNC_DAY6_NIGHT,
     transitionText: DAY6_PUB_TRANSITION,
-    message: '아 의리 ㅎㅎ\n편지 너무 좋다 ~~\n아껴 먹을게\n고마워',
+    message: '아 의리 ㅎㅎ\n편지 너무 좋��� ~~\n아껴 먹을게\n고마워',
     choices: [{ id: 'A', text: '헤헤 이따 집 가서 맛있게 먹어 ❤️', susp: 0, reply: '응 ㅎㅎ', next: 'P3_Night_Cling' }],
   },
   P2_Ribbon_Doubt: {
@@ -1984,6 +1984,37 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
   },
 }
 
+/* ─────────────────────── 7일 차 (축제 마지막 날 · 뒤풀이) ───────────────────────
+ * 선택지 없이 시온(0초) → 리쿠(5초) → 유우시(10초) 순으로 카톡이 도착하고,
+ * 마지막 카톡 이후 최종 선택 화면이 열립니다.
+ */
+const DAY7_TIMING: Record<'a' | 'b' | 'c', PhaseTiming> = {
+  a: { initialDelay: 0, phaseDelay: 30, replyDelayMs: 2000, workEndDelay: 0 },
+  b: { initialDelay: 10, phaseDelay: 30, replyDelayMs: 2000, workEndDelay: 0 },
+  c: { initialDelay: 20, phaseDelay: 30, replyDelayMs: 2000, workEndDelay: 0 },
+}
+
+const SION_DAY7: Record<string, PhaseNode> = {
+  P1_Morning: {
+    message: '일어났어?\n어제에 한 약속 안 잊었지?\n이따 뒤풀이 끝나고 우리 집 가는 거다 ❤️',
+    choices: [],
+  },
+}
+
+const RIKU_DAY7: Record<string, PhaseNode> = {
+  P1_Morning: {
+    message: '여주야아 잘 잣어?? ㅎㅎ\n오늘 저녁에 뒤풀이당!!\n어제 약속한 대로 이따 뒤풀이 끝나구\n꼭 나랑만 잇어야 해 알겟지?! ❤️',
+    choices: [],
+  },
+}
+
+const YUSHI_DAY7: Record<string, PhaseNode> = {
+  P1_Morning: {
+    message: '일어났어 ?\n오늘 부스 정리만 하면 축제 진짜 끝이네\n이따 뒤풀이 끝나고 나랑 따로 보기로 한 거 잊지 마 ^_^',
+    choices: [],
+  },
+}
+
 export const SCRIPTS: Record<string, Script> = {
   ...sampleDay(),
   a: fromPhases('P1_Start', SION_DAY1, SAMPLE_TIMING.a),
@@ -2020,7 +2051,11 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     b: fromPhases('P1_Fridge_Find', RIKU_DAY6, SAMPLE_TIMING.b),
     c: fromPhases('P1_Morning', YUSHI_DAY6, SAMPLE_TIMING.c),
   },
-  7: sampleDay(),
+  7: {
+    a: fromPhases('P1_Morning', SION_DAY7, DAY7_TIMING.a),
+    b: fromPhases('P1_Morning', RIKU_DAY7, DAY7_TIMING.b),
+    c: fromPhases('P1_Morning', YUSHI_DAY7, DAY7_TIMING.c),
+  },
 }
 
 /* ──────────── 단톡방 이벤트 ───────────── */
