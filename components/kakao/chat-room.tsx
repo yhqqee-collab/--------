@@ -427,9 +427,9 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                     ? { ...item, unread: count }
                     : item,
                 )
-          return [...lowered, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel(), unread: count }]
+          return [...lowered, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel(), unread: count, images: line.images }]
         })
-        latest.current.onIncoming(`${line.sender}: ${text}`)
+        latest.current.onIncoming(`${line.sender}: ${line.images ? '사진을 보냈습니다.' : text}`)
         vibrate()
         if (latest.current.active) {
           setNewBadge(true)
@@ -924,7 +924,21 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                 <div className={cn('flex min-w-0 flex-col', mine ? 'items-end' : 'items-start')}>
                   {!mine && first && <span className="mb-[4px] text-[12px] text-[#3c4a57]">{senderName}</span>}
                   <div className={cn('flex items-end gap-[5px]', mine && 'flex-row-reverse')}>
-                    {typeof item.image === 'string' ? (
+                    {item.images?.length ? (
+                      <div className="grid w-[220px] grid-cols-2 gap-[2px] overflow-hidden rounded-[12px] bg-white">
+                        {item.images.map((src, index) => (
+                          <button
+                            key={src}
+                            type="button"
+                            onClick={() => setViewer(src)}
+                            className="aspect-[3/4] overflow-hidden transition-opacity active:opacity-80"
+                            aria-label={`${senderName}님이 보낸 사진 ${index + 1} 크게 보기`}
+                          >
+                            <Image src={src} alt="" width={1658} height={2210} className="size-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : typeof item.image === 'string' ? (
                       <button
                         type="button"
                         onClick={() => setViewer(item.image as string)}

@@ -3,7 +3,7 @@ import { CHARACTERS, CLUB_CHAT_MEMBERS, CLUB_CHAT_NAME, GROUP_CHAT_NAME, GROUP_M
 export type ChatItem =
   | { type: 'date'; label: string }
   | { type: 'break' }
-  | { type: 'msg'; from: 'me' | 'them'; text: string; time: string; unread?: boolean | number; sender?: string; image?: boolean | string }
+  | { type: 'msg'; from: 'me' | 'them'; text: string; time: string; unread?: boolean | number; sender?: string; image?: boolean | string; images?: string[] }
 
 export type Chat = {
   id: string
@@ -202,7 +202,7 @@ export const CHATS: Chat[] = [
         [T, '저녁엔 술도 좀 마시구 ㅎㅎ'],
       ]),
       ...block('오후 4:23', [
-        [M, '헐 완전 좋아!! 목요일��� 바라보고 버틴다 진짜 ㅠㅠ ❤️'],
+        [M, '헐 완전 좋아!! 목요일����� 바라보고 버틴다 진짜 ㅠㅠ ❤️'],
       ]),
       ...block('오후 4:25', [
         [T, '기대해 ㅋㅋㅋ'],
