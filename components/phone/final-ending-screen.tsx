@@ -31,6 +31,9 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
   const lines = ending?.lines.map((line) => personalizeText(line, owner)) ?? []
   const allShown = ending !== null && visibleLines >= lines.length
   const obsessive = ending?.type === 'obsessive'
+  const breakup = ending?.type === 'breakup'
+  const accent = obsessive ? 'text-[#ff9a9a]' : breakup ? 'text-[#b8c4d6]' : 'text-[#ffd9e4]'
+  const badge = obsessive ? 'OBSESSION ENDING' : breakup ? 'BREAKUP ENDING' : 'HAPPY ENDING'
 
   function choose(id: EndingRoute) {
     setRoute(id)
@@ -105,8 +108,7 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
                 className={cn(
                   'animate-in fade-in slide-in-from-bottom-1 whitespace-pre-line text-pretty text-[14px] leading-relaxed',
                   isDialogue ? 'font-semibold text-white' : 'text-white/65',
-                  isDialogue && obsessive && 'text-[#ff9a9a]',
-                  isDialogue && !obsessive && 'text-[#ffd9e4]',
+                  isDialogue && accent,
                 )}
               >
                 {line}
@@ -123,9 +125,7 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
 
       {ending && allShown && (
         <div className="flex animate-in flex-col items-center gap-5 px-8 pb-16 pt-2 text-center fade-in duration-1000">
-          <p className={cn('text-xs font-semibold tracking-[0.4em]', obsessive ? 'text-[#ff9a9a]' : 'text-[#ffd9e4]')}>
-            {obsessive ? 'OBSESSIVE END' : 'HAPPY END'}
-          </p>
+          <p className={cn('text-xs font-semibold tracking-[0.3em]', accent)}>{badge}</p>
           <h2 className="text-balance text-lg font-black leading-snug">{ending.title}</h2>
           <div className="flex w-full max-w-[240px] flex-col gap-3 border-t border-white/10 pt-5">
             <button
