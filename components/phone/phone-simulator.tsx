@@ -179,7 +179,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
     setCurrentDay((day) => day + 1)
     setWorkPhase('before')
   }
-  const [myStoryDay, setMyStoryDay] = useState<number | null>(null)
+  const [myStoryDay] = useState<number | null>(null)
   const hasMyStory = myStoryDay === currentDay
   const [workPhase, setWorkPhase] = useState<'before' | 'working' | 'after'>('before')
   const handlePreWorkDone = useCallback(() => {
@@ -199,8 +199,8 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
     done?.()
   }, [])
   const handleWorkDone = useCallback(() => {
-    setWorkPhase('after')
-    if (currentDay === 1) setMyStoryDay(currentDay)
+  setWorkPhase('after')
+
     // 대영 국밥집 스토리는 afterWork 라서 전환이 끝난 뒤에 태그 알림을 띄움
     if (currentDay === DAEYOUNG_TAG_DAY) {
       window.setTimeout(

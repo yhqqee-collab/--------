@@ -22,9 +22,9 @@ const avatarOf = (person: { name: string }) =>
 /** 여주(휴대폰 주인) 프로필 및 기본 스토리 */
 export const MY_AVATAR = OWNER_AVATAR
 export const MY_PROFILE = {
-  followers: 100,
-  following: 100,
-  bio: '[내 프로필 소개글을 입력하세요]',
+  followers: 315,
+  following: 321,
+  bio: '',
 }
 export const MY_STORY = {
   src: PLACEHOLDER_IMAGE,
@@ -318,44 +318,6 @@ export const POSTS: Post[] = [
     likedBy: [riku.id, yushi.id],
     comments: [],
   },
-  {
-    id: 'sample-post-a',
-    handle: sion.id,
-    avatar: avatarOf(sion),
-    time: '2시간 전',
-    location: '[위치 정보 입력]',
-    images: [{ src: PLACEHOLDER_IMAGE, alt: '[게시물 이미지 설명을 입력하세요]' }],
-    caption: '[게시물 본문 캡션을 입력하세요]',
-    likes: 120,
-    likedBy: [yushi.id, riku.id],
-    comments: [
-      { name: MY_HANDLE, mine: true, text: '[내가 남긴 댓글 입력]', time: '1시간', likes: 2 },
-      { name: daeyoung.id, text: '[등장인물 댓글 입력]', time: '30분', likes: 1 },
-    ],
-  },
-  {
-    id: 'sample-post-b',
-    handle: riku.id,
-    avatar: avatarOf(riku),
-    time: '5시간 전',
-    images: [{ src: PLACEHOLDER_IMAGE, alt: '[게시물 이미지 설명을 입력하세요]' }],
-    caption: '[게시물 본문 캡션을 입력하세요]',
-    likes: 210,
-    likedBy: [sakuya.id, ryo.id],
-    comments: [],
-    commentsDisabled: true,
-  },
-  {
-    id: 'sample-post-c',
-    handle: yushi.id,
-    avatar: avatarOf(yushi),
-    time: '1일 전',
-    images: [{ src: PLACEHOLDER_IMAGE, alt: '[게시물 이미지 설명을 입력하세요]' }],
-    caption: '[게시물 본문 캡션을 입력하세요]',
-    likes: 180,
-    likedBy: [sion.id, sakuya.id],
-    comments: [],
-  },
 ]
 
 /** 홈 타임라인에는 뜨지 않고 프로필 피드에만 보이는 게시물 템플릿 (최신순) */
@@ -394,6 +356,17 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     comments: [],
   },
   {
+    id: 'sion-coffee-post',
+    handle: sion.id,
+    avatar: avatarOf(sion),
+    time: '3주 전',
+    images: [{ src: '/posts/sion-coffee.png', alt: '도심 거리에서 검은 민소매 차림으로 커피를 마시는 금발의 시온' }],
+    caption: '',
+    likes: 876,
+    likedBy: [riku.id, daeyoung.id],
+    comments: [],
+  },
+  {
     id: 'sakuya-bench-post',
     handle: sakuya.id,
     avatar: avatarOf(sakuya),
@@ -412,22 +385,11 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     avatar: avatarOf(sakuya),
     time: '1주 전',
     images: [
-      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹는 분홍 티셔츠의 사쿠야' },
+      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹��� 분홍 티셔츠의 사쿠야' },
     ],
     caption: '',
     likes: 389,
     likedBy: [riku.id, sion.id],
-    comments: [],
-  },
-  {
-    id: 'profile-only-sample',
-    handle: sion.id,
-    avatar: avatarOf(sion),
-    time: '1주 전',
-    images: [{ src: PLACEHOLDER_IMAGE, alt: '[프로필 전용 게시물 이미지 설명]' }],
-    caption: '[프로필 전용 게시물 캡��]',
-    likes: 150,
-    likedBy: [riku.id, daeyoung.id],
     comments: [],
   },
 ]
@@ -449,9 +411,9 @@ export function postsOf(handle: string): Post[] {
 }
 
 export const PROFILES: Record<string, UserProfileData> = {
-  [sion.id]: profile(sion, 612, 298, ''),
+  [sion.id]: profile(sion, 3189, 298, ''),
   [riku.id]: profile(riku, 1203, 341, ''),
-  [yushi.id]: profile(yushi, 845, 402, ''),
+  [yushi.id]: profile(yushi, 121, 121, ''),
   [sakuya.id]: profile(sakuya, 730, 388, ''),
   [ryo.id]: profile(ryo, 521, 476, ''),
   [daeyoung.id]: profile(daeyoung, 389, 412, ''),
