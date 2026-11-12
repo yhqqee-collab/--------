@@ -168,6 +168,9 @@ export const STORIES: StoryItem[] = [
   story(riku, '7시간', {
     image: { src: '/stories/riku-day1.jpg', alt: '밤거리에서 상어 후드를 뒤집어쓰고 옆을 바라보는 리쿠' },
   }),
+  story(yushi, '8시간', {
+    image: { src: '/stories/yushi-day1.jpg', alt: '캠퍼스 길가에서 남색 과잠을 입고 책을 든 채 옆을 바라보는 유우시' },
+  }),
 ]
 
 STORIES_BY_DAY[1] = STORIES
