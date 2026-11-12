@@ -122,11 +122,15 @@ STORIES_BY_DAY[DAEYOUNG_TAG_DAY] = [
       images: [
         { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집에서 숟가락을 문 채 정면을 보는 대영, "여주 누나가 찍어줌" 문구' },
         { src: '/stories/daeyoung-day5-2.jpg', alt: '국밥집 메뉴판 아래에서 숟가락을 물고 옆을 보는 대영' },
+        { src: '/stories/daeyoung-day5-3.jpg', alt: '커튼 앞에서 흑백 래글런 티셔츠를 입고 살짝 웃는 대영의 셀카' },
       ],
     }),
     afterWork: true,
     mentionOwner: true,
   },
+  story(sion, '3시간', {
+    image: { src: '/stories/sion-day5.jpg', alt: '검은 카라 니트를 입고 휴대폰으로 얼굴을 가린 시온의 거울 셀카' },
+  }),
 ]
 
 /** 4일 차: 유우시 스토리 태그를 허락하면 5초 뒤 올라오는 밀크티 스토리 (플레이어 아이디 멘션) */
@@ -157,7 +161,7 @@ export function shiftTime(time: string, elapsedDays: number): string {
 /** 1일 차 스토리 */
 export const STORIES: StoryItem[] = [
   story(sion, '2시간', {
-    image: { src: '/stories/sion-day1.jpg', alt: '앞머리를 넘기고 눈썹 위까지만 찍은 시온의 근접 셀카' },
+    image: { src: '/stories/sion-day1.jpg', alt: '줄무늬 카라 셔츠를 입고 얼굴 반쪽만 찍은 시온의 셀카' },
   }),
   story(daeyoung, '3시간', {
     image: { src: '/stories/daeyoung-day1.jpg', alt: '검은 트레이닝복 세트를 입고 거울 셀카를 찍는 대영' },

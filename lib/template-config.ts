@@ -57,7 +57,7 @@ export const GROUP_MEMBERS = {
   sujin: { name: '박수진' },
   yuna: { name: '이윤아' },
   daeyoung: { name: '김대영', handle: 'dddaaaeee', avatar: '/avatars/daeyoung.jpg' },
-  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.png' },
+  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.jpg' },
   ryo: { name: '료', handle: 'ryoryoryo', avatar: '/avatars/ryo.jpg' },
 } satisfies Record<string, { name: string; handle?: string; avatar?: string }>
 
