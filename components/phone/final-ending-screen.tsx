@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ENDING_CHOICES, endingFor, type EndingRoute } from '@/components/kakao/endings'
+import { ENDING_CHOICES, canUnlockHarem, resolveFinalEnding, type FinalChoice } from '@/components/kakao/endings'
 import { personalizeText } from '@/components/kakao/replies'
 import { cn } from '@/lib/utils'
 
@@ -19,7 +19,7 @@ const LINE_FADE_MS = 700
 
 export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRetryDay, onRestart, onViewHistory }: FinalEndingScreenProps) {
   const [shown, setShown] = useState(false)
-  const [route, setRoute] = useState<EndingRoute | null>(null)
+  const [route, setRoute] = useState<FinalChoice | null>(null)
   const [visibleLines, setVisibleLines] = useState(0)
 
   useEffect(() => {
@@ -27,12 +27,20 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
     return () => window.clearTimeout(id)
   }, [])
 
-  const ending = route ? endingFor(route, suspicion[route] ?? 0) : null
+  const haremUnlocked = canUnlockHarem(suspicion)
+  const ending = route ? resolveFinalEnding(route, suspicion) : null
   const lines = ending?.lines.map((line) => personalizeText(line, owner)) ?? []
   const allShown = ending !== null && visibleLines >= lines.length
-  const obsessive = ending?.type === 'obsessive'
+  const endingStyle = {
+    happy: { accent: 'text-[#ffd9e4]', badge: 'HAPPY ENDING' },
+    obsessive: { accent: 'text-[#ff9a9a]', badge: 'OBSESSION ENDING' },
+    breakup: { accent: 'text-[#b8c4d6]', badge: 'BREAKUP ENDING' },
+    harem: { accent: 'text-[#ffd27a]', badge: 'HIDDEN ENDING' },
+    catastrophe: { accent: 'text-[#ff5c5c]', badge: 'CATASTROPHE ENDING' },
+  }[ending?.type ?? 'happy']
+  const { accent, badge } = endingStyle
 
-  function choose(id: EndingRoute) {
+  function choose(id: FinalChoice) {
     setRoute(id)
     window.setTimeout(() => setVisibleLines(1), 1200)
   }
@@ -61,12 +69,16 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
           )}
         >
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-xs font-semibold tracking-[0.4em] text-white/50">FINAL CHOICE</p>
-            <h2 className="text-balance text-xl font-bold leading-relaxed">
-              세 사람이 나를 기다리고 있다.
+            <p className="rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-amber-300">
+              {'🍻 [동아리 전체 뒤풀이 진행 중...] (18:00 ~ 22:00) 🍻'}
+            </p>
+            <p className="mt-2 text-xs font-semibold tracking-[0.4em] text-white/50">FINAL CHOICE</p>
+            <h2 className="text-balance text-xl font-bold leading-relaxed">마지막 선택은?</h2>
+            <p className="text-pretty text-sm leading-relaxed text-white/60">
+              뒤풀이가 끝나갈 무렵, 세 사람의 시선이 당신을 향합니다.
               <br />
-              오늘 밤, 누구에게 갈까?
-            </h2>
+              오늘 밤, 누구와 함께 나가시겠습니까?
+            </p>
           </div>
           <ul className="flex w-full max-w-[260px] flex-col gap-3">
             {ENDING_CHOICES.map((choice) => (
@@ -80,6 +92,17 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
                 </button>
               </li>
             ))}
+            {haremUnlocked && (
+              <li className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => choose('harem')}
+                  className="min-h-12 w-full rounded-xl border border-amber-300/60 bg-amber-300/10 px-5 py-3 text-[15px] font-bold text-amber-200 transition-colors hover:bg-amber-300 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
+                >
+                  {'✨ 셋 다 놓칠 수 없어 (어장 완성)'}
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}
@@ -101,8 +124,7 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
                 className={cn(
                   'animate-in fade-in slide-in-from-bottom-1 whitespace-pre-line text-pretty text-[14px] leading-relaxed',
                   isDialogue ? 'font-semibold text-white' : 'text-white/65',
-                  isDialogue && obsessive && 'text-[#ff9a9a]',
-                  isDialogue && !obsessive && 'text-[#ffd9e4]',
+                  isDialogue && accent,
                 )}
               >
                 {line}
@@ -119,9 +141,7 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
 
       {ending && allShown && (
         <div className="flex animate-in flex-col items-center gap-5 px-8 pb-16 pt-2 text-center fade-in duration-1000">
-          <p className={cn('text-xs font-semibold tracking-[0.4em]', obsessive ? 'text-[#ff9a9a]' : 'text-[#ffd9e4]')}>
-            {obsessive ? 'OBSESSIVE END' : 'HAPPY END'}
-          </p>
+          <p className={cn('text-xs font-semibold tracking-[0.3em]', accent)}>{badge}</p>
           <h2 className="text-balance text-lg font-black leading-snug">{ending.title}</h2>
           <div className="flex w-full max-w-[240px] flex-col gap-3 border-t border-white/10 pt-5">
             <button

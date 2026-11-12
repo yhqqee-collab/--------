@@ -1,6 +1,6 @@
 'use client'
 
-import { Beef, ChevronRight, Coffee, CupSoda, Drumstick, Fish, Flame, MapPin, Receipt, Salad, Soup } from 'lucide-react'
+import { ChevronRight, MapPin, Receipt } from 'lucide-react'
 import { won } from './baemin-data'
 import { MINT, TopBar } from './baemin-store'
 
@@ -8,7 +8,7 @@ export type DeliveryOrder = {
   id: string
   date: string
   storeName: string
-  icon: typeof Soup
+  thumbnail: string
   items: { name: string; price: number }[]
   deliveryTip: number
   address: string
@@ -20,7 +20,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-8',
     date: '11월 3일 (화) 오후 6:20',
     storeName: '춘리마라탕 대학로점',
-    icon: Soup,
+    thumbnail: '/images/baemin/orders/malatang.png',
     items: [
       { name: '마라탕 1인분 (소고기 추가)', price: 11000 },
       { name: '꿔바로우 미니', price: 6000 },
@@ -33,7 +33,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-7',
     date: '11월 1일 (일) 오후 8:10',
     storeName: '교촌치킨 대학로점',
-    icon: Drumstick,
+    thumbnail: '/images/baemin/kyochon.png',
     items: [
       { name: '허니콤보 1마리', price: 23000 },
       { name: '국물맵떡 + 치즈볼 세트', price: 8500 },
@@ -46,7 +46,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-6',
     date: '10월 28일 (수) 오후 1:30',
     storeName: '슬로우캘리 정문점',
-    icon: Salad,
+    thumbnail: '/images/baemin/orders/poke.png',
     items: [
       { name: '클래식 연어 포케', price: 12500 },
       { name: '제로콜라 355ml', price: 2000 },
@@ -59,7 +59,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-5',
     date: '10월 25일 (일) 오후 7:30',
     storeName: '공차 대학로점',
-    icon: CupSoda,
+    thumbnail: '/images/baemin/orders/gongcha.png',
     items: [
       { name: '타로 밀크티 + 펄 (L)', price: 5700 },
       { name: '딸기 쿠키 스무디', price: 5900 },
@@ -73,7 +73,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-4',
     date: '10월 23일 (금) 오후 8:40',
     storeName: '바른생육회 대학로점',
-    icon: Beef,
+    thumbnail: '/images/baemin/orders/yukhoe.png',
     items: [{ name: '1인 육회비빔밥 세트 + 소고기무국', price: 13500 }],
     deliveryTip: 2500,
     address: '정문 해솔원룸 401호',
@@ -83,7 +83,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-3',
     date: '10월 21일 (수) 오후 2:40',
     storeName: '투썸플레이스 정문점',
-    icon: Coffee,
+    thumbnail: '/images/baemin/orders/twosome.png',
     items: [
       { name: '아이스 아메리카노 (L)', price: 5000 },
       { name: '아이스 바닐라라떼 (L)', price: 5900 },
@@ -97,7 +97,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-2',
     date: '10월 18일 (일) 오후 7:45',
     storeName: '동대문엽기떡볶이 대학로점',
-    icon: Flame,
+    thumbnail: '/images/baemin/yupdduk.png',
     items: [
       { name: '엽기반반 (모짜렐라치즈 추가)', price: 17000 },
       { name: '주먹김밥', price: 2000 },
@@ -111,7 +111,7 @@ export const DELIVERY_ORDERS: DeliveryOrder[] = [
     id: 'ord-1',
     date: '10월 16일 (금) 오후 7:15',
     storeName: '스시히로 정문점',
-    icon: Fish,
+    thumbnail: '/images/baemin/orders/sushi.png',
     items: [{ name: '모둠초밥 10p + 미니우동', price: 15000 }],
     deliveryTip: 2000,
     address: '정문 해솔원룸 401호',
@@ -132,7 +132,6 @@ export function OrderHistoryList({ onSelect }: { onSelect: (order: DeliveryOrder
       </header>
       <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3 pb-6">
         {DELIVERY_ORDERS.map((order) => {
-          const Icon = order.icon
           const summary = order.items.length > 1 ? `${order.items[0].name} 외 ${order.items.length - 1}개` : order.items[0].name
           return (
             <li key={order.id}>
@@ -149,9 +148,11 @@ export function OrderHistoryList({ onSelect }: { onSelect: (order: DeliveryOrder
                   </span>
                 </span>
                 <span className="flex items-center gap-3">
-                  <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#E6F8F7]" style={{ color: MINT }}>
-                    <Icon aria-hidden className="size-6" />
-                  </span>
+                  <img
+                    src={order.thumbnail}
+                    alt=""
+                    className="size-12 shrink-0 rounded-xl bg-[#E6F8F7] object-cover"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[15px] font-extrabold">{order.storeName}</span>
                     <span className="mt-0.5 block truncate text-[13px] text-[#666]">{`${summary} · ${won(orderTotal(order))}`}</span>

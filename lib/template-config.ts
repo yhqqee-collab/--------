@@ -57,7 +57,7 @@ export const GROUP_MEMBERS = {
   sujin: { name: '박수진' },
   yuna: { name: '이윤아' },
   daeyoung: { name: '김대영', handle: 'dddaaaeee', avatar: '/avatars/daeyoung.jpg' },
-  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.png' },
+  sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.jpg' },
   ryo: { name: '료', handle: 'ryoryoryo', avatar: '/avatars/ryo.jpg' },
 } satisfies Record<string, { name: string; handle?: string; avatar?: string }>
 
@@ -77,7 +77,7 @@ export const PERSON_AVATARS: Record<string, string> = Object.fromEntries(
 
 /** 인스타그램에서만 카카오톡과 다른 프로필 사진을 쓰는 인물 (이름 기준). */
 export const INSTAGRAM_AVATAR_OVERRIDES: Record<string, string> = {
-  오시온: '/avatars/sion-insta.png',
+  오시온: '/avatars/sion-insta.jpg',
   유우시: '/avatars/yushi.jpg',
 }
 

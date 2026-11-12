@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { INSTA_CROSS_MESSAGE_EVENT } from '@/components/instagram/insta-comment-choices'
 import { replaceUserName } from '@/lib/korean-name'
 import { OWNER_AVATAR } from '@/lib/template-config'
 import { cn } from '@/lib/utils'
@@ -17,7 +18,10 @@ import {
   SPAM_START_DELAY_MS,
   SUSPICION_100_GAME_OVER_TEXT,
   syncMembers,
+  INSTA_SYNC_SOURCE,
+  SYNC_EXTERNAL_SOURCES,
   type SpamNotification,
+  type CrossMessage,
 } from './scripts'
 import { INITIAL_SUSPICION, turnLimit } from './suspicion'
 
@@ -54,9 +58,17 @@ type KakaoAppProps = {
   /** 있으면 이 일차 시작 시점의 상태에서 이어서 시작합니다 */
   snapshot?: DaySnapshot | null
   onDaySnapshot?: (snapshot: DaySnapshot) => void
+  /** 단톡방 단계 사이의 시간 경과 팝업을 띄우고, 닫히면 done 을 호출합니다 */
+  onInterlude?: (text: string, done: () => void) => void
+  onFlag?: (flag: string) => void
 }
 
-export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, onBusted, onDayComplete, onSpamStart, onSpam, clockStarted = false, workEnded = false, onPreWorkDone, day = 1, snapshot, onDaySnapshot }: KakaoAppProps) {
+export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, onBusted, onDayComplete, onSpamStart, onSpam, clockStarted = false, workEnded = false, onPreWorkDone, day = 1, snapshot, onDaySnapshot, onInterlude, onFlag }: KakaoAppProps) {
+  const interludeCallbackRef = useRef(onInterlude)
+  interludeCallbackRef.current = onInterlude
+  const flagCallbackRef = useRef(onFlag)
+  flagCallbackRef.current = onFlag
+  const interludeShownRef = useRef(new Set<number>())
   const [resume] = useState(() => (snapshot ? cloneSnapshot(snapshot) : null))
   const completedPreWorkRef = useRef(new Set<string>())
   const preWorkFiredRef = useRef(false)
@@ -197,6 +209,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     setHeldAt({})
     setStagesPlayed(0)
     setStageCue(0)
+    interludeShownRef.current = new Set()
   }, [day])
 
   const [heldAt, setHeldAt] = useState<Record<string, string>>({})
@@ -225,7 +238,17 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     }
     const holds = stages[stagesPlayed].holdNodes
     const ready = manIds.every((id) => completedScripts.has(id) || !holds[id] || heldAt[id] === holds[id])
-    if (ready) setStageCue(stagesPlayed + 1)
+    if (!ready) return
+    const stageIndex = stagesPlayed
+    const interlude = stages[stageIndex].interlude
+    const showInterlude = interludeCallbackRef.current
+    if (!interlude || !showInterlude) {
+      setStageCue(stageIndex + 1)
+      return
+    }
+    if (interludeShownRef.current.has(stageIndex)) return
+    interludeShownRef.current.add(stageIndex)
+    showInterlude(interlude, () => setStageCue((current) => Math.max(current, stageIndex + 1)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heldAt, completedScripts, stagesPlayed, stageCue, clockStarted, day, stagedGroupId, stagesSkipped])
 
@@ -233,7 +256,8 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     const answered = syncAnswersRef.current.get(key) ?? new Set<string>()
     answered.add(id)
     syncAnswersRef.current.set(key, answered)
-    if (!syncMembers(dayRef.current, key).every((member) => answered.has(member))) return
+    const required = [...syncMembers(dayRef.current, key), ...(SYNC_EXTERNAL_SOURCES[key] ?? [])]
+    if (!required.every((member) => answered.has(member))) return
     setReadySyncs((current) => new Set(current).add(key))
   }, [])
 
@@ -268,6 +292,25 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     preWorkFiredRef.current = true
     preWorkCallbackRef.current?.()
   }, [])
+
+  const handleCrossMessage = useCallback(
+    ({ chat, texts, delayMs, delta, sync, setFlag }: CrossMessage) => {
+      window.setTimeout(() => {
+        if (bustedRef.current) return
+        if (setFlag) flagsRef.current.add(setFlag)
+        if (chat && texts.length) deliver(chat, texts, { badge: true })
+        if (chat && delta) changeSuspicion(chat, delta)
+        if (sync) handleSync(INSTA_SYNC_SOURCE, sync)
+      }, delayMs)
+    },
+    [deliver, changeSuspicion, handleSync],
+  )
+
+  useEffect(() => {
+    const onInstaComment = (event: Event) => handleCrossMessage((event as CustomEvent<CrossMessage>).detail)
+    window.addEventListener(INSTA_CROSS_MESSAGE_EVENT, onInstaComment)
+    return () => window.removeEventListener(INSTA_CROSS_MESSAGE_EVENT, onInstaComment)
+  }, [handleCrossMessage])
 
   const handleIncoming = useCallback((id: string, text: string) => {
     setPreviews((current) => ({ ...current, [id]: text }))
@@ -359,6 +402,9 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               })()}
               gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
               onReply={() => markReplied(chat.id)}
+              onCrossMessage={handleCrossMessage}
+              onFlag={(flag) => flagCallbackRef.current?.(flag)}
+              onInterlude={(text, done) => (interludeCallbackRef.current ? interludeCallbackRef.current(text, done) : done())}
             />
           </div>
         )

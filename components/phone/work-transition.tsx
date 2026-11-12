@@ -32,7 +32,7 @@ export function WorkTransition({ text, onDone }: WorkTransitionProps) {
         phase === 'show' ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <p className="text-balance text-center text-[17px] font-semibold leading-relaxed tracking-[-0.01em] text-white">{text}</p>
+      <p className="whitespace-pre-line text-balance text-center text-[17px] font-semibold leading-relaxed tracking-[-0.01em] text-white">{text}</p>
     </section>
   )
 }

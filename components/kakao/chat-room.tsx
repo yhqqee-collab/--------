@@ -9,7 +9,7 @@ import { PERSON_AVATARS } from '@/lib/template-config'
 import { Avatar } from './avatar'
 import type { Chat, ChatItem } from './chat-data'
 import { personalizeText } from './replies'
-import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type GroupChoice, type GroupLine } from './scripts'
+import { ME_LINE_PREFIX, dayDivider, fillMetName, groupScriptsForDay, isActionText, isDoomNode, pauseDuration, replyFor, resolveNode, scriptsForDay, type Choice, type CrossMessage, type GroupChoice, type GroupLine } from './scripts'
 import { getStage, STAGE_LABEL, type SuspicionStage } from './suspicion'
 import { SuspicionAlert } from './suspicion-alert'
 
@@ -32,6 +32,7 @@ type Batch = {
   dateLabel?: string
   gameOver?: boolean
   gameOverAlert?: string
+  interludeShown?: boolean
 }
 
 const NO_SYNCS: ReadonlySet<string> = new Set()
@@ -81,6 +82,10 @@ type ChatRoomProps = {
   /** 지정하면 startGate 가 열린 뒤 이 시간(ms) 후 첫 카톡이 도착 */
   gatedStartMs?: number
   onReply?: () => void
+  onCrossMessage?: (message: CrossMessage) => void
+  onInterlude?: (text: string, done: () => void) => void
+  /** 선택지가 setFlag 를 켰을 때 (폰 전체 연출용) */
+  onFlag?: (flag: string) => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -126,7 +131,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage, onInterlude, onFlag }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -150,6 +155,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const [pendingPhase, setPendingPhase] = useState(delayedStart)
   const startedRef = useRef(false)
   const gatedNextRef = useRef<string | null>(null)
+  const gatedWaitRef = useRef<{ sync?: string; waitOthers: boolean; delayMs: number } | null>(null)
   const [waiting, setWaiting] = useState(false)
   const [picked, setPicked] = useState<number | null>(null)
   const [typing, setTyping] = useState(false)
@@ -179,8 +185,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const pendingNodeRef = useRef<string | null>(null)
 
   const scriptDoneRef = useRef(false)
-  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply })
-  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply }
+  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude })
+  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude }
 
   const hasSuspicion = suspicion !== undefined
   const items: ChatItem[] = [...chat.items, ...added]
@@ -320,6 +326,16 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       heldCallbackRef.current?.(batch.enterNode)
       return
     }
+    const interlude = batch.enterNode && !batch.interludeShown ? script?.nodes[batch.enterNode]?.interlude : undefined
+    if (interlude) {
+      schedule(Math.max(0, batch.dueAt - Date.now()), () => {
+        const resume = () => enqueue({ ...batch, interludeShown: true, dueAt: Date.now() + 400 })
+        const show = latest.current.onInterlude
+        if (show) show(interlude, resume)
+        else resume()
+      })
+      return
+    }
     queueRef.current.push(batch)
     if (!playingRef.current) playNext()
   }
@@ -380,6 +396,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     dayRef.current = day
     startedRef.current = false
     gatedNextRef.current = null
+    gatedWaitRef.current = null
     waitNextRef.current = null
     waitSyncRef.current = null
     setSyncText(null)
@@ -400,8 +417,19 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         const text = personalizeText(line.text, latest.current.owner)
         if (index === 0 && dateLabel) setAdded((prev) => [...prev, { type: 'date', label: dateLabel }])
         setTyping(false)
-        setAdded((prev) => [...prev, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel() }])
-        latest.current.onIncoming(`${line.sender}: ${text}`)
+        const count = line.unread
+        setAdded((prev) => {
+          const lowered =
+            count === undefined
+              ? prev
+              : prev.map((item) =>
+                  item.type === 'msg' && typeof item.unread === 'number' && item.unread > count
+                    ? { ...item, unread: count }
+                    : item,
+                )
+          return [...lowered, { type: 'msg', from: 'them', sender: line.sender, text, time: nowLabel(), unread: count, images: line.images }]
+        })
+        latest.current.onIncoming(`${line.sender}: ${line.images ? '사진을 보냈습니다.' : text}`)
         vibrate()
         if (latest.current.active) {
           setNewBadge(true)
@@ -465,7 +493,10 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (groupPicked !== null) return
     setGroupPicked(index)
     setNewBadge(false)
-    if (choice.setFlag) flags?.add(choice.setFlag)
+    if (choice.setFlag) {
+      flags?.add(choice.setFlag)
+      onFlag?.(choice.setFlag)
+    }
     const text = personalizeText(choice.text, owner)
     setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time: nowLabel() }])
     onSent(text)
@@ -505,15 +536,26 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     const gated = gatedNextRef.current
     if (!workEnded || !script || !gated) return
     gatedNextRef.current = null
+    const wait = gatedWaitRef.current
+    gatedWaitRef.current = null
+    // 근무 후 첫 카톡이 다른 이벤트(인스타 댓글 등)를 기다려야 하는 경우
+    if (wait?.sync && !readySyncs.has(wait.sync)) {
+      waitSyncRef.current = { key: wait.sync, next: gated, delayMs: wait.delayMs }
+      return
+    }
     const next = resolveNode(script, gated, activeFlags)
     const node = next ? script.nodes[next] : undefined
     if (!node || !next) {
       setPendingPhase(false)
       return
     }
+    if (wait?.waitOthers && !othersDoneRef.current) {
+      waitNextRef.current = { id: next, delayMs: wait.delayMs }
+      return
+    }
     enqueue({
       texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
-      dueAt: Date.now() + (script.workEndDelayMs ?? 5000),
+      dueAt: Date.now() + (wait ? wait.delayMs : (script.workEndDelayMs ?? 5000)),
       instant: false,
       badge: true,
       turn: replyTurnRef.current,
@@ -593,7 +635,11 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (waitingRef.current) return
     waitingRef.current = true
     latest.current.onReply?.()
-    if (choice.setFlag) flags?.add(choice.setFlag)
+    if (choice.setFlag) {
+      flags?.add(choice.setFlag)
+      onFlag?.(choice.setFlag)
+    }
+    if (choice.crossMessage) latest.current.onCrossMessage?.(choice.crossMessage)
     const deferBranch = Boolean(choice.next && choice.next === holdNodeRef.current && script?.nodes[choice.next]?.branch)
     const nextId = script && !deferBranch ? resolveNode(script, choice.next, activeFlags) : choice.next
     pendingNodeRef.current = nextId
@@ -602,6 +648,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     let sendOffset = 0
     says.forEach((text, i) => {
       const send = () => {
+        if (isActionText(text)) return
         setAdded((prev) => [...prev, { type: 'msg', from: 'me', text, time }])
         if (i === says.length - 1) onSent(text)
       }
@@ -653,6 +700,9 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       }
       if (choice.gate) {
         gatedNextRef.current = gatedNext
+        gatedWaitRef.current =
+          choice.sync || choice.waitOthers ? { sync: choice.sync, waitOthers: Boolean(choice.waitOthers), delayMs: choice.nextDelayMs } : null
+        if (choice.sync) onSync?.(choice.sync)
         return
       }
       if (choice.sync) {
@@ -874,7 +924,21 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                 <div className={cn('flex min-w-0 flex-col', mine ? 'items-end' : 'items-start')}>
                   {!mine && first && <span className="mb-[4px] text-[12px] text-[#3c4a57]">{senderName}</span>}
                   <div className={cn('flex items-end gap-[5px]', mine && 'flex-row-reverse')}>
-                    {typeof item.image === 'string' ? (
+                    {item.images?.length ? (
+                      <div className="grid w-[220px] grid-cols-2 gap-[2px] overflow-hidden rounded-[12px] bg-white">
+                        {item.images.map((src, index) => (
+                          <button
+                            key={src}
+                            type="button"
+                            onClick={() => setViewer(src)}
+                            className="aspect-[3/4] overflow-hidden transition-opacity active:opacity-80"
+                            aria-label={`${senderName}님이 보낸 사진 ${index + 1} 크게 보기`}
+                          >
+                            <Image src={src} alt="" width={1658} height={2210} className="size-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : typeof item.image === 'string' ? (
                       <button
                         type="button"
                         onClick={() => setViewer(item.image as string)}
@@ -908,10 +972,13 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                       {item.text}
                     </p>
                     )}
-                    {item.unread && (
+                    {Boolean(item.unread) && (
                       <div className={cn('flex shrink-0 flex-col gap-[2px] self-end pb-[1px]', mine ? 'items-end' : 'items-start')}>
-                        <span className="text-[10.5px] font-bold leading-none text-[#E6B800]" aria-label="읽지 않음">
-                          1
+                        <span
+                          className="text-[10.5px] font-bold leading-none text-[#E6B800]"
+                          aria-label={`읽지 않은 사람 ${typeof item.unread === 'number' ? item.unread : 1}명`}
+                        >
+                          {typeof item.unread === 'number' ? item.unread : 1}
                         </span>
                       </div>
                     )}

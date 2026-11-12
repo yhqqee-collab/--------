@@ -80,6 +80,7 @@ export const STORES: Store[] = [
     deliveryFee: 2000,
     minOrder: 12000,
     tagline: '싸이버거 세트 할인 중',
+    thumbnail: '/images/baemin/momstouch.png',
     menu: [
       { id: 'm1', name: '싸이버거 세트', price: 8400, description: '싸이버거 + 감자튀김 + 음료', popular: true },
       { id: 'm2', name: '불싸이버거 세트', price: 8900, description: '매콤한 불싸이' },
@@ -97,6 +98,7 @@ export const STORES: Store[] = [
     deliveryFee: 3000,
     minOrder: 15000,
     tagline: '짬뽕 국물 진한 집',
+    thumbnail: '/images/baemin/hongkong.png',
     menu: [
       { id: 'h1', name: '짬뽕', price: 8500, description: '불맛 가득', popular: true },
       { id: 'h2', name: '짜장면', price: 7000, description: '기본에 충실' },
@@ -114,6 +116,7 @@ export const STORES: Store[] = [
     deliveryFee: 3000,
     minOrder: 15000,
     tagline: '딜리버스 주문 가능',
+    thumbnail: '/images/baemin/sutabucks.png',
     menu: [
       { id: 's1', name: '아이스 아메리카노 (Tall)', price: 4700, description: '진한 에스프레소', popular: true },
       { id: 's2', name: '자몽 허니 블랙 티', price: 5700, description: '상큼한 티 음료' },
@@ -131,6 +134,7 @@ export const STORES: Store[] = [
     deliveryFee: 4000,
     minOrder: 20000,
     tagline: '숯불 돼지갈비 배달',
+    thumbnail: '/images/baemin/myeongryun.png',
     menu: [
       { id: 'g1', name: '숯불 돼지갈비 2인', price: 26000, description: '쌈채소 포함', popular: true },
       { id: 'g2', name: '양념 목살 1인', price: 14000, description: '도시락형' },
@@ -147,6 +151,7 @@ export const STORES: Store[] = [
     deliveryFee: 2000,
     minOrder: 12000,
     tagline: '가성비 피자',
+    thumbnail: '/images/baemin/pizzaschool.png',
     menu: [
       { id: 'p1', name: '포테이토 피자 (L)', price: 13900, description: '감자 + 베이컨', popular: true },
       { id: 'p2', name: '페퍼로니 피자 (L)', price: 12900, description: '클래식' },

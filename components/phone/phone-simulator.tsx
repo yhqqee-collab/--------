@@ -7,10 +7,10 @@ import { CalendarApp } from '@/components/calendar/calendar-app'
 import { todayFor } from '@/components/calendar/calendar-data'
 import { InstagramApp } from '@/components/instagram/instagram-app'
 import { StoryViewer } from '@/components/instagram/story-viewer'
-import { NOTIFICATION_COMMENT } from '@/components/instagram/instagram-data'
+import { DAEYOUNG_ID, DAEYOUNG_TAG_DAY, NOTIFICATION_COMMENT, YUSHI_ID } from '@/components/instagram/instagram-data'
 import { CHAT_DISPLAY_NAMES } from '@/components/kakao/chat-data'
 import { KakaoApp } from '@/components/kakao/kakao-app'
-import { FINAL_DAY, WORK_FIRST_DAYS, workTransitionText } from '@/components/kakao/scripts'
+import { FINAL_DAY, FLAG_DAY4_YUSHI_STORY_TAG, WORK_FIRST_DAYS, workTransitionText } from '@/components/kakao/scripts'
 import { MessagesApp } from '@/components/messages/messages-app'
 import { PhotosApp } from '@/components/photos/photos-app'
 import { SafariApp } from '@/components/safari/safari-app'
@@ -32,6 +32,12 @@ import { DayIntro } from './day-intro'
 import { PostypeGate } from './postype-gate'
 
 const DEMO_LAST_DAY = 2
+/** 유우시 스토리 태그 허락 후 스토리가 올라오기까지 */
+const YUSHI_STORY_DELAY_MS = 5000
+/** 태그 알림 배너가 머무는 시간 (등장 지연 + 노출 + 퇴장) */
+const TAG_NOTICE_MS = 6500
+/** 5일 차 시작 후 대영 점심 스토리 태그 알림까지 (시온 카톡보다 먼저 뜨도록) */
+const DAEYOUNG_TAG_DELAY_MS = 1200
 import { TrueEndScreen } from './true-end-screen'
 import { FinalEndingScreen } from './final-ending-screen'
 import { HomeScreen } from './home-screen'
@@ -142,6 +148,12 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const dayIntroDone = introDoneDay >= currentDay
   const showDayIntro = userName !== null && introDoneDay < currentDay
   const [finalSuspicion, setFinalSuspicion] = useState<Record<string, number> | null>(null)
+  const [tagNotice, setTagNotice] = useState<{ nonce: number; handle: string; text: string } | null>(null)
+  const showTagNotice = useCallback((handle: string, text: string) => {
+    const nonce = Date.now()
+    setTagNotice({ nonce, handle, text })
+    window.setTimeout(() => setTagNotice((current) => (current?.nonce === nonce ? null : current)), TAG_NOTICE_MS)
+  }, [])
   const finishDayIntro = useCallback(() => {
     setIntroDoneDay(currentDay)
     if (WORK_FIRST_DAYS.has(currentDay)) setWorkPhase('working')
@@ -167,16 +179,50 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
     setCurrentDay((day) => day + 1)
     setWorkPhase('before')
   }
-  const [myStoryDay, setMyStoryDay] = useState<number | null>(null)
+  const [myStoryDay] = useState<number | null>(null)
   const hasMyStory = myStoryDay === currentDay
   const [workPhase, setWorkPhase] = useState<'before' | 'working' | 'after'>('before')
   const handlePreWorkDone = useCallback(() => {
     window.setTimeout(() => setWorkPhase((current) => (current === 'before' ? 'working' : current)), 1200)
   }, [])
+  const [interlude, setInterlude] = useState<{ text: string; nonce: number } | null>(null)
+  const interludeDoneRef = useRef<(() => void) | null>(null)
+  const handleInterlude = useCallback((text: string, done: () => void) => {
+    setKakaoNotice(null)
+    interludeDoneRef.current = done
+    setInterlude({ text, nonce: Date.now() })
+  }, [])
+  const finishInterlude = useCallback(() => {
+    const done = interludeDoneRef.current
+    interludeDoneRef.current = null
+    setInterlude(null)
+    done?.()
+  }, [])
   const handleWorkDone = useCallback(() => {
-    setWorkPhase('after')
-    if (currentDay === 1) setMyStoryDay(currentDay)
-  }, [currentDay])
+  setWorkPhase('after')
+
+    // 대영 국밥집 스토리는 afterWork 라서 전환이 끝난 뒤에 태그 알림을 띄움
+    if (currentDay === DAEYOUNG_TAG_DAY) {
+      window.setTimeout(
+        () => showTagNotice(DAEYOUNG_ID, `@${DAEYOUNG_ID}님이 스토리에 회원님을 태그했습니다.`),
+        DAEYOUNG_TAG_DELAY_MS,
+      )
+    }
+  }, [currentDay, showTagNotice])
+
+  const [yushiTagDay, setYushiTagDay] = useState<number | null>(null)
+  const [autoOpenStory, setAutoOpenStory] = useState<{ handle: string; nonce: number } | null>(null)
+  const handleFlag = useCallback(
+    (flag: string) => {
+      if (flag !== FLAG_DAY4_YUSHI_STORY_TAG) return
+      const day = currentDay
+      window.setTimeout(() => {
+        setYushiTagDay(day)
+        showTagNotice(YUSHI_ID, `${YUSHI_ID}님이 회원님을 태그했습니다.`)
+      }, YUSHI_STORY_DELAY_MS)
+    },
+    [currentDay, showTagNotice],
+  )
 
   const locked = owner === null
   const activeApp = locked ? null : openApp
@@ -186,9 +232,11 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const name = userName ?? owner ?? DEFAULT_OWNER_NAME
   const instagramOwner = toInstagramId(name)
 
-  const bannerKind = kakaoNotice ? 'kakao' : safariNotification ? 'safari' : null
+  const bannerKind = tagNotice !== null ? 'tag' : kakaoNotice ? 'kakao' : safariNotification ? 'safari' : null
   const bannerMessage =
-    bannerKind === 'safari'
+    bannerKind === 'tag'
+      ? (tagNotice?.text ?? '')
+      : bannerKind === 'safari'
       ? NOTIFICATION_COMMENT
         ? `${NOTIFICATION_COMMENT.comment.name}님이 회원님의 게시물에 댓글을 달았습니다: ${NOTIFICATION_COMMENT.comment.text}`
         : ''
@@ -197,7 +245,11 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         : ''
 
   function openNotification() {
-    if (bannerKind === 'safari') {
+    if (bannerKind === 'tag') {
+      setAutoOpenStory({ handle: tagNotice?.handle ?? YUSHI_ID, nonce: Date.now() })
+      setTagNotice(null)
+      setOpenApp('instagram')
+    } else if (bannerKind === 'safari') {
       setSafariNotification(false)
       setAutoOpenPostId(NOTIFICATION_COMMENT?.postId ?? null)
       setRevealNotificationComment(true)
@@ -284,11 +336,13 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         day={currentDay}
         snapshot={resume}
         onDaySnapshot={onDaySnapshot}
+        onInterlude={handleInterlude}
+        onFlag={handleFlag}
       />
       <CalendarApp open={activeApp === 'calendar'} day={currentDay} />
       <SafariApp open={activeApp === 'safari'} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />
       <MessagesApp open={activeApp === 'messages'} owner={name} />
-      <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} />
+      <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} workEnded={workPhase === 'after'} yushiTagged={yushiTagDay === currentDay} autoOpenStory={autoOpenStory} />
       <StoryViewer open={showStory} owner={name} onClose={() => setStoryOpen(false)} />
       <LockScreen visible={locked} name={userName ?? ''} onUnlock={setOwner} dateLabel={dayLabel(currentDay)} />
       {userName === null && (
@@ -301,10 +355,10 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
       )}
       <StatusBar locked={locked} dark={appOpen ? !lightChrome : true} />
       <NotificationBanner
-        key={bannerKind === 'kakao' ? `kakao-${kakaoNotice?.nonce}` : (bannerKind ?? owner ?? 'locked')}
+        key={bannerKind === 'tag' ? `tag-${tagNotice?.nonce}` : bannerKind === 'kakao' ? `kakao-${kakaoNotice?.nonce}` : (bannerKind ?? owner ?? 'locked')}
         active={bannerKind !== null}
-        appName={bannerKind === 'safari' ? 'Instagram' : 'KakaoTalk'}
-        enterDelayMs={bannerKind === 'kakao' ? 250 : undefined}
+        appName={bannerKind === 'safari' || bannerKind === 'tag' ? 'Instagram' : 'KakaoTalk'}
+        enterDelayMs={bannerKind === 'kakao' || bannerKind === 'tag' ? 250 : undefined}
         message={bannerMessage}
         onOpen={openNotification}
       />
@@ -312,6 +366,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         <DayIntro key={currentDay} day={currentDay} dateLabel={dayLabel(currentDay)} onDone={finishDayIntro} />
       )}
       {workPhase === 'working' && !busted && <WorkTransition key={currentDay} text={workTransitionText(currentDay)} onDone={handleWorkDone} />}
+      {interlude && !busted && <WorkTransition key={interlude.nonce} text={interlude.text} onDone={finishInterlude} />}
       {spams && !busted && <SpamOverlay spams={spams} />}
       {sleepReady && !busted && !spams && (
         <div className="pointer-events-none absolute inset-x-0 bottom-10 z-[86] flex flex-col items-center gap-2 px-6">
