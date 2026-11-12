@@ -1,8 +1,10 @@
 export type EndingRoute = 'a' | 'b' | 'c'
+export type FinalChoice = EndingRoute | 'harem'
+export type Suspicion = Record<string, number>
 
 export interface EndingScene {
   title: string
-  type: 'happy' | 'obsessive' | 'breakup'
+  type: 'happy' | 'obsessive' | 'breakup' | 'harem' | 'catastrophe'
   lines: string[]
 }
 
@@ -13,11 +15,44 @@ export const ENDING_CHOICES: { id: EndingRoute; name: string }[] = [
   { id: 'c', name: '유우시' },
 ]
 
-/** 선택한 남자의 의심도가 이 값 이상이면 집착엔딩 */
-export const OBSESSIVE_THRESHOLD = 30
+/** 세 명 모두 이 값 이하이면 히든 '다같살' 선택지 해금 */
+export const HAREM_UNLOCK_MAX = 15
+/** 세 명 모두 이 값 이상이면 파국 */
+export const CATASTROPHE_ALL_MIN = 35
+/** 선택받지 못한 두 명이 모두 이 값 이상이면 파국 */
+export const CATASTROPHE_OTHERS_MIN = 45
+/** 선택한 사람의 의심도가 이 값 이하이면 해피엔딩 */
+export const HAPPY_MAX = 20
+/** 선택한 사람의 의심도가 이 값 이하이면 집착엔딩, 초과하면 헤어짐엔딩 */
+export const OBSESSIVE_MAX = 45
 
-/** 이별엔딩이 있는 루트에서 의심도가 이 값 이상이면 이별엔딩 */
-export const BREAKUP_THRESHOLD = 70
+export const HAREM_ENDING: EndingScene = {
+  title: '어장 완성',
+  type: 'harem',
+  lines: [
+    '뒤풀이 술집 문을 밀고 나오자, 골목 앞에 세 사람이 나란히 서 있었다. 시온은 벽에 기대 있었고, 리쿠는 휴대폰을 만지작거렸고, 유우시는 주머니에 손을 넣은 채 여주를 기다리고 있었다.',
+    '"…뭐야, 다들 왜 여기 있어?"',
+    '서로를 힐끔거리던 세 사람의 시선이 동시에 여주에게 꽂혔다. 일주일 내내 단 한 번도 틈을 보이지 않았던 덕분에, 누구도 여주를 의심할 이유가 없었다.',
+    '"집 방향 같으니까 같이 가자."',
+    '"나 오늘 차 가져왔는데. 데려다줄게."',
+    '"…편의점 들렀다 갈래? 너 좋아하는 거 사줄게."',
+    '세 사람이 동시에 내민 손 사이에서, 여주는 천천히 웃었다. 아무것도 들키지 않은 완벽한 일주일. 그리고 이 아슬아슬한 균형은, 아마 내일도 계속될 것이다.',
+  ],
+}
+
+export const CATASTROPHE_ENDING: EndingScene = {
+  title: '삼자대면',
+  type: 'catastrophe',
+  lines: [
+    '뒤풀이가 끝나갈 무렵, 테이블 위에 놓인 여주의 휴대폰이 연달아 울렸다. 화면에 뜬 세 개의 이름을, 하필이면 세 사람이 동시에 보고 말았다.',
+    '"…잠깐만. 방금 그거 나한테 보낸 거랑 똑같은 말인데."',
+    '시온이 먼저 입을 열었고, 리쿠의 얼굴에서 웃음이 사라졌다. 유우시는 말없이 자기 휴대폰을 꺼내 대화창을 내밀었다. 같은 시간, 같은 말투, 같은 약속.',
+    '"너 이번 주에 나한테 바쁘다고 했던 날, 얘랑 있었던 거야?"',
+    '시끄럽던 술집이 순식간에 조용해졌다. 세 사람의 시선이 동시에 여주를 향했다. 일주일 동안 쌓인 의심들이 한꺼번에 맞아떨어지는 소리가 들리는 것 같았다.',
+    '"설명해 봐. 셋 중에 누가 진짜였는지."',
+    '대답하지 못한 채 서 있는 여주를 두고, 세 사람은 차례로 자리에서 일어났다. 아슬아슬했던 일주일은 그렇게, 가장 최악의 방식으로 끝이 났다.',
+  ],
+}
 
 export const ENDINGS: Record<EndingRoute, { happy: EndingScene; obsessive: EndingScene; breakup?: EndingScene }> = {
   a: {
@@ -154,8 +189,23 @@ export const ENDINGS: Record<EndingRoute, { happy: EndingScene; obsessive: Endin
   },
 }
 
-export function endingFor(route: EndingRoute, suspicion: number): EndingScene {
-  const scenes = ENDINGS[route]
-  if (scenes.breakup && suspicion >= BREAKUP_THRESHOLD) return scenes.breakup
-  return suspicion >= OBSESSIVE_THRESHOLD ? scenes.obsessive : scenes.happy
+const ROUTE_IDS: EndingRoute[] = ['a', 'b', 'c']
+
+export function canUnlockHarem(susp: Suspicion): boolean {
+  return ROUTE_IDS.every((id) => (susp[id] ?? 0) <= HAREM_UNLOCK_MAX)
+}
+
+export function resolveFinalEnding(choice: FinalChoice, susp: Suspicion): EndingScene {
+  if (choice === 'harem') return HAREM_ENDING
+
+  const level = (id: EndingRoute) => susp[id] ?? 0
+  const allThreeHigh = ROUTE_IDS.every((id) => level(id) >= CATASTROPHE_ALL_MIN)
+  const bothOthersHigh = ROUTE_IDS.filter((id) => id !== choice).every((id) => level(id) >= CATASTROPHE_OTHERS_MIN)
+  if (allThreeHigh || bothOthersHigh) return CATASTROPHE_ENDING
+
+  const scenes = ENDINGS[choice]
+  const targetSusp = level(choice)
+  if (targetSusp <= HAPPY_MAX) return scenes.happy
+  if (targetSusp <= OBSESSIVE_MAX || !scenes.breakup) return scenes.obsessive
+  return scenes.breakup
 }

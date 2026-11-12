@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ENDING_CHOICES, endingFor, type EndingRoute } from '@/components/kakao/endings'
+import { ENDING_CHOICES, canUnlockHarem, resolveFinalEnding, type FinalChoice } from '@/components/kakao/endings'
 import { personalizeText } from '@/components/kakao/replies'
 import { cn } from '@/lib/utils'
 
@@ -19,7 +19,7 @@ const LINE_FADE_MS = 700
 
 export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRetryDay, onRestart, onViewHistory }: FinalEndingScreenProps) {
   const [shown, setShown] = useState(false)
-  const [route, setRoute] = useState<EndingRoute | null>(null)
+  const [route, setRoute] = useState<FinalChoice | null>(null)
   const [visibleLines, setVisibleLines] = useState(0)
 
   useEffect(() => {
@@ -27,15 +27,20 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
     return () => window.clearTimeout(id)
   }, [])
 
-  const ending = route ? endingFor(route, suspicion[route] ?? 0) : null
+  const haremUnlocked = canUnlockHarem(suspicion)
+  const ending = route ? resolveFinalEnding(route, suspicion) : null
   const lines = ending?.lines.map((line) => personalizeText(line, owner)) ?? []
   const allShown = ending !== null && visibleLines >= lines.length
-  const obsessive = ending?.type === 'obsessive'
-  const breakup = ending?.type === 'breakup'
-  const accent = obsessive ? 'text-[#ff9a9a]' : breakup ? 'text-[#b8c4d6]' : 'text-[#ffd9e4]'
-  const badge = obsessive ? 'OBSESSION ENDING' : breakup ? 'BREAKUP ENDING' : 'HAPPY ENDING'
+  const endingStyle = {
+    happy: { accent: 'text-[#ffd9e4]', badge: 'HAPPY ENDING' },
+    obsessive: { accent: 'text-[#ff9a9a]', badge: 'OBSESSION ENDING' },
+    breakup: { accent: 'text-[#b8c4d6]', badge: 'BREAKUP ENDING' },
+    harem: { accent: 'text-[#ffd27a]', badge: 'HIDDEN ENDING' },
+    catastrophe: { accent: 'text-[#ff5c5c]', badge: 'CATASTROPHE ENDING' },
+  }[ending?.type ?? 'happy']
+  const { accent, badge } = endingStyle
 
-  function choose(id: EndingRoute) {
+  function choose(id: FinalChoice) {
     setRoute(id)
     window.setTimeout(() => setVisibleLines(1), 1200)
   }
@@ -87,6 +92,17 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
                 </button>
               </li>
             ))}
+            {haremUnlocked && (
+              <li className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => choose('harem')}
+                  className="min-h-12 w-full rounded-xl border border-amber-300/60 bg-amber-300/10 px-5 py-3 text-[15px] font-bold text-amber-200 transition-colors hover:bg-amber-300 hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
+                >
+                  {'✨ 셋 다 놓칠 수 없어 (어장 완성)'}
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}
