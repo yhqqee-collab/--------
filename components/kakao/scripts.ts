@@ -381,7 +381,7 @@ function longestPath(script: Script) {
   return depth(script.start)
 }
 
-/* ───────────── 기본 샘플 구조 ─────────────
+/* ───────────── 기본 샘��� 구조 ─────────────
  * phase1 (preWork: true)  : 일정 시작 전 카톡 → 선택지 A(의심도 0) / B(의심도 +10) → phase2
  * phase2 (preWork: false) : 일정 종료 후 카톡 → 마무리 선택지 A → 'end'
  * 일차·멤버별로 대사를 바꾸려면 아래 DAY_SCRIPTS 에서 sampleNodes() 대신
@@ -1765,7 +1765,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
   },
   P1_Insta_Jealous: {
     delay: 3,
-    message: '대영이 스토리 봤는데\n점심 대영이랑 먹었네?\n나한테는 밥 먹자는 말도 없��니 ㅎㅎ',
+    message: '대영이 스토리 봤는데\n점심 대영이랑 먹었네?\n��한테는 밥 먹자는 말도 없��니 ㅎㅎ',
     choices: [
       { id: 'A', text: '료랑 대영이랑 수업 가기 전에 먹었지 ㅎㅎ\n질투하지 망 ❤️', susp: -5, next: 'P1_Insta_Good' },
       { id: 'B', text: '수업 전이라 같이 먹었어 ㅎㅎ\n저번에 너 찍어준 게 더 잘나왔는데?', susp: 0, next: 'P1_Insta_Norm' },
@@ -2240,14 +2240,14 @@ const STAFF_DAY2: GroupScript = {
   ],
 }
 
-/** Day 3 (일요일): 사쿠야 & 대영 영화관 단톡 → 리쿠 밤 카톡 직전에 자취방 데이트 팝업 */
+/** Day 3 (일요일): 리쿠 자취방 데이트 팝업이 끝난 밤, 사쿠야 & 대영 영화관 단톡 → 그 뒤 리쿠 밤 카톡(P3_Night_Sweet) */
 const STAFF_DAY3: GroupScript = {
   startDelayMs: 5000,
   messages: [],
   choices: [],
   stages: [
     {
-      holdNodes: {},
+      holdNodes: { b: 'P3_Night_Sweet' },
       messages: [
         {
           sender: G_SAKUYA,
