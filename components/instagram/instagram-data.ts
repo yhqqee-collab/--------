@@ -277,7 +277,7 @@ export const POSTS: Post[] = [
       { src: '/posts/sion-day3-6.jpg', alt: '용산에서 찍은 시온 사진 6' },
       { src: '/posts/sion-day3-7.jpg', alt: '용산에서 찍은 시온 사진 7' },
     ],
-    caption: '날씨 좋은 날 🍃',
+    caption: '🍃',
     likes: 442,
     likedBy: [riku.id, daeyoung.id],
     comments: [],
