@@ -16,7 +16,7 @@
  */
 
 export const SITE = {
-  title: '어장 키우기 Uni ver.',
+  title: '어장 키우기 Uni ver. (트위터)',
   description: '어장 키우기 Uni ver. — 휴대폰 시뮬레이터 게임',
 }
 
