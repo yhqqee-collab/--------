@@ -162,7 +162,7 @@ type PhaseChoice = {
   setFlag?: string
   gameOver?: boolean
   setGlobal?: Record<string, boolean>
-  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 사람의 의심도 */
+  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 ���람의 의심도 */
   sendTo?: { chat: string; message: string; delay: number; susp?: number }
 }
 /**
@@ -539,7 +539,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
   },
 }
 
-/** 유우시 Day 1: 수업 전 점심 제안 → 점심 동선 → 시식회 중 알리바이 추궁 → 밤 카톡 */
+/** 유우시 Day 1: ��업 전 점심 제안 → 점심 동선 → 시식회 중 알리바이 추궁 → 밤 카톡 */
 const YUSHI_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
     preWork: true,
@@ -621,16 +621,11 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   },
   P2_RikuFlow_B: {
     message: '발표 연습 화이팅 !\n이따 연락해',
-    choices: [{ id: 'A', text: '웅 고마워!', susp: 0, next: 'P3_LunchCheck' }],
+    choices: [{ id: 'A', text: '웅 고마워!', susp: 0, next: 'P4_Start' }],
   },
   P2_RikuFlow_C: {
     message: '수진이랑 맛있게 먹어\n이따 연락해',
-    choices: [{ id: 'A', text: '웅 고마워!', susp: 0, next: 'P3_LunchCheck' }],
-  },
-  P3_LunchCheck: {
-    delay: 20,
-    message: '밥은 먹었어 ?\n대답이 좀 늦네\n수업 잘 들어 ^_^',
-    choices: [{ id: 'A', text: '응 먹었어! 이따 동방에서 봐', susp: 10, next: 'P4_Start' }],
+    choices: [{ id: 'A', text: '웅 고마워!', susp: 0, next: 'P4_Start' }],
   },
   P4_Start: {
     delay: 40,
@@ -748,7 +743,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
   },
 }
 
-/** Day 2 단톡방 장보기 팀 선택 플래그 */
+/** Day 2 단톡방 장보�� 팀 선택 플래그 */
 export const FLAG_SHOP_RIKU = 'shop-riku'
 export const FLAG_SHOP_SION = 'shop-sion'
 
@@ -951,7 +946,7 @@ const YUSHI_DAY2: Record<string, PhaseNode> = {
       },
     ],
   },
-  // 시온과 유우시를 둘 다 수락했으면 삼자대면, 아니면 정상 마무리
+  // 시온과 유우시를 둘 다 수락했으면 삼자대면, ��니면 정상 마무리
   Branch_DoubleBooking: {
     delay: 16,
     message: '',
@@ -1305,7 +1300,7 @@ const SION_DAY4: Record<string, PhaseNode> = {
   },
 }
 
-/** 리쿠 Day 4 (월): 아침 인사 → (수업) → 16:40 경영관 방문 → 시온 선택에 따라 분기 → 동방 작업 후 밤 카톡 */
+/** 리쿠 Day 4 (월): 아침 인사 → (수업) → 16:40 경영관 방문 �� 시온 선택에 따라 분기 → 동방 작업 후 밤 카톡 */
 const RIKU_DAY4: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
@@ -1495,7 +1490,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     preWork: true,
     delay: 6,
     isSystem: true,
-    alert: '카페에서 유우시를 만나 애교를 부리며 달래줬습니다.\n유우시도 금방 기분이 풀려\n사진을 찍으며 오붓한 시간을 보냈습니다.',
+    alert: '카페에서 유우시를 만나 애교를 ��리며 달래줬습니다.\n유우시도 금방 기분이 풀려\n사진을 찍으며 오붓한 시간을 보냈습니다.',
     message: '',
     choices: [{ id: 'A', susp: -5, next: 'P2_Story_Ask' }],
   },
@@ -1768,7 +1763,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
  * → 밤 야식 방문 제안 (리쿠 방문과 겹치면 리쿠 방에서 즉사 판정)
  */
 const SION_DAY5: Record<string, PhaseNode> = {
-  // 대영이 국밥 스������(afterWork)가 부스 세팅 이후에 올라오므로, 시온은 출근 전 모닝톡으로 먼저 시작
+  // 대영이 국밥 스������(afterWork)가 부스 세팅 이후에 올라오므로, 시온은 출근 전 모닝��으로 먼저 시작
   P1_Morning: {
     preWork: true,
     message: '여주야 잘 잤어??\n오늘 축제 첫날이라며\n바쁘겠다 ㅠㅠ 무리하지 마',
@@ -2440,7 +2435,7 @@ export const SPAM_SENDER_GAP_MS = 1000
 /** 폭격이 끝난 뒤 게임오버 화면까지의 대기 (ms) */
 export const SPAM_END_DELAY_MS = 1000
 export const SUSPICION_100_GAME_OVER_TEXT =
-  '의심도가 100%에 도달해 상대방이 당신의 바람을 확신했습니다!'
+  '의심도가 100%에 도달��� 상대방이 당신의 바람을 확신했습니다!'
 
 const spam = (senderId: 'a' | 'b' | 'c', texts: string[]): SpamNotification[] =>
   texts.map((text) => ({ senderId, senderName: CHARACTERS[senderId].name, text }))
