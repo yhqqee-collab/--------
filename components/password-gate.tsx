@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { LanguagePicker } from '@/components/language-picker'
+import { PasswordScreen } from '@/components/password-screen'
 import { LANG_OPTIONS, getLang, setLang, type Lang } from '@/lib/i18n'
 
 const PhoneSimulator = dynamic(
@@ -29,6 +30,7 @@ function writeStorage(key: string, value: string) {
 export function PasswordGate() {
   const [restored, setRestored] = useState(false)
   const [ready, setReady] = useState(false)
+  const [unlocked, setUnlocked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -47,6 +49,7 @@ export function PasswordGate() {
   }, [])
 
   if (!restored) return null
+  if (!unlocked) return <PasswordScreen onUnlock={() => setUnlocked(true)} />
   if (!ready)
     return (
       <LanguagePicker
