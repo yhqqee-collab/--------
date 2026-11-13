@@ -258,7 +258,7 @@ function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming:
           ? [SYSTEM_NODE_PAUSE]
           : splitLines(phase.message).map(toPauseToken),
       interlude: phase.isSystem ? (phase.alert ?? phase.message.replace(/^\[\[시스템:\s*|\]\]$/g, '')) : undefined,
-      autoAdvance: phase.isSystem && phase.choices.length === 1 && !phase.choices[0].text ? true : undefined,
+      autoAdvance: phase.choices.length === 1 && !phase.choices[0].text?.trim() ? true : undefined,
       redirect: phase.redirect,
       branch: phase.branch,
       gameOver: phase.gameOver,
@@ -1220,7 +1220,7 @@ const SION_DAY4: Record<string, PhaseNode> = {
   P2_Lunch_Res: {
     delay: 6,
     message: '아 그래?\n유우시는 친구 없대? ㅎㅎ\n왜 너한테 빌리지',
-    choices: [{ id: 'A', text: '(아차... 시온이 말에 뼈가 있다 ㅠㅠ)', susp: 0, next: 'P3_Class_Start' }],
+    choices: [{ id: 'A', susp: 0, next: 'P3_Class_Start' }],
   },
   // 16:40 소행론 수업 마치기 10분 전 (리쿠 카톡과 동시에 도착)
   P3_Class_Start: {
@@ -1235,12 +1235,12 @@ const SION_DAY4: Record<string, PhaseNode> = {
   P3_Accept_Sion: {
     delay: 6,
     message: '오키 ㅎㅎ 끝나고 같이 나가자!',
-    choices: [{ id: 'A', text: '(수업이 끝났다)', susp: 0, next: 'RESOLVE_AFTER_ACCEPT_SION' }],
+    choices: [{ id: 'A', susp: 0, next: 'RESOLVE_AFTER_ACCEPT_SION' }],
   },
   P3_Reject_Sion: {
     delay: 6,
     message: '아 그래?\n알겠어~\n이따 동방에서 봐!',
-    choices: [{ id: 'A', text: '(수업이 끝났다)', susp: 0, next: 'RESOLVE_AFTER_REJECT_SION' }],
+    choices: [{ id: 'A', susp: 0, next: 'RESOLVE_AFTER_REJECT_SION' }],
   },
   // 충돌 팝업·시온 의심도(A-2 +15 / B-1 -10 / B-2 +30)는 리쿠 Day 4 스크립트에서 처리 → 여기선 중복 팝업 없이 마무리
   RESOLVE_AFTER_ACCEPT_SION: {
@@ -1266,17 +1266,17 @@ const SION_DAY4: Record<string, PhaseNode> = {
   // 승낙 + 리쿠 B (복도 마주침)
   P3_Safe_B: {
     message: '',
-    choices: [{ id: 'A', text: '(동아리방으로 이동하자)', susp: 0, next: 'end' }],
+    choices: [{ id: 'A', susp: 0, next: 'end' }],
   },
   // 승낙 + 리쿠 A (1층 로비 정면충돌)
   P3_Accept_Clash_A: {
     message: '',
-    choices: [{ id: 'A', text: '(동아리방으로 이동하자)', susp: 0, next: 'end' }],
+    choices: [{ id: 'A', susp: 0, next: 'end' }],
   },
   // 거절 + 리쿠 B (3층 문 앞 목격)
   P3_Reject_Odd_B: {
     message: '',
-    choices: [{ id: 'A', text: '(시온이 눈빛이 너무 무섭다...)', susp: 0, next: 'end' }],
+    choices: [{ id: 'A', susp: 0, next: 'end' }],
   },
   // 거절 + 리쿠 A (17:05 로비 목격 추궁)
   P3_Susp_A: {
@@ -1287,7 +1287,7 @@ const SION_DAY4: Record<string, PhaseNode> = {
   P3_Res_A: {
     delay: 6,
     message: '우연히 마주쳤는데\n커피는 어디서 났을까 ㅎㅎ\n이따 동아리방에서 봐',
-    choices: [{ id: 'A', text: '(시온이가 다 봤나 보다... 이따 동방 가기 무섭네 ㅠㅠ)', susp: 0, next: 'end' }],
+    choices: [{ id: 'A', susp: 0, next: 'end' }],
   },
 }
 
@@ -1340,7 +1340,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   // [A-1] 1층 대기 + 시온 거절 (내려가던 시온에게 목격됨)
   P3_Route_A_Safe: {
     message: '오키오키!! 그롬 1층 로비에 잇을게 ㅎㅎ\n조심히 내려와 ❤️',
-    choices: [{ id: 'A', text: '(1층 로비로 내려가 리쿠를 만났다!)', susp: -10, next: 'P3_Route_A_Safe_Popup' }],
+    choices: [{ id: 'A', susp: -10, next: 'P3_Route_A_Safe_Popup' }],
   },
   P3_Route_A_Safe_Popup: {
     isSystem: true,
@@ -1399,13 +1399,13 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   P3_Route_B_End: {
     delay: 6,
     message: 'ㅎㅎ...\n신경쓰이네\n일단 알겟어',
-    choices: [{ id: 'A', text: '(이따 동방에서 눈치 좀 봐야겠다...)', susp: 0, next: 'P4_Club_Work' }],
+    choices: [{ id: 'A', susp: 0, next: 'P4_Club_Work' }],
   },
   // [C] 동방 핑계로 학생회관 유인 (완벽 회피)
   P3_Route_C_Clear: {
     delay: 6,
     message: '아 맞다 오늘 동방 모임이징!!\n그롬 학생회관 앞 벤치로 갈게 거기서 보자 ❤️',
-    choices: [{ id: 'A', text: '(시온과도 동선이 안 겹치고 완벽하게 클리어했다!)', susp: 0, next: 'P3_Route_C_Popup' }],
+    choices: [{ id: 'A', susp: 0, next: 'P3_Route_C_Popup' }],
   },
   P3_Route_C_Popup: {
     isSystem: true,
@@ -1437,7 +1437,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   P4_Night_Bad: {
     delay: 6,
     message: '어떻�� 신경을 안 써...\n나 진짜 질투 난단 말이야...ㅠ',
-    choices: [{ id: 'A', text: '(조금 더 다정하게 말해줄걸 그랬나 보다...)', susp: 0, next: 'end' }],
+    choices: [{ id: 'A', susp: 0, next: 'end' }],
   },
 }
 
@@ -1499,7 +1499,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     preWork: true,
     delay: 6,
     message: '응 ㅎㅎ\n수업 잘 듣고\n이따 동방에서 봐',
-    choices: [{ id: 'A', text: '(유우시가 여주를 태그한 밀크티 스토리를 올렸다...!)', susp: 0, next: 'P4_Night_Msg' }],
+    choices: [{ id: 'A', susp: 0, next: 'P4_Night_Msg' }],
   },
   P2_Deny_Story: {
     preWork: true,
@@ -1525,7 +1525,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   P4_Night_Bad: {
     delay: 6,
     message: '그냥 장난친 거 치고는 너무 좋아하던데\n알겠어\n피곤할 텐데 쉬어',
-    choices: [{ id: 'A', text: '(아차... 괜히 변명만 한 꼴이 됐네 ㅠㅠ)', susp: 0, next: 'end' }],
+    choices: [{ id: 'A', susp: 0, next: 'end' }],
   },
 }
 
@@ -1556,7 +1556,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     nextCheckGlobal: SYNC_DAY5_HOODIE,
     message: '응 ㅎㅎ\n밤에 추우니까 겉옷 따뜻하게 챙겨 와',
     // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
-    choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
+    choices: [{ id: 'A', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
   },
   // 쇼핑 플래그가 없으면(입고 감 / 리쿠 스크립트 미작성) 입고 온 루트
   CHECK_RIKU_HOODIE: {
@@ -1676,14 +1676,14 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
     delay: 6,
     nextCheckGlobal: SYNC_DAY5_HOODIE,
     message: '헐 진짜?!?!\n귀엽겟당...ㅎㅎ\n이따 보자 ❤️',
-    choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'P2_Afternoon_Wear' }],
+    choices: [{ id: 'A', susp: 0, next: 'P2_Afternoon_Wear' }],
   },
   P1_Bring_Bag: {
     preWork: true,
     delay: 6,
     nextCheckGlobal: SYNC_DAY5_HOODIE,
     message: '에이\n입은 거 보고 시펏는데 아쉽다 ㅠㅠ\n그롬 이따 몰래 나한테 전달해 줘 ㅎㅎ\n이따 봐 ❤️',
-    choices: [{ id: 'A', text: '(쇼핑백을 챙겨 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'P2_Afternoon_Bag' }],
+    choices: [{ id: 'A', susp: 0, next: 'P2_Afternoon_Bag' }],
   },
   // 15:10 부스 세팅 중 [입고 간 경우] (유우시 방 P2_Wear_Msg 와 동시 진행)
   P2_Afternoon_Wear: {
