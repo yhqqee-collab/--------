@@ -27,6 +27,8 @@ type Batch = {
   turn: number
   nudge?: boolean
   reply?: boolean
+  /** 선택지에 대한 상대의 답장 (마지막 줄이 도착할 때까지 전환 팝업 대기) */
+  choiceReply?: boolean
   enterNode?: string
   gateDone?: boolean
   dateLabel?: string
@@ -92,6 +94,8 @@ type ChatRoomProps = {
   onInterlude?: (text: string, done: () => void) => void
   /** 선택지가 setFlag 를 켰을 때 (폰 전체 연출용) */
   onFlag?: (flag: string) => void
+  /** 선택지 답장이 전송 중인지 (true: 아직 마지막 말풍선이 도착하지 않음) */
+  onReplyPending?: (pending: boolean) => void
 }
 
 const REPLY_DELAY_MIN_MS = 15000
@@ -140,7 +144,7 @@ function typingDuration(text: string) {
   return Math.min(1200 + text.length * 70, 4000)
 }
 
-export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage, onInterlude, onFlag }: ChatRoomProps) {
+export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspicionActive, onSuspicionChange, onIncoming, onSent, turns = 0, onTurn, clockStarted = false, workEnded = false, onGateDone, onScriptDone, day = 1, flags, onGameOver, othersDone = true, readySyncs = NO_SYNCS, onSync, onDoomed, initialAdded, onAddedChange, forcedChoice, onForcedChoice, holdNode = null, onHeld, stageCue = 0, onStageDone, startGate = true, gatedStartMs, onReply, onCrossMessage, onInterlude, onFlag, onReplyPending }: ChatRoomProps) {
   const script = scriptsForDay(day)[chat.id]
   const groupScript = groupScriptsForDay(day)[chat.id]
   const [groupChoices, setGroupChoices] = useState<GroupChoice[] | null>(null)
@@ -198,8 +202,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const chooseRef = useRef<(choice: Choice, index: number, nextDelayOverride?: number) => void>(() => {})
 
   const scriptDoneRef = useRef(false)
-  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude })
-  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude }
+  const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude, onReplyPending })
+  latest.current = { active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude, onReplyPending }
 
   const hasSuspicion = suspicion !== undefined
   const items: ChatItem[] = [...chat.items, ...added]
@@ -298,6 +302,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       if (index === 0 && batch.enterNode) vibrate()
       if (!isLast) return schedule(batch.instant ? 300 : 0, () => playLine(batch, index + 1))
       if (batch.reply) finishReply()
+      if (batch.reply || batch.choiceReply) latest.current.onReplyPending?.(false)
       const autoNode = batch.enterNode ? script?.nodes[batch.enterNode] : undefined
       if (batch.enterNode && autoNode?.autoAdvance && autoNode.choices[0]) {
         const autoChoice = autoNode.choices[0]
@@ -433,6 +438,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       playingRef.current = false
         setTyping(false)
         finishReply()
+        latest.current.onReplyPending?.(false)
       }
       enqueue({ texts: delivery.texts, sender: delivery.sender, time: delivery.time, dueAt: Date.now(), instant: Boolean(delivery.instant), badge: Boolean(delivery.badge), turn: replyTurnRef.current })
     })
@@ -751,8 +757,9 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       setNodeId(null)
       setPendingPhase(choice.gate ? Boolean(gatedNext) : Boolean(nextNode))
       const replyDelay = choice.replyDelayMs ?? ALERT_REPLY_DELAY_MS
+      latest.current.onReplyPending?.(alert.length > 0)
       if (alert.length) {
-        enqueue({ texts: alert, dueAt: replyAt + replyDelay, instant: false, badge: false, turn, gateDone: choice.gate, gameOver: choice.gameOver, gameOverAlert: choice.gameOverAlert })
+        enqueue({ texts: alert, dueAt: replyAt + replyDelay, instant: false, badge: false, turn, choiceReply: true, gateDone: choice.gate, gameOver: choice.gameOver, gameOverAlert: choice.gameOverAlert })
       } else {
         if (choice.gate) schedule(sendOffset + GATE_NO_REPLY_MS, () => latest.current.onGateDone?.())
         if (choice.gameOver) schedule(sendOffset + GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(choice.gameOverAlert))
@@ -793,6 +800,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     }
 
     const texts = script ? replyFor(choice, getStage(value), script).map((line) => personalizeText(line, owner)) : []
+    latest.current.onReplyPending?.(texts.length > 0)
     if (!texts.length) {
       finishReply()
       return

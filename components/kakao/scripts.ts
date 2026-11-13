@@ -9,7 +9,7 @@ import type { SuspicionStage } from './suspicion'
 
 /** 모든 멤버의 '일정 시작 전' 대화가 끝나면 4초간 표시되는 전환 문구 (일차별) */
 const WORK_TRANSITION_TEXTS: Record<number, string> = {
-  1: '⏳ [오전 수업 끝나고 점심시간...] (10:30 ~ 12:00) ⏳',
+  1: '⏳ [오전 수업 끝나고 점심식사 후...] (~ 12:40) ⏳',
   2: '⏳ [장본 물품을 들고 동아리방에서 다 같이 짐 정리 중...] (16:00 ~ 21:30) ⏳',
   3: '⏳ [시온과 용산공원에서 피크닉 데이트 중...] (13:00 ~ 17:00) ⏳',
   4: '⏳ [월요일 수업 듣는 중...] (13:00 ~ 16:40) ⏳',
@@ -162,7 +162,7 @@ type PhaseChoice = {
   setFlag?: string
   gameOver?: boolean
   setGlobal?: Record<string, boolean>
-  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �������람의 ���심도 */
+  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �������람의 �����심도 */
   sendTo?: { chat: string; message: string; delay: number; susp?: number }
 }
 /**
@@ -350,7 +350,7 @@ const C_TREE: Record<string, TreeNode> = {
   },
   T2: {
     speakerText: ['[��물 C의 반응]'],
-    options: [{ text: '[마���리 답���]', suspicionDelta: 0, nextNodeId: 'END' }],
+    options: [{ text: '[마����� 답���]', suspicionDelta: 0, nextNodeId: 'END' }],
   },
   END: { speakerText: ['[인물 C의 마지막 인사]'], options: [] },
 }
@@ -394,7 +394,7 @@ function sampleNodes(): Record<string, PhaseNode> {
       message: '[일정 시작 전 카톡 대사를 입력하세요]',
       choices: [
         { id: 'A', text: '[선택지 A - 안전한 답변]', susp: 0, reply: '[선택지 A 반응 대사]', next: 'phase2' },
-        { id: 'B', text: '[선택지 B - 의심받는 답변]', susp: 10, alert: '[선택지 B 의심 반응 대사]', next: 'phase2' },
+        { id: 'B', text: '[선택지 B - 의심받�� 답변]', susp: 10, alert: '[선택지 B 의심 반응 대사]', next: 'phase2' },
       ],
     },
     phase2: {
@@ -741,7 +741,7 @@ export const FLAG_SHOP_SION = 'shop-sion'
 /** 시온·유우시의 밤 데이트 답장을 모두 받은 뒤 삼자대면 여부를 판정 */
 const SYNC_DAY2_NIGHT = 'day2-night'
 
-/** 시온 Day 2: 아침 인사 → 단톡방 장보기 분기 → 밤 호출 → 마무리 인사 */
+/** 시온 Day 2: 아침 인사 → 단톡방 장���기 분기 → 밤 호출 → 마무리 인사 */
 const SION_DAY2: Record<string, PhaseNode> = {
   P0_Morning: {
     preWork: true,
@@ -1348,7 +1348,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     message: '',
     choices: [{ id: 'A', susp: 0, next: 'P4_Club_Work' }],
   },
-  // [A-2] 1층 ���기 + 시온 승낙 (로비 정면충돌)
+  // [A-2] 1층 ����기 + 시온 승낙 (로비 정면충돌)
   P3_Route_A_Clash: {
     isSystem: true,
     alert: '시온과 함께 1층 로비로 내려오다\n바닐라라떼를 들고 기다리던 리쿠와\n정면으로 마주쳤습니다!',
@@ -1653,7 +1653,7 @@ export const FLAG_DAY5_SION_VISIT = 'day5-sion-visit'
 export const FLAG_DAY5_RIKU_VISIT = 'day5-riku-visit'
 
 /**
- * 리쿠 Day 5 (���제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
+ * ���쿠 Day 5 (���제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
  * → 밤 질투 & 기습 방문 (시온 방문과 겹치면 즉사)
  */
 const RIKU_DAY5: Record<string, PhaseNode> = {
@@ -2059,7 +2059,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
 
 /* ─────────────────────── 7일 차 (축제 마지막 날 · 뒤풀이) ───────────────────────
  * ���택지 없이 ��온(0초) → 리쿠(5초) → 유우시(10초) 순으로 카톡이 도착하고,
- * 마지막 카톡 이후 최종 선택 화면이 열립니다.
+ * 마지막 카톡 이후 최종 선택 화면�� 열립니다.
  */
 const DAY7_TIMING: Record<'a' | 'b' | 'c', PhaseTiming> = {
   a: { initialDelay: 0, phaseDelay: 30, replyDelayMs: 2000, workEndDelay: 0 },
@@ -2294,7 +2294,7 @@ const STAFF_DAY4: GroupScript = {
           id: 'A',
           text: '나도 치킨 완전 찬성!!',
           reply: [
-            gl2(G_YUSHI, '그럼 치킨 시키자 내가 배민으로 주문 넣어둘게'),
+            gl2(G_YUSHI, '그럼 치킨 시키자 내가 ���민으로 주문 넣어둘게'),
             gl2(G_SAKUYA, '오 치킨이면 인정이지 ��ㅎ 사이드로 치즈볼도 추가해 주세용'),
             gl2(G_RYO, 'ㅋㅋㅋㅋ 돼지야'),
           ],
