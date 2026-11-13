@@ -29,9 +29,7 @@ import { BustedScreen } from './busted-screen'
 import { SpamOverlay } from './spam-overlay'
 import type { SpamNotification } from '@/components/kakao/scripts'
 import { DayIntro } from './day-intro'
-import { PostypeGate } from './postype-gate'
 
-const DEMO_LAST_DAY = 2
 /** 유우시 스토리 태그 허락 후 스토리가 올라오기까지 */
 const YUSHI_STORY_DELAY_MS = 5000
 /** 태그 알림 배너가 머무는 시간 (등장 지연 + 노출 + 퇴장) */
@@ -169,13 +167,8 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
     [currentDay],
   )
   const [sleepReady, setSleepReady] = useState(false)
-  const [postypeGate, setPostypeGate] = useState(false)
   function goToSleep() {
     setSleepReady(false)
-    if (currentDay >= DEMO_LAST_DAY) {
-      setPostypeGate(true)
-      return
-    }
     setCurrentDay((day) => day + 1)
     setWorkPhase('before')
   }
@@ -384,7 +377,6 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         </div>
       )}
       {busted && <BustedScreen day={currentDay} onRetryDay={onRetryDay} onRestart={onRestart} message={bustedAlert} />}
-      {postypeGate && !busted && <PostypeGate day={currentDay} onRestart={onRestart} />}
       {trueEnd && <TrueEndScreen onRestart={onRestart} />}
       {finalSuspicion && !busted && (
         <FinalEndingScreen
