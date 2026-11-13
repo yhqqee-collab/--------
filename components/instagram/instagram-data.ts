@@ -185,7 +185,7 @@ export const STORIES: StoryItem[] = [
 
 STORIES_BY_DAY[1] = STORIES
 
-/** 2일 차: 대�� 스토리 */
+/** 2일 차: 대영 스토리 */
 STORIES_BY_DAY[2] = [
   story(daeyoung, '4시간', {
     image: { src: '/stories/daeyoung-day2.jpg', alt: '나무 그늘 아래 검은 나시 차림으로 앉아 옆을 보는 대영' },
@@ -404,7 +404,7 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     avatar: avatarOf(sakuya),
     time: '1주 전',
     images: [
-      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹��� 분홍 티셔츠의 사쿠야' },
+      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹는 분홍 티셔츠의 사쿠야' },
     ],
     caption: '',
     likes: 389,
