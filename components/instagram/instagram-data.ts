@@ -123,9 +123,8 @@ STORIES_BY_DAY[DAEYOUNG_TAG_DAY] = [
   {
     ...story(daeyoung, '1시간', {
       images: [
-        { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집에서 숟가락을 문 채 정면을 보는 대영, "여주 누나가 찍어줌" 문구' },
+        { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집 메뉴판 아래에서 검은 패딩 차림으로 숟가락을 문 채 정면을 보는 대영, "누나가 찍어줌" 문구' },
         { src: '/stories/daeyoung-day5-2.jpg', alt: '국밥집 메뉴판 아래에서 숟가락을 물고 옆을 보는 대영' },
-        { src: '/stories/daeyoung-day5-3.jpg', alt: '커튼 앞에서 흑백 래글런 티셔츠를 입고 살짝 웃는 대영의 셀카' },
       ],
     }),
     afterWork: true,
