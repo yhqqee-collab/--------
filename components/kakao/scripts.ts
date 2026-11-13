@@ -236,7 +236,7 @@ function splitReplyLines(text: string) {
   })
 }
 
-/** 모든 메시지 대기 시간(초)에 곱하는 배율. 순서는 그대로 유지하면서 전�� 속도만 조절합니다. */
+/** 모든 메시지 대기 시간(초)에 곱하는 배율. 순서는 그대로 유지하면서 전��� 속도만 조절합니다. */
 const TIME_SCALE = 0.5
 
 function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming: PhaseTiming): Script {
@@ -584,7 +584,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   P4_Start: {
     delay: 40,
     message:
-      '방금 시온이 형이 얘기했는데 \n 그저께 집에만 있었어? \n 나한테는 본가 다녀왔다고 했잖아',
+      '방금 시온이 형이 얘기했는데 \n 일요일에 집에만 있었어? \n 나한테는 본가 다녀왔다고 했잖아',
     choices: [
       {
         id: 'A',
@@ -755,7 +755,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
       },
       {
         id: 'B',
-        text: '앗 나 ���금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
+        text: '앗 나 ���금 씻고 ��웠는데 ㅠㅠ 너무 피곤해...',
         susp: 5,
         reply: '벌�� 누웠어? / 알겠어 푹 쉬어',
         next: 'P4_Goodnight_Reject',
@@ -1317,7 +1317,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     choices: [
       {
         id: 'A',
-        text: '(시온이가 가버린 뒤 리쿠에게 커피를 받았다...)',
+        text: '(시���이가 가버린 뒤 리쿠에게 커피를 받았다...)',
         susp: -10,
         sendTo: { chat: 'a', message: '', delay: 0, susp: 30 },
         next: 'P4_Club_Work',
@@ -1452,7 +1452,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Bad: {
     delay: 6,
-    message: '그냥 장난친 거 치고는 너무 좋아하던데\n알겠어\n피곤할 텐데 쉬어',
+    message: '그냥 장난친 거 치고는 너무 좋아하던데\n알겠어\n피곤�� 텐데 쉬어',
     choices: [{ id: 'A', text: '(아차... 괜히 변명만 한 꼴이 됐네 ㅠㅠ)', susp: 0, next: 'end' }],
   },
 }
@@ -2060,7 +2060,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
 
 /* ──────────── 단톡방 이벤트 ───────────── */
 
-/** unread: 말풍선 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이��� 말��선 숫자도 함께 줄어듭니다 (읽음 연출) */
+/** unread: 말풍��� 옆 안 읽은 사람 수. 더 작은 숫자의 메시지가 오면 이��� 말��선 숫자도 함께 줄어듭니다 (읽음 연출) */
 export type GroupLine = { sender: string; text: string; delayMs: number; unread?: number; images?: string[] }
 export type GroupChoice = { id: string; text: string; reply: GroupLine[]; setFlag?: string }
 export type GroupScript = {
@@ -2075,7 +2075,7 @@ export type GroupScript = {
   /**
    * 지정하면 messages 대신 단계별로 진행합니다.
    * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시작되고,
-   * 해당 노드의 카톡은 그 단계의 단톡방 대화��� 끝난 뒤에 도착합니다.
+   * 해당 노드의 카톡은 그 단계의 단톡방 대화����� 끝난 뒤에 도착합니다.
    */
   stages?: GroupStage[]
   /** 이 플래그 중 하나라도 켜져 있으면 stages 단톡방 대화가 나오지 않습니다. */
