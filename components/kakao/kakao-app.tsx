@@ -12,6 +12,7 @@ import type { Chat, ChatItem } from './chat-data'
 import { cloneSnapshot, type DaySnapshot } from './snapshot'
 import {
   groupScriptsForDay,
+  GROUP_DONE_FLAG_PREFIX,
   preWorkIds,
   scriptsForDay,
   buildSpamSchedule,
@@ -325,6 +326,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
   const handleScriptDone = useCallback((id: string) => {
     completedScriptsRef.current.add(id)
     setCompletedScripts(new Set(completedScriptsRef.current))
+    if (id in groupScriptsForDay(dayRef.current)) flagCallbackRef.current?.(`${GROUP_DONE_FLAG_PREFIX}${id}`)
     if (dayCompleteFiredRef.current || bustedRef.current) return
     const ids = [...Object.keys(scriptsForDay(dayRef.current)), ...Object.keys(groupScriptsForDay(dayRef.current))]
     if (!ids.length || !ids.every((key) => completedScriptsRef.current.has(key))) return

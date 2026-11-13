@@ -247,12 +247,17 @@ export type Post = {
   day?: number
   /** true 면 day 당일엔 데이트(업무) 전환이 끝난 뒤에 노출 */
   afterWork?: boolean
+  /** 지정한 단톡방 대화가 끝난 뒤에만 노출 (day 당일 기준) */
+  afterGroup?: string
 }
 
-export function isPostVisible(post: Post, day: number, workEnded: boolean) {
+export function isPostVisible(post: Post, day: number, workEnded: boolean, doneGroups?: ReadonlySet<string>) {
   if (!post.day) return true
   if (day < post.day) return false
-  return !(day === post.day && post.afterWork && !workEnded)
+  if (day !== post.day) return true
+  if (post.afterWork && !workEnded) return false
+  if (post.afterGroup && !doneGroups?.has(post.afterGroup)) return false
+  return true
 }
 
 /** 여주 게시물 handle 토큰. 화면에서는 입력한 이름의 영문 아이디로 자동 치환됩니다. */
@@ -304,6 +309,7 @@ export const POSTS: Post[] = [
     comments: [{ name: sakuya.id, text: '오~ 훈남', time: '방금', likes: 1 }],
     day: 3,
     afterWork: true,
+    afterGroup: 'staff',
   },
   {
     id: 'daeyoung-friday-post',
@@ -382,7 +388,7 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     handle: riku.id,
     avatar: avatarOf(riku),
     time: '5일 전',
-    images: [{ src: '/posts/riku-vintage.png', alt: '빈티지 숍 계단 앞에서 안경과 이어폰을 끼고 회색 재��을 여미는 리쿠' }],
+    images: [{ src: '/posts/riku-vintage.png', alt: '빈티지 숍 계단 앞에서 안경과 이어폰을 끼고 회색 재���을 여미는 리쿠' }],
     caption: '',
     likes: 987,
     likedBy: [yushi.id, ryo.id],
