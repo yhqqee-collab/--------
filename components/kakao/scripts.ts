@@ -741,7 +741,7 @@ export const FLAG_SHOP_SION = 'shop-sion'
 /** 시온·유우시의 밤 데이트 답장을 모두 받은 뒤 삼자대면 여부를 판정 */
 const SYNC_DAY2_NIGHT = 'day2-night'
 
-/** 시온 Day 2: 아침 인사 → 단���방 장���기 분기 → 밤 호출 → 마무리 인사 */
+/** ��온 Day 2: 아침 인사 → 단���방 장���기 분기 → 밤 호출 → 마무리 인사 */
 const SION_DAY2: Record<string, PhaseNode> = {
   P0_Morning: {
     preWork: true,
@@ -1097,7 +1097,7 @@ const YUSHI_DAY3: Record<string, PhaseNode> = {
 const RIKU_DAY3: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
-    message: '여주야 일어낫어??\n오늘 뭐해 ㅎㅎ',
+    message: '여주야 일어낫���??\n오늘 뭐해 ㅎㅎ',
     choices: [
       { id: 'A', text: '오늘 뭐하�� ㅎㅎ', susp: 0, next: 'P1_Prop' },
       { id: 'B', text: '아직 침대야 ㅠㅠ 리쿠는 뭐해?', susp: 0, next: 'P1_Prop' },
@@ -1473,7 +1473,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
   P1_Sulk_Bad: {
     preWork: true,
     delay: 6,
-    message: '바쁜 거 알지 ...\n그냥 그렇다고\n오전에 잠깐만 만나자',
+    message: '바쁜 거 알지 ...\n그냥 그렇다고\n��전에 잠깐만 만나자',
     choices: [{ id: 'A', text: '웅 미안해 ㅠㅠ\n11시까지 바로 나갈게!!', susp: 0, next: 'P1_Date_Popup' }],
   },
   // 11:00 공강 카페 데이트
@@ -1985,7 +1985,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
     delay: 4,
     nextCheckGlobal: SYNC_DAY6_FRIDGE,
     message: '진짜 ?\n벌써 설레네 ㅎㅎ\n나중에 보자',
-    choices: [{ id: 'A', text: '웅 이따 부스에서 봐 ❤️', susp: 0, next: 'CHECK_FRIDGE_YUSHI' }],
+    choices: [{ id: 'A', text: '웅 이따 부스에서 봐 ��️', susp: 0, next: 'CHECK_FRIDGE_YUSHI' }],
   },
   // 리쿠가 가져갔으면 리쿠 방에서 게임 오버 (중복 팝업 방지로 여기선 종료)
   CHECK_FRIDGE_YUSHI: {
@@ -2288,7 +2288,7 @@ const STAFF_DAY4: GroupScript = {
           text: '나도 치킨 완전 찬성!!',
           reply: [
             gl2(G_YUSHI, '그럼 치킨 시키자 내가 ���민으로 주문 넣어둘게'),
-            gl2(G_SAKUYA, '오 치킨이면 인정이지 ��ㅎ 사이드로 치즈볼도 추가해 주세용'),
+            gl2(G_SAKUYA, '오 치킨이면 ���정이지 ��ㅎ 사이드로 치즈볼도 추가해 주세용'),
             gl2(G_RYO, 'ㅋㅋㅋㅋ 돼��야'),
           ],
         },
@@ -2334,11 +2334,33 @@ const STAFF_DAY5: GroupScript = {
  * 주점 마지막 날 전환 팝업을 띄운 뒤 밤 11:40 카톡들을 풀어줍니다.
  */
 const STAFF_DAY6: GroupScript = {
-  startDelayMs: 0,
+  startDelayMs: 4000,
   messages: [],
   choices: [],
   stages: [
     {
+      // 1단계: 6일 차 부스 준비 중 사쿠야가 올리는 유우시 기빨림 짤
+      holdNodes: {},
+      messages: [
+        {
+          sender: G_SAKUYA,
+          text: '사진',
+          images: ['/images/chat/yushi_tired.jpg'],
+          delayMs: 2000,
+        },
+        gl(G_SAKUYA, '우시 형 벌써 기빨리는 중 ㅋㅋㅋ'),
+        gl(G_DAEYOUNG, 'ㅋㅋㅋㅋㅋ 영혼 나갔는데?'),
+        gl(G_RYO, 'ㅋㅋㅋㅋㅋㅋㅋ'),
+        gl(G_YUSHI, '야 그걸 왜 찍어...'),
+        gl(G_YUSHI, '집 가고 싶다'),
+        gl(G_RIKU, 'ㅋㅋㅋㅋㅋㅋㅋ'),
+        gl(G_RIKU, '좀만 참아...'),
+        gl(G_SION, '다들 조금만 더 힘내자'),
+        gl(G_SION, '오늘만 버티면 끝이야~'),
+      ],
+    },
+    {
+      // 2단계: 오후 빼빼로 대화가 모두 끝난 뒤 주점 마지막 날 영업 팝업 -> 밤 11:40 카톡 해금
       holdNodes: { a: 'P3_Night_Cling', b: 'P3_Night_Drunk', c: 'P3_Night_Cling' },
       interlude: DAY6_PUB_TRANSITION,
       messages: [],
@@ -2432,7 +2454,7 @@ export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
     '나 말고 딴 새끼 만나냐? ㅋㅋ',
     '어쩐지 요즘 연락도 그렇고 앞뒤가 하나도 안 맞더라',
     '나 두고 바람피우니까 재밌어?',
-    '사람 하나 제대로 병신 만��었네',
+    '사람 하나 ��대로 병신 만��었네',
     '읽씹하지 말고 전화 받아',
   ]),
   ...spam('b', [
