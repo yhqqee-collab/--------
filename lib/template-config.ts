@@ -43,7 +43,7 @@ export type Character = {
 
 /** 메인 공략 캐릭터 3명. 키(a/b/c)는 채팅방 id·스크립트 키와 연결됩니다. */
 export const CHARACTERS: Record<'a' | 'b' | 'c', Character> = {
-  a: { name: '오시온', handle: 'sion_5', avatar: '/avatars/sion.jpg', color: '#4F7DD8' },
+  a: { name: '오시온', handle: 'sion_5', avatar: '/avatars/sion-kakao.png', color: '#4F7DD8' },
   b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku-kakao.webp', color: '#E8A33D' },
   c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi-kakao.jpg', color: '#4CAF7A' },
 }

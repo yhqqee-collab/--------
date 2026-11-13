@@ -10,7 +10,7 @@ const FRIENDS: Friend[] = [
   { name: CHARACTERS.c.name, avatar: CHARACTERS.c.avatar },
   { name: GROUP_MEMBERS.daeyoung.name, avatar: GROUP_MEMBERS.daeyoung.avatar },
   { name: GROUP_MEMBERS.ryo.name, avatar: GROUP_MEMBERS.ryo.avatar },
-  { name: GROUP_MEMBERS.sakuya.name, avatar: GROUP_MEMBERS.sakuya.avatar, status: '한국 생활 n년차' },
+  { name: GROUP_MEMBERS.sakuya.name, avatar: GROUP_MEMBERS.sakuya.avatar },
   { name: '엄마', avatar: '/images/kakao/mom.png', status: '우리 딸 화이팅' },
   { name: '아빠', status: '건강이 최고' },
   { name: '동기 수진이' },
