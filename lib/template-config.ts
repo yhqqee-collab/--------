@@ -82,7 +82,7 @@ export const INSTAGRAM_AVATAR_OVERRIDES: Record<string, string> = {
   리쿠: '/avatars/riku.png',
 }
 
-/** 인스타그램 아이디 고정값. 댓글·좋���요·DM에는 항상 이 아이디가 노출됩니다. */
+/** 인스타그램 아이디 고정값. 댓글·좋아요·DM에는 항상 이 아이디가 노출됩니다. */
 export const INSTAGRAM_IDS = {
   sion: { id: CHARACTERS.a.handle, name: CHARACTERS.a.name },
   riku: { id: CHARACTERS.b.handle, name: CHARACTERS.b.name },

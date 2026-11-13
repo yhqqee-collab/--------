@@ -236,7 +236,7 @@ export type Post = {
   images: { src: string; alt: string }[]
   caption: string
   likes: number
-  /** 좋아요 누른 사람 (첫 번째 아이디가 '○○님 외 N��'으로 노출) */
+  /** 좋아요 누른 사람 (첫 번째 아이디가 '○○님 외 N명'으로 노출) */
   likedBy?: string[]
   comments: PostComment[]
   commentsDisabled?: boolean
