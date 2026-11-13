@@ -1,3 +1,5 @@
+import { fillName, getLang, setPlayerName, tr } from '@/lib/i18n'
+
 export function hasBatchim(name: string) {
   const lastChar = name.charCodeAt(name.length - 1)
   if (lastChar < 0xac00 || lastChar > 0xd7a3) return false
@@ -21,7 +23,13 @@ function replaceScriptName(text: string, name: string, batchim: boolean) {
   })
 }
 
+function translateWithName(text: string, name: string) {
+  setPlayerName(name)
+  return fillName(tr(text), name).replace(/(?<!보)여주(야|아)?(?!:)/g, name)
+}
+
 export function replaceUserName(text: string, name: string) {
+  if (getLang() !== 'ko') return translateWithName(text, name)
   if (!name) return text
   const batchim = hasBatchim(name)
 
@@ -53,6 +61,7 @@ const LITERARY_PARTICLES: Record<string, [string, string]> = {
  * 받침 있음(윤정): 여주를 → 윤정을, 여주가 → 윤정이, 여주는 → 윤정은, 여주의 → 윤정의, 여주야 → 윤정아
  */
 export function replaceUserNameLiterary(text: string, name: string) {
+  if (getLang() !== 'ko') return translateWithName(text, name)
   if (!name) return text
   const batchim = hasBatchim(name)
   const replaced = text
