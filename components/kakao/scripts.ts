@@ -14,7 +14,7 @@ const WORK_TRANSITION_TEXTS: Record<number, string> = {
   3: '⏳ [시온과 용산공원에서 피크닉 데이트 중...] (13:00 ~ 17:00) ⏳',
   4: '⏳ [월요일 수업 듣는 중...] (13:00 ~ 16:40) ⏳',
   5: '⏳ [동기 대영·료와 국밥으로 점심을 먹고 주점 부스 세팅 중...] (12:30 ~ 15:10) ⏳',
-  6: '⏳ [수업 듣고 주점 부스 준비 중...] (14:00 ~ 15:30) ⏳',
+  6: '⏳ [빼빼로를 챙겨 동아리방과 주점 부스 준비 중...] (14:00 ~ 15:30) ⏳',
   7: '🍻 [부스 철거 후 동아리 전체 뒤풀이 진행 중...] (18:00 ~ 22:00) 🍻',
 }
 
@@ -350,7 +350,7 @@ const C_TREE: Record<string, TreeNode> = {
   },
   T2: {
     speakerText: ['[��물 C의 반응]'],
-    options: [{ text: '[마����� 답���]', suspicionDelta: 0, nextNodeId: 'END' }],
+    options: [{ text: '[마������� 답���]', suspicionDelta: 0, nextNodeId: 'END' }],
   },
   END: { speakerText: ['[인물 C의 마지막 인사]'], options: [] },
 }
@@ -741,7 +741,7 @@ export const FLAG_SHOP_SION = 'shop-sion'
 /** 시온·유우시의 밤 데이트 답장을 모두 받은 뒤 삼자대면 여부를 판정 */
 const SYNC_DAY2_NIGHT = 'day2-night'
 
-/** 시온 Day 2: 아침 인사 → 단톡방 장���기 분기 → 밤 호출 → 마무리 인사 */
+/** 시온 Day 2: 아침 인사 → 단���방 장���기 분기 → 밤 호출 → 마무리 인사 */
 const SION_DAY2: Record<string, PhaseNode> = {
   P0_Morning: {
     preWork: true,
@@ -1099,7 +1099,7 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 일어낫어??\n오늘 뭐해 ㅎㅎ',
     choices: [
-      { id: 'A', text: '오늘 뭐하징 ㅎㅎ', susp: 0, next: 'P1_Prop' },
+      { id: 'A', text: '오늘 뭐하�� ㅎㅎ', susp: 0, next: 'P1_Prop' },
       { id: 'B', text: '아직 침대야 ㅠㅠ 리쿠는 뭐해?', susp: 0, next: 'P1_Prop' },
     ],
   },
@@ -1765,7 +1765,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
   },
   P1_Insta_Jealous: {
     delay: 3,
-    message: '대영이 스토리 봤는데\n점심 대영이랑 먹었네?\n나한테는 밥 먹자는 말도 없더니 ㅎㅎ',
+    message: '대영이 스토리 봤는데\n점심 대영이랑 먹었네?\n나한테는 밥 먹자는 말도 없��니 ㅎㅎ',
     choices: [
       { id: 'A', text: '료랑 대영이랑 수업 가기 전에 먹었지 ㅎㅎ\n질투하지 망 ❤️', susp: -5, next: 'P1_Insta_Good' },
       { id: 'B', text: '수업 전이라 같이 먹었어 ㅎㅎ\n저번에 너 찍어준 게 더 잘나왔는데?', susp: 0, next: 'P1_Insta_Norm' },
@@ -1834,18 +1834,16 @@ const DAY6_PUB_TRANSITION = '⏳ [축제 주점 마지막 날 영업 및 뒷정�
 const SION_DAY6: Record<string, PhaseNode> = {
   // 오전 11:30
   P1_Morning: {
-    preWork: true,
     message: '여주 일어났어?\n어제 늦게까지 일해서 피곤할 텐데\n눈 뜨자마자 또 보고 싶네\n근데\n오늘 빼빼로데이인데 내 거는 없나 ㅎㅎ',
     choices: [
       { id: 'A', text: '동방 냉장고 맨 안쪽에\n몰래 넣어뒀지 ㅎㅎ\n아무도 없을 때 챙겨 가 ❤️', susp: -5, next: 'P1_Sweet' },
       { id: 'B', text: '당연히 준비했지!! 동방 냉장고 안쪽에\n숨겨놨어 ㅎㅎ', susp: 0, next: 'P1_Sweet' },
     ],
   },
-  // 오전 11:32 — 답장 후 근무 전환, 동방 냉장고 결과는 SYNC_DAY6_FRIDGE 충족 뒤 결정
+  // 오전 11:32 — 동방 냉장고 결과는 SYNC_DAY6_FRIDGE 충족 뒤 결정
   P1_Sweet: {
-    preWork: true,
     nextCheckGlobal: SYNC_DAY6_FRIDGE,
-    message: '진짜? ㅋㅋㅋ\n어쩐지 아침부터 기분 좋더라\n나 수업 끝나고 2시쯤 동방 들러서 챙겨갈게\n기대된다',
+    message: '진짜? ㅋㅋㅋ\n어쩐지 아침부터 기분 좋더라\n나 2시쯤 동방 들러서 챙겨갈게\n기대된다',
     choices: [{ id: 'A', text: '웅 이따 챙기면 카톡 해 ㅎㅎ\n나도 사랑해 ❤️', susp: 0, next: 'CHECK_FRIDGE_SION' }],
   },
   // 오후 3:30 — 리쿠가 가져갔으면 리쿠 방에서 게임 오버 (중복 팝업 방지로 여기선 종료)
@@ -1896,7 +1894,6 @@ const SION_DAY6: Record<string, PhaseNode> = {
  */
 const RIKU_DAY6: Record<string, PhaseNode> = {
   P1_Fridge_Find: {
-    preWork: true,
     message: '여주\n나 앞치마 가지러 동방 왓는데\n냉장고에 리본 묶인 수제 빼빼로 상자가 잇어!!\nㅎㅎ\n이거 리쿠거 맞징❤️',
     choices: [
       {
@@ -1915,14 +1912,12 @@ const RIKU_DAY6: Record<string, PhaseNode> = {
     ],
   },
   P1_Take_Confirm: {
-    preWork: true,
     delay: 4,
     nextCheckGlobal: SYNC_DAY6_FRIDGE,
     message: '헤헤 역시 내 거 맞지?!\n여주 진짜 천사야 ㅠㅠ\n지금 들고 동방 나가는 중!!\n신난당 ❤️',
     choices: [{ id: 'A', text: '웅\n이따 부스에서 보자 ㅎㅎ', susp: 0, next: 'P2_Dead_Fridge' }],
   },
   P1_Stop_Safe: {
-    preWork: true,
     delay: 4,
     nextCheckGlobal: SYNC_DAY6_FRIDGE,
     message: '아 진짜?!\n혼자 김칫국 마셧네 ㅋㅋㅋ\n빨리 3시 됏으면 좋겟어\n여주 얼굴도 보구\n빼빼로도 받을랭',
@@ -1980,7 +1975,6 @@ const RIKU_DAY6: Record<string, PhaseNode> = {
 const YUSHI_DAY6: Record<string, PhaseNode> = {
   // 오후 12:00
   P1_Morning: {
-    preWork: true,
     message: '일어났어 ?\n오늘 축제 마지막 날이네\n오늘 빼빼로데이 ?\n그거 맞지',
     choices: [
       { id: 'A', text: '웅!! 오늘 빼빼로데이니까\n유우시 줄 것도\n가방에 챙겨놨어 ㅎㅎ\n이따 몰래 줄게 ❤️', susp: -5, next: 'P1_Sweet' },
@@ -1988,7 +1982,6 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
     ],
   },
   P1_Sweet: {
-    preWork: true,
     delay: 4,
     nextCheckGlobal: SYNC_DAY6_FRIDGE,
     message: '진짜 ?\n벌써 설레네 ㅎㅎ\n나중에 보자',
@@ -2296,7 +2289,7 @@ const STAFF_DAY4: GroupScript = {
           reply: [
             gl2(G_YUSHI, '그럼 치킨 시키자 내가 ���민으로 주문 넣어둘게'),
             gl2(G_SAKUYA, '오 치킨이면 인정이지 ��ㅎ 사이드로 치즈볼도 추가해 주세용'),
-            gl2(G_RYO, 'ㅋㅋㅋㅋ 돼지야'),
+            gl2(G_RYO, 'ㅋㅋㅋㅋ 돼��야'),
           ],
         },
       ],
