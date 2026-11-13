@@ -166,6 +166,34 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
               대화 기록 보기
             </button>
           </div>
+          <div className="flex w-full max-w-[260px] flex-col gap-4 border-t border-white/10 pt-5 text-[12px] leading-relaxed text-white/60">
+            <div className="flex flex-col gap-2">
+              <p className="text-pretty">플레이 후기를 트위터 인용으로 자유롭게 공유해주세요!</p>
+              <a
+                href="https://x.com/luneeging/status/2121255860265684999?a=gfAh_S7lvp8-Ic4nbgg&s=20"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-h-10 rounded-full border border-white/25 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                트위터로 후기 남기기
+              </a>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-pretty">
+                이런 시뮬레이터 / 미연시가 나왔으면 좋겠어요~ 여러분들의 아이디어를 자유롭게 공유해주세요
+                <br />
+                <span className="text-white/40">(=아이디어 고갈이라는 뜻)</span>
+              </p>
+              <a
+                href="https://pushoong.com/ask/8701059494"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-h-10 rounded-full border border-white/25 px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                푸슝으로 아이디어 보내기
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>
