@@ -39,7 +39,7 @@ function expandDictionary(source: Record<string, string>) {
     if (key && HANGUL.test(key) && !(key in out)) out[key] = translated.trim()
   }
   for (const [ko, translated] of Object.entries(source)) {
-    if (!ko.includes('\n')) continue
+    if (!ko.includes('\n') && !ko.includes(' / ') && !SPEAKER.test(ko)) continue
     const koLines = ko.split('\n').map((l) => l.trim()).filter(Boolean)
     const trLines = translated.split('\n').map((l) => l.trim()).filter(Boolean)
     if (koLines.length !== trLines.length) continue
