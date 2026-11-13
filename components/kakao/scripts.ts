@@ -236,7 +236,7 @@ function splitReplyLines(text: string) {
   })
 }
 
-/** 모든 메시지 대기 시간(초)에 곱하는 배율. 순서는 그대로 유지하면서 전체 속도만 조절합니다. */
+/** 모든 메시지 대기 시간(초)에 곱하는 배율. 순서는 그대로 유지하면서 전�� 속도만 조절합니다. */
 const TIME_SCALE = 0.5
 
 function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming: PhaseTiming): Script {
@@ -524,7 +524,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '1시 수업 발표 준비 때문에... 점심에 대본 봐야 할 것 같아... ㅠㅠ',
         susp: 15,
-        reply: '아 그래 ? / ���업 늦지 않게 얼른 와 / 옆자리 비워놨어',
+        reply: '아 그래 ? / 수업 늦지 않게 얼른 와 / 옆자리 비워놨어',
         next: 'P2_RikuFlow_B',
         setFlag: FLAG_YUSHI_EXCUSE_SOLO,
       },
@@ -554,7 +554,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '라멘야 어때?',
         susp: 0,
-        reply: '알겠어 / 이따 사물함만 ��렀��가 그쪽으��� 갈게 ^_^',
+        reply: '알겠어 / 이따 사물함만 들렀다가 그쪽으로 갈게 ^_^',
         next: 'P2_Ramen_Safe',
         setFlag: FLAG_YUSHI_LUNCH_RAMEN,
       },
@@ -612,7 +612,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   P5_Start: {
     delay: 30,
     message:
-      '오늘 사람들 많아서 얼굴만 보고 얘기도 제대로 못 했네\n아까 동방 앞에서 몰래 손잡은 거 설렜어 ㅎ��\n집 들어가기 전에 우리 ��� 잠깐 들렀다 갈래 ?',
+      '오늘 사람들 많아서 얼굴만 보고 얘기도 제대로 못 했네\n아까 동방 앞에서 몰래 손잡은 거 설렜어 ㅎㅎ\n집 들어가기 전에 우리 집 잠깐 들렀다 갈래 ?',
     choices: [
       {
         id: 'A',
@@ -731,7 +731,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
     message:
       '여주야 나 주차 좀 하고 갈 테니까 먼저 마트 들어가 있어 ㅋㅋ\n근데 방금 주차장 쪽에서 수진이 봤는데\n며칠 푹 쉬고 방금 본가에서 올라왔다던데?\n너 수요일 밤에 수진이 자취방에서 과제하며 밤샜다고 하지 않았어?',
     choices: [
-      { id: 'A', text: '수요일 늦게 내려갔을 걸?\n그전까지 같이 한 거야!', susp: -15, reply: '아 그래? / 알겠어 얼른 들어갈게', next: 'P3_Night_Start' },
+      { id: 'A', text: '수요일 늦게 내려갔을 걸?\n그전까지 같이 �� 거야!', susp: -15, reply: '아 그래? / 알겠어 얼른 들어갈게', next: 'P3_Night_Start' },
       {
         id: 'B',
         text: '아 수진이 아니고 민지였어\n내가 헷갈렸다 ㅎㅎ',
@@ -755,7 +755,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
       },
       {
         id: 'B',
-        text: '앗 나 방금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
+        text: '앗 나 ���금 씻고 누웠는데 ㅠㅠ 너무 피곤해...',
         susp: 5,
         reply: '벌�� 누웠어? / 알겠어 푹 쉬어',
         next: 'P4_Goodnight_Reject',
@@ -977,7 +977,7 @@ const SION_DAY3: Record<string, PhaseNode> = {
   },
 }
 
-/** 유우시 Day 3: 아침 (감기 핑계) → 시온 인스타 댓글 10초 뒤 추궁 → 답장 시 시온 저녁 카톡 */
+/** 유우시 Day 3: 아침 (감기 핑계) → 시온 ���스타 댓글 10초 뒤 추궁 → 답장 시 시온 저녁 카톡 */
 const YUSHI_DAY3: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
@@ -1935,7 +1935,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
     message:
       '빼빼로 고마워 ㅎㅎ\n근데\n[[대기:5]]\n아까 짐 정리하다 보니까\n시온이 형이랑 리쿠 가방에도\n네가 준 거랑 똑같은 리본 상자 있던데\n둘한테도 준 거야...?',
     choices: [
-      { id: 'A', text: '그건 그냥 의리로 돌린 거고\n손편지랑 하트 초코 넣은 건\n유우시 거 하나뿐이야 ㅎㅎ', susp: -5, next: 'P2_Ribbon_Good' },
+      { id: 'A', text: '그건 그냥 의리로 돌린 거고\n손편지랑 하트 초�� 넣은 건\n유우시 거 하나뿐이야 ㅎㅎ', susp: -5, next: 'P2_Ribbon_Good' },
       { id: 'B', text: '상자 흔한 거라 겹쳤나 봐 ㅋㅋ\n내가 챙겨준 건 유우시 거밖에 없어!', susp: 10, next: 'P2_Ribbon_Doubt' },
     ],
   },
@@ -2075,7 +2075,7 @@ export type GroupScript = {
   /**
    * 지정하면 messages 대신 단계별로 진행합니다.
    * 각 단계는 그날 모든 남주의 대화가 holdNodes 의 노드에 도착(또는 대화 종료)했을 때 시작되고,
-   * 해당 노드의 카톡은 그 단계의 단톡방 대화가 끝난 뒤에 도착합니다.
+   * 해당 노드의 카톡은 그 단계의 단톡방 대화��� 끝난 뒤에 도착합니다.
    */
   stages?: GroupStage[]
   /** 이 플래그 중 하나라도 켜져 있으면 stages 단톡방 대화가 나오지 않습니다. */
