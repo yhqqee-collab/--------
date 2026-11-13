@@ -12,6 +12,7 @@ const PhoneSimulator = dynamic(
 )
 
 const LANG_KEY = 'fishbowl_lang_v1'
+const UNLOCK_KEY = 'fishbowl_unlocked_v1'
 
 function readStorage(key: string) {
   try {
@@ -39,6 +40,7 @@ export function PasswordGate() {
       const validLang = savedLang && LANG_OPTIONS.some((option) => option.value === savedLang) ? savedLang : null
       if (validLang) await setLang(validLang)
       if (cancelled) return
+      setUnlocked(readStorage(UNLOCK_KEY) === '1')
       setReady(validLang !== null)
       setRestored(true)
     }
@@ -49,7 +51,15 @@ export function PasswordGate() {
   }, [])
 
   if (!restored) return null
-  if (!unlocked) return <PasswordScreen onUnlock={() => setUnlocked(true)} />
+  if (!unlocked)
+    return (
+      <PasswordScreen
+        onUnlock={() => {
+          writeStorage(UNLOCK_KEY, '1')
+          setUnlocked(true)
+        }}
+      />
+    )
   if (!ready)
     return (
       <LanguagePicker
