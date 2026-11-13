@@ -539,7 +539,8 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   },
   P2_YushiFlow: {
     preWork: true,
-    delay: 12,
+    // TIME_SCALE(0.5) 적용 후 실제 10초
+    delay: 20,
     message: '오고 있어 ?\n이따가 뭐 먹지\n먹고 싶은 거 있어 ?',
     choices: [
       {
@@ -1482,7 +1483,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     preWork: true,
     delay: 6,
     nextCheckGlobal: SYNC_DAY5_HOODIE,
-    message: '응 ㅎㅎ\n밤에 추우니까 겉옷 따뜻하게 챙겨 와',
+    message: '응 ㅎㅎ\n밤에 추우니까 겉옷 따뜻하게 챙겨 ��',
     // 이 답장 후 부스 세팅 전환 팝업 (WORK_TRANSITION_TEXTS[5])
     choices: [{ id: 'A', text: '(오후 3시 부스 세팅 시간에 맞춰 나간다)', susp: 0, next: 'CHECK_RIKU_HOODIE' }],
   },
@@ -2068,7 +2069,7 @@ export type GroupScript = {
   startDelayMs: number
   /** true 면 그날 모든 남자와의 대화가 끝난 뒤에 단톡방 이벤트 시작 */
   afterAllChats?: boolean
-  /** true 면 근무 종료 직후 시작하고, 남자들의 근무 후 카톡은 이 이벤트가 끝난 뒤에 도착 */
+  /** true 면 근무 종료 직후 ���작하고, 남자들의 근무 후 카톡은 이 이벤트가 끝난 뒤에 도착 */
   afterWorkEnd?: boolean
   messages: GroupLine[]
   choices: GroupChoice[]
@@ -2107,12 +2108,11 @@ const G_DAEYOUNG = GROUP_MEMBERS.daeyoung.name
 const G_SAKUYA = GROUP_MEMBERS.sakuya.name
 const G_RYO = GROUP_MEMBERS.ryo.name
 
-/** Day 1 단톡방: 시식회 전 대화 → 시식회 후 해산 대화 (라멘야 목격담 엔딩이면 나오지 않음) */
+/** Day 1 단톡방: 시식회 전 대화 → 시식회 팝업 → 시식회 후 해산 대화 */
 const STAFF_DAY1: GroupScript = {
   startDelayMs: 5000,
   messages: [],
   choices: [],
-  skipIfFlags: [FLAG_RIKU_LUNCH_RAMEN, FLAG_YUSHI_LUNCH_RAMEN],
   stages: [
     {
       // 오후 수업이 끝나고 시식회 시작 전
@@ -2171,8 +2171,16 @@ const STAFF_DAY2: GroupScript = {
         },
       ],
     },
+  ],
+}
+
+/** Day 3 (일요일): 사쿠야 & 대영 영화관 단톡 → 리쿠 밤 카톡 직전에 자취방 데이트 팝업 */
+const STAFF_DAY3: GroupScript = {
+  startDelayMs: 5000,
+  messages: [],
+  choices: [],
+  stages: [
     {
-      // 팀 나누기 직후, 장보기 전에 사쿠야가 영화관 사진을 묶어서 보냄
       holdNodes: {},
       messages: [
         {
@@ -2189,15 +2197,6 @@ const STAFF_DAY2: GroupScript = {
       ],
       choices: [{ id: 'A', text: '둘이 주말 데이트하네 귀엽다 ㅋㅋㅋ', reply: [] }],
     },
-  ],
-}
-
-/** Day 3: 단톡방 대화 없이 리쿠 밤 카톡 직전에 자취방 데이트 팝업만 띄움 */
-const STAFF_DAY3: GroupScript = {
-  startDelayMs: 0,
-  messages: [],
-  choices: [],
-  stages: [
     {
       holdNodes: { b: 'P3_Night_Sweet' },
       interlude: '리쿠의 자취방에서 배달 음식을 먹으며\n오붓한 시간을 보냈습니다...\n\n밤이 깊어 집으로 돌아왔습니다',

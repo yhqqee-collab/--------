@@ -1007,7 +1007,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         </div>
         {newBadge && (
           <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center" role="status">
-            <span className="flex items-center gap-[6px] rounded-full bg-[#FA5A3C] px-3 py-[6px] text-[12.5px] font-semibold text-white shadow-lg">
+            <span className="flex items-center gap-[6px] rounded-full bg-[#FA5A3C]/60 px-3 py-[6px] text-[12.5px] font-semibold text-white shadow-lg backdrop-blur-sm">
               <span className="size-[7px] rounded-full bg-white" aria-hidden />
               새 메시지 도착
             </span>

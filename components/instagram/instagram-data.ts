@@ -185,7 +185,7 @@ export const STORIES: StoryItem[] = [
 
 STORIES_BY_DAY[1] = STORIES
 
-/** 2일 차: 대영 스토리 */
+/** 2일 차: 대�� 스토리 */
 STORIES_BY_DAY[2] = [
   story(daeyoung, '4시간', {
     image: { src: '/stories/daeyoung-day2.jpg', alt: '나무 그늘 아래 검은 나시 차림으로 앉아 옆을 보는 대영' },
@@ -277,7 +277,7 @@ export const POSTS: Post[] = [
     likes: 301,
     likedBy: [sakuya.id, ryo.id],
     comments: [{ name: sakuya.id, text: '오~ 훈남', time: '방금', likes: 1 }],
-    day: 2,
+    day: 3,
     afterWork: true,
   },
   {
