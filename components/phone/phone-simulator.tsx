@@ -169,7 +169,7 @@ type PhoneSessionProps = {
 }
 
 function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, onRestart }: PhoneSessionProps) {
-  const startDay = resume?.day ?? 1
+  const startDay = Math.min(resume?.day ?? 1, FINAL_DAY)
   const [busted, setBusted] = useState(false)
   const [bustedAlert, setBustedAlert] = useState<string>()
   const [spams, setSpams] = useState<(SpamNotification & { key: number })[] | null>(null)
