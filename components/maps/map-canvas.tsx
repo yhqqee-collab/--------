@@ -223,7 +223,7 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
             place={place}
             zoom={zoom}
             selected={place.id === selectedId}
-            hidden={place.id === HOME.id && navPoint !== null}
+            hidden={place.id === HOME.id}
             onSelect={onSelect}
           />,
           element,

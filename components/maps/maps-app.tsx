@@ -1,7 +1,7 @@
 'use client'
 
 import type { Map as LeafletMap } from 'leaflet'
-import { CalendarCheck, LocateFixed, Map as MapIcon, Mic, Minus, Navigation, Plus } from 'lucide-react'
+import { CalendarCheck, Map as MapIcon, Mic, Minus, Navigation, Plus } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { AppShell } from '@/components/phone/app-shell'
 import { cn } from '@/lib/utils'
@@ -190,14 +190,6 @@ export function MapsApp({ open }: { open: boolean }) {
                     <Minus className="size-5" />
                   </button>
                 </div>
-                <button
-                  type="button"
-                  aria-label="내 위치로 이동"
-                  onClick={() => focus(HOME.x, HOME.y, 16)}
-                  className={cn('flex size-11 items-center justify-center rounded-lg bg-white text-[#03C75A]', SHADOW)}
-                >
-                  <LocateFixed className="size-5" />
-                </button>
                 <button
                   type="button"
                   onClick={() => startRoute(HOME.id, null)}
