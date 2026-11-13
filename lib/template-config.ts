@@ -16,8 +16,8 @@
  */
 
 export const SITE = {
-  title: '어장 키우기 hard ver.',
-  description: '어장 키우기 hard ver. — 휴대폰 시뮬레이터 게임',
+  title: '어장 키우기 Uni ver.',
+  description: '어장 키우기 Uni ver. — 휴대폰 시뮬레이터 게임',
 }
 
 export const DEFAULT_OWNER_NAME = '주인공'
@@ -45,7 +45,7 @@ export type Character = {
 export const CHARACTERS: Record<'a' | 'b' | 'c', Character> = {
   a: { name: '오시온', handle: 'sion_5', avatar: '/avatars/sion.jpg', color: '#4F7DD8' },
   b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku-kakao.webp', color: '#E8A33D' },
-  c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi.png', color: '#4CAF7A' },
+  c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi-kakao.jpg', color: '#4CAF7A' },
 }
 
 /** 여주(휴대폰 주인) 프로필 사진. 카카오톡·인스타그램에 공통 적용됩니다. */
