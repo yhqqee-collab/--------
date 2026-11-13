@@ -525,7 +525,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
         id: 'A',
         text: '오늘은 늦었으니까 ㅠㅠ 주말에 집데이트하자 ❤️',
         susp: 0,
-        reply: '헤헤 / 주말에 꼭 우리 집 오기다?? / 약속!! / 조심히 들어가구 잘 자 / 여주야 사랑해 ❤️',
+        reply: ' / 주말에 꼭 우리 집 오기다?? / 약속!! / 조심히 들어가구 잘 자 / 여주야 사랑해 ❤️',
         next: 'end',
       },
       {
@@ -924,7 +924,7 @@ const RIKU_DAY2: Record<string, PhaseNode> = {
 const YUSHI_DAY2: Record<string, PhaseNode> = {
   P0_Morning: {
     preWork: true,
-    message: '여주야 잘 잤어 ?\n오늘 일정 때문에 늦을 것 같네\n형한테는 말해뒀어',
+    message: '여주야 잘 잤어 ?\n오늘 일정 때문에 늦을 것 같네\n형한테는 말해뒀���',
     choices: [
       { id: 'A', text: '헉 그렇구나 ㅠㅠ\n보고 싶어서 어떡해...', susp: -5, reply: '응 이따가 갈 때 연락할게 ^_^', next: 'P3_Night' },
       { id: 'B', text: '알겠어! 이따 짐 정리할 때 봐', susp: 0, reply: '그래 이따 봐', next: 'P3_Night' },
@@ -1437,7 +1437,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Msg: {
     delay: 16,
-    message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n�� ��각이지?',
+    message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n�� ����각이지?',
     choices: [
       { id: 'A', text: '시온이 원래 잘 챙겨주잖아\n오늘 내 눈엔 리쿠밖에 안 보였어 ❤️', susp: -10, next: 'P4_Night_Good' },
       { id: 'B', text: '어차피 다같이 있는데 뭐 ~\n신경쓰지 마 ㅎㅎ', susp: 5, next: 'P4_Night_Bad' },
@@ -1615,7 +1615,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     // 유우시 답장 없이(읽씹) 바로 주점 종료로
     choices: [
       { id: 'A', text: '미안 ㅠㅠ', susp: 0, next: 'P3_Pub_Skip' },
-      { id: 'B', text: '옆에 리쿠��� 있어서... ㅜㅜ', susp: 0, next: 'P3_Pub_Skip' },
+      { id: 'B', text: '옆에 리�������� 있어서... ㅜㅜ', susp: 0, next: 'P3_Pub_Skip' },
     ],
   },
   P2_Bag_Dead: {
@@ -1768,7 +1768,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
  * → 밤 야식 방문 제안 (리쿠 방문과 겹치면 리쿠 방에서 즉사 판정)
  */
 const SION_DAY5: Record<string, PhaseNode> = {
-  // 대영이 국밥 스토리(afterWork)가 부스 세팅 이후에 올라오므로, 시온은 출근 전 모닝톡으로 먼저 시작
+  // 대영이 국밥 스������(afterWork)가 부스 세팅 이후에 올라오므로, 시온은 출근 전 모닝톡으로 먼저 시작
   P1_Morning: {
     preWork: true,
     message: '여주야 잘 잤어??\n오늘 축제 첫날이라며\n바쁘겠다 ㅠㅠ 무리하지 마',
@@ -2204,7 +2204,7 @@ const STAFF_DAY1: GroupScript = {
       // 오후 수업이 끝나고 시식회 시작 전
       holdNodes: { a: 'P2_Start', b: 'P4_Start', c: 'P4_Start' },
       messages: [
-        gl(G_SION, '애들아 오늘 저녁 7시 동방에서 주점 메뉴 관련 회의랑 시식 있는 거 안 잊었지? ㅋㅋ'),
+        gl(G_SION, '애들아 오늘 저녁 7시 동방에서 주점 메뉴 관련 회의랑 시식 있는 거 안 잊었지?'),
         gl(G_SION, '나 지금 일찍 가서 동방 테이블 먼저 세팅해 둘게~'),
         gl(G_RIKU, '나도 집 앞 마트에서 타코야끼 가루랑 소스 사서 출발햇어 ㅎㅎ'),
         gl(G_RYO, '오 리쿠 형 벌써 기대돼요 ㅋㅋㅋ 저랑 사쿠야는 음료수 사서 갈게요!'),
@@ -2218,7 +2218,7 @@ const STAFF_DAY1: GroupScript = {
       holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
       interlude: '19:00 ~ 21:30\n동아리방에서 주점 메뉴 회의 중...',
       messages: [
-        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었���요 ㅋㅋㅋ'),
+        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보��� 맛있었���요 ㅋㅋㅋ'),
         gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
         gl(G_RIKU, '다들 맛잇게 먹어줘서 고마워 ㅎㅎ 주점 대박 날 듯!!'),
         gl(G_RYO, '오늘 다들 고생하셨어요 조심히 들어가세요~!!'),
@@ -2238,7 +2238,7 @@ const STAFF_DAY2: GroupScript = {
       holdNodes: { a: 'Branch_Group', b: 'Branch_Group' },
       messages: [
         gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누자 ㅋㅋ'),
-        gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 올게'),
+        gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 ���게'),
         gl(G_RIKU, '나�� 다이소 가서 앞치마랑 데코 소품 사 올게! 가까우니까 걸어갈 거야 ㅎㅎ'),
         gl(G_DAEYOUNG, '여주누나는 어디 따라갈래?'),
       ],
