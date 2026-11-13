@@ -62,7 +62,7 @@ const CALENDAR_EVENTS: DayEvent[] = [
   { day: 9, category: 'club', title: '동아리 소품 작업', start: '18:00' },
   { day: 10, category: 'club', title: '축제 주점 1일차', start: '18:00' },
   { day: 11, category: 'club', title: '축제 주점 2일차 & 회식', start: '18:00' },
-  { day: 12, category: 'club', title: '주점 철거', start: '13:00' },
+  { day: 12, category: 'club', title: '뒷풀이', start: '13:00' },
 ]
 
 function buildEvents(): CalendarEvent[] {

@@ -15,18 +15,48 @@ export function getLang() {
 
 export async function setLang(lang: Lang) {
   currentLang = lang
-  dictionary =
+  dictionary = expandDictionary(
     lang === 'en'
       ? (await import('./i18n/en.json')).default
       : lang === 'zh'
         ? (await import('./i18n/zh.json')).default
-        : {}
+        : {},
+  )
   const option = LANG_OPTIONS.find((o) => o.value === lang)
   if (option) document.documentElement.lang = option.htmlLang
   if (lang !== 'ko') startDomTranslation()
 }
 
 const HANGUL = /[가-힣ㄱ-ㅎㅏ-ㅣ]/
+const SPEAKER = /^[가-힣A-Za-z\u4e00-\u9fff]{1,10}:\s*/
+
+// Chat scripts are played one line (and one ' / ' bubble) at a time, but the dictionary
+// stores whole multi-line messages, so line-level pairs are derived here.
+function expandDictionary(source: Record<string, string>) {
+  const out: Record<string, string> = { ...source }
+  const add = (ko: string, translated: string) => {
+    const key = ko.trim()
+    if (key && HANGUL.test(key) && !(key in out)) out[key] = translated.trim()
+  }
+  for (const [ko, translated] of Object.entries(source)) {
+    if (!ko.includes('\n') && !ko.includes(' / ') && !SPEAKER.test(ko)) continue
+    const koLines = ko.split('\n').map((l) => l.trim()).filter(Boolean)
+    const trLines = translated.split('\n').map((l) => l.trim()).filter(Boolean)
+    if (koLines.length !== trLines.length) continue
+    koLines.forEach((line, i) => {
+      add(line, trLines[i])
+      const koBody = line.replace(SPEAKER, '')
+      const trBody = trLines[i].replace(SPEAKER, '')
+      add(koBody, trBody)
+      const koParts = koBody.split(' / ')
+      const trParts = trBody.split(' / ')
+      if (koParts.length > 1 && koParts.length === trParts.length) {
+        koParts.forEach((part, j) => add(part, trParts[j]))
+      }
+    })
+  }
+  return out
+}
 
 /** 원문(한국어) 문자열을 현재 언어로 바꿉니다. 사전에 없으면 원문을 그대로 돌려줍니다. */
 export function tr(text: string) {
