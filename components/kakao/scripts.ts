@@ -349,7 +349,7 @@ const C_TREE: Record<string, TreeNode> = {
     ],
   },
   T2: {
-    speakerText: ['[인물 C의 반응]'],
+    speakerText: ['[��물 C의 반응]'],
     options: [{ text: '[마무리 답장]', suspicionDelta: 0, nextNodeId: 'END' }],
   },
   END: { speakerText: ['[인물 C의 마지막 인사]'], options: [] },
@@ -647,7 +647,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
       {
         id: 'B',
         text: '아아 일요일 아침 일찍 자취방 와서 쉬었어!',
-        susp: 0,
+        susp: 5,
         reply: '아 일요일 아침에 미리 올라왔구나 ㅎㅎ / 난 또 ^_^',
         next: 'P5_Start',
       },
@@ -1437,7 +1437,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Msg: {
     delay: 16,
-    message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n내 착각이지?',
+    message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n내 ��각이지?',
     choices: [
       { id: 'A', text: '시온이 원래 잘 챙겨주잖아\n오늘 내 눈엔 리쿠밖에 안 보였어 ❤️', susp: -10, next: 'P4_Night_Good' },
       { id: 'B', text: '어차피 다같이 있는데 뭐 ~\n신경쓰지 마 ㅎㅎ', susp: 5, next: 'P4_Night_Bad' },
@@ -1457,7 +1457,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
 
 /**
  * 유우시 Day 4 (월): 아침 서운함 달래기 → 공강 카페 데이트 → 스토리 태그 허락 여부(시온 점심 추궁 분기)
- * → (수업) → 리쿠·시온 대화가 모두 끝난 뒤 밤 리쿠 견제 카톡
+ * → (수업) → 리쿠·시온 대화가 모두 끝난 뒤 ��� 리쿠 견제 카톡
  * 스토리 태그 플래그가 수업 전환 전에 정해져야 시온의 CHECK_YUSHI_STORY 가 읽을 수 있으므로 오전 파트는 preWork
  */
 const YUSHI_DAY4: Record<string, PhaseNode> = {
@@ -1751,7 +1751,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
   },
   P4_Safe_Riku_After: {
     delay: 6,
-    message: '얼굴 보니까 이제 살 거 같아 ㅎㅎ\n잘 자\n사랑해애애❤️',
+    message: '얼굴 보니까 이제 살 거 같아 ㅎㅎ\n��� 자\n사랑해애애❤️',
     choices: [{ id: 'A', text: '나도 사랑해 조심히 들어가 ❤️', susp: -10, next: 'end' }],
   },
   P4_Dead_Clash: {
@@ -2072,7 +2072,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
 }
 
 /* ─────────────────────── 7일 차 (축제 마지막 날 · 뒤풀이) ───────────────────────
- * 선택지 없이 시온(0초) → 리쿠(5초) → 유우시(10초) 순으로 카톡이 도착하고,
+ * 선택지 없이 ��온(0초) → 리쿠(5초) → 유우시(10초) 순으로 카톡이 도착하고,
  * 마지막 카톡 이후 최종 선택 화면이 열립니다.
  */
 const DAY7_TIMING: Record<'a' | 'b' | 'c', PhaseTiming> = {
@@ -2239,7 +2239,7 @@ const STAFF_DAY2: GroupScript = {
       messages: [
         gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누자 ㅋㅋ'),
         gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 올게'),
-        gl(G_RIKU, '나는 다이소 가서 앞치마랑 데코 소품 사 올게! 가까우니까 걸어갈 거야 ㅎㅎ'),
+        gl(G_RIKU, '나�� 다이소 가서 앞치마랑 데코 소품 사 올게! 가까우니까 걸어갈 거야 ㅎㅎ'),
         gl(G_DAEYOUNG, '여주누나는 어디 따라갈래?'),
       ],
       choices: [
