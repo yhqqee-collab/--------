@@ -41,6 +41,12 @@ const GAME_OVER_DELAY_MS = 2500
 
 const ALERT_REPLY_DELAY_MS = 4000
 const GATE_NO_REPLY_MS = 1200
+/** 단톡방 선택으로 분기가 정해진 뒤 개인톡이 먼저 오기까지 */
+const HELD_BRANCH_MIN_MS = 7000
+/** 시스템 팝업을 닫은 뒤 다음 카톡이 오기까지 */
+const AUTO_ADVANCE_DELAY_MS = 5000
+/** 마지막 답장을 본 뒤 전환 팝업이 뜨기까지 최소 읽을 시간 */
+const READ_TIME_MS = 2500
 
 type ChatRoomProps = {
   chat: Chat
@@ -123,6 +129,9 @@ function nowLabel() {
   return `${period} ${hour}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
+/** 이 시간(ms) 이상 대기한 뒤 오는 카톡은 새 묶음으로 분리 */
+const LONG_PAUSE_MS = 3000
+
 function sameGroup(a: ChatItem | undefined, b: Message) {
   return a?.type === 'msg' && a.from === b.from && a.time === b.time && a.sender === b.sender
 }
@@ -183,6 +192,10 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
   const badgeTimerRef = useRef<number | undefined>(undefined)
   const waitingRef = useRef(false)
   const pendingNodeRef = useRef<string | null>(null)
+  const unreadRef = useRef(false)
+  const lastSeenAtRef = useRef(0)
+  const pendingReadRef = useRef<(() => void)[]>([])
+  const chooseRef = useRef<(choice: Choice, index: number, nextDelayOverride?: number) => void>(() => {})
 
   const scriptDoneRef = useRef(false)
   const latest = useRef({ active, owner, onSuspicionChange, onIncoming, onGateDone, onScriptDone, onGameOver, onDoomed, onReply, onCrossMessage, onInterlude })
@@ -199,6 +212,17 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       fn()
     }, ms)
     timersRef.current.add(id)
+  }
+
+  /** 안 읽은 답장이 있으면 방에 들어올 때까지 기다린 뒤, 마지막 말풍선을 본 시점부터 READ_TIME_MS 후 실행 */
+  function whenRead(fn: () => void) {
+    if (unreadRef.current || !latest.current.active) {
+      if (unreadRef.current) {
+        pendingReadRef.current.push(fn)
+        return
+      }
+    }
+    schedule(Math.max(0, lastSeenAtRef.current + READ_TIME_MS - Date.now()), fn)
   }
 
   function showNote(delta: number) {
@@ -221,14 +245,23 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     setWaiting(false)
   }
 
-  function land(text: string, badge: boolean, nudge: boolean, sender?: string, time = nowLabel()) {
+  /** 새 페이즈·긴 대기 뒤에 상대가 이어서 보내면 묶음을 나눠 프로필·이름이 다시 보이게 함 */
+  function withBreak(prev: ChatItem[], split: boolean): ChatItem[] {
+    if (!split) return prev
+    const last = prev.length ? prev[prev.length - 1] : chat.items[chat.items.length - 1]
+    return last?.type === 'msg' && last.from === 'them' ? [...prev, { type: 'break' }] : prev
+  }
+
+  function land(text: string, badge: boolean, nudge: boolean, sender?: string, time = nowLabel(), split = false) {
     setTyping(false)
     if (text.startsWith(ME_LINE_PREFIX)) {
       const mine = text.slice(ME_LINE_PREFIX.length)
       setAdded((prev) => [...prev, { type: 'msg', from: 'me', text: mine, time }])
       return
     }
-    setAdded((prev) => [...prev, { type: 'msg', from: 'them', text, time, ...(sender ? { sender } : {}) }])
+    setAdded((prev) => [...withBreak(prev, split), { type: 'msg', from: 'them', text, time, ...(sender ? { sender } : {}) }])
+    if (latest.current.active) lastSeenAtRef.current = Date.now()
+    else unreadRef.current = true
     if (!nudge || readAtRef.current === null) {
       readAtRef.current = latest.current.active ? Date.now() : null
     }
@@ -257,15 +290,23 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         const label = batch.dateLabel
         setAdded((prev) => [...prev, { type: 'date', label }])
       }
-      if (pause === null) land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time)
+      if (pause === null) {
+        const previousPause = index > 0 ? pauseDuration(batch.texts[index - 1]) : null
+        const split = (index === 0 && !batch.reply) || (previousPause !== null && previousPause >= LONG_PAUSE_MS)
+        land(text, batch.badge && index === 0, Boolean(batch.nudge), batch.sender, batch.time, split)
+      }
       if (index === 0 && batch.enterNode) vibrate()
       if (!isLast) return schedule(batch.instant ? 300 : 0, () => playLine(batch, index + 1))
       if (batch.reply) finishReply()
-      if (batch.enterNode) {
+      const autoNode = batch.enterNode ? script?.nodes[batch.enterNode] : undefined
+      if (batch.enterNode && autoNode?.autoAdvance && autoNode.choices[0]) {
+        const autoChoice = autoNode.choices[0]
+        schedule(0, () => chooseRef.current(autoChoice, 0, AUTO_ADVANCE_DELAY_MS))
+      } else if (batch.enterNode) {
         setNodeId(batch.enterNode)
         setPendingPhase(false)
       }
-      if (batch.gateDone) latest.current.onGateDone?.()
+      if (batch.gateDone) whenRead(() => latest.current.onGateDone?.())
       if (batch.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(batch.gameOverAlert))
       const enteredNode = batch.enterNode ? script?.nodes[batch.enterNode] : undefined
       if (enteredNode?.gameOver) schedule(GAME_OVER_DELAY_MS, () => latest.current.onGameOver?.(enteredNode.gameOverAlert))
@@ -307,6 +348,24 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
       return
     }
     playingRef.current = true
+    const interlude = batch.enterNode && !batch.interludeShown ? script?.nodes[batch.enterNode]?.interlude : undefined
+    if (interlude) {
+      const stillCurrent = () => epoch === queueEpochRef.current && queueRef.current[0] === batch
+      schedule(Math.max(0, batch.dueAt - Date.now()), () =>
+        whenRead(() => {
+          if (!stillCurrent()) return
+          const resume = () => {
+            if (!stillCurrent()) return
+            queueRef.current[0] = { ...batch, interludeShown: true, dueAt: Date.now() + 400 }
+            playNext(epoch)
+          }
+          const show = latest.current.onInterlude
+          if (show) show(interlude, resume)
+          else resume()
+        }),
+      )
+      return
+    }
     if (batch.instant || !latest.current.active) {
       schedule(Math.max(0, batch.dueAt - Date.now()), () => playLine(batch, 0))
       return
@@ -324,16 +383,6 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (batch.enterNode && batch.enterNode === holdNodeRef.current) {
       heldBatchRef.current = { batch, remainingMs: Math.max(0, batch.dueAt - Date.now()) }
       heldCallbackRef.current?.(batch.enterNode)
-      return
-    }
-    const interlude = batch.enterNode && !batch.interludeShown ? script?.nodes[batch.enterNode]?.interlude : undefined
-    if (interlude) {
-      schedule(Math.max(0, batch.dueAt - Date.now()), () => {
-        const resume = () => enqueue({ ...batch, interludeShown: true, dueAt: Date.now() + 400 })
-        const show = latest.current.onInterlude
-        if (show) show(interlude, resume)
-        else resume()
-      })
       return
     }
     queueRef.current.push(batch)
@@ -361,7 +410,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         ...held.batch,
         texts: node.lines.map((line) => personalizeText(line, latest.current.owner)),
         enterNode: resolved,
-        dueAt: Date.now() + held.remainingMs,
+        dueAt: Date.now() + Math.max(held.remainingMs, HELD_BRANCH_MIN_MS),
         turn: replyTurnRef.current,
       })
       return
@@ -418,11 +467,13 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
         if (index === 0 && dateLabel) setAdded((prev) => [...prev, { type: 'date', label: dateLabel }])
         setTyping(false)
         const count = line.unread
+        const split = index === 0 || line.delayMs >= LONG_PAUSE_MS
         setAdded((prev) => {
+          const base = withBreak(prev, split)
           const lowered =
             count === undefined
-              ? prev
-              : prev.map((item) =>
+              ? base
+              : base.map((item) =>
                   item.type === 'msg' && typeof item.unread === 'number' && item.unread > count
                     ? { ...item, unread: count }
                     : item,
@@ -615,6 +666,13 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
 
   useEffect(() => {
     if (active && awaitingRef.current && readAtRef.current === null) readAtRef.current = Date.now()
+    if (!active || !unreadRef.current) return
+    unreadRef.current = false
+    lastSeenAtRef.current = Date.now()
+    const pending = pendingReadRef.current
+    pendingReadRef.current = []
+    pending.forEach((fn) => schedule(READ_TIME_MS, fn))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active])
 
   useEffect(() => {
@@ -631,7 +689,8 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     if (el) el.scrollTop = el.scrollHeight
   }, [added.length, typing, active, waiting])
 
-  function choose(choice: Choice, index: number) {
+  function choose(rawChoice: Choice, index: number, nextDelayOverride?: number) {
+    const choice = nextDelayOverride !== undefined && rawChoice.nextDelayMs !== undefined ? { ...rawChoice, nextDelayMs: nextDelayOverride } : rawChoice
     if (waitingRef.current) return
     waitingRef.current = true
     latest.current.onReply?.()
@@ -740,6 +799,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
     }
     enqueue({ texts, dueAt: Date.now() + sendOffset + randomReplyDelay(), instant: false, badge: false, turn: replyTurnRef.current, reply: true })
   }
+  chooseRef.current = choose
 
   const lastItem = items.at(-1)
   const typingContinues = lastItem?.type === 'msg' && lastItem.from === 'them'
@@ -902,7 +962,7 @@ export function ChatRoom({ chat, owner, active, onBack, inbox, suspicion, suspic
                 </div>
               )
             }
-            if (item.type === 'break') return <div key={i} aria-hidden className="h-5" />
+            if (item.type === 'break') return <div key={i} aria-hidden className="h-1.5" />
 
             const first = !sameGroup(items[i - 1], item)
             const next = items[i + 1]

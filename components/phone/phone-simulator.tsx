@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Moon } from 'lucide-react'
 import type { DaySnapshot } from '@/components/kakao/snapshot'
 import { CalendarApp } from '@/components/calendar/calendar-app'
@@ -86,20 +86,64 @@ function dayLabel(day: number) {
   return `${date.getMonth() + 1}월 ${date.getDate()}일 ${WEEKDAYS[date.getDay()]}`
 }
 
+const SAVE_KEY = 'fishbowl_save_v1'
+
+type SaveData = { userName: string; snapshot: DaySnapshot }
+
+function readSave(): SaveData | null {
+  try {
+    const raw = window.localStorage.getItem(SAVE_KEY)
+    const data = raw ? (JSON.parse(raw) as SaveData) : null
+    return data?.userName && data.snapshot?.day ? data : null
+  } catch {
+    return null
+  }
+}
+
+function writeSave(userName: string | null, snapshot: DaySnapshot | null) {
+  try {
+    if (userName && snapshot) window.localStorage.setItem(SAVE_KEY, JSON.stringify({ userName, snapshot }))
+    else window.localStorage.removeItem(SAVE_KEY)
+  } catch {}
+}
+
 export function PhoneSimulator() {
   const [run, setRun] = useState(0)
+  const [loaded, setLoaded] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
   const [resume, setResume] = useState<DaySnapshot | null>(null)
   const latestSnapshotRef = useRef<DaySnapshot | null>(null)
+  const userNameRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    const save = readSave()
+    if (save) {
+      userNameRef.current = save.userName
+      latestSnapshotRef.current = save.snapshot
+      setUserName(save.userName)
+      setResume(save.snapshot)
+    }
+    setLoaded(true)
+  }, [])
+
   const handleDaySnapshot = useCallback((snapshot: DaySnapshot) => {
     latestSnapshotRef.current = snapshot
+    if (userNameRef.current) writeSave(userNameRef.current, snapshot)
   }, [])
+  const handleStart = useCallback((name: string) => {
+    userNameRef.current = name
+    setUserName(name)
+    writeSave(name, latestSnapshotRef.current)
+  }, [])
+
+  if (!loaded) return null
+
   return (
     <PhoneSession
       key={run}
       userName={userName}
       resume={resume}
-      onStart={setUserName}
+      onStart={handleStart}
       onDaySnapshot={handleDaySnapshot}
       onRetryDay={() => {
         setResume(latestSnapshotRef.current)
@@ -107,6 +151,7 @@ export function PhoneSimulator() {
       }}
       onRestart={() => {
         latestSnapshotRef.current = null
+        writeSave(null, null)
         setResume(null)
         setRun((current) => current + 1)
       }}
