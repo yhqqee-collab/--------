@@ -129,7 +129,7 @@ export function HomeScreen({
             <AppIcon name="YouTube Music" showLabel={false}>
               <YouTubeMusicArt />
             </AppIcon>
-            <AppIcon name="사파리" showLabel={false} onClick={onOpenSafari}>
+            <AppIcon name="사파리" showLabel={false} disabled>
               <SafariArt />
             </AppIcon>
           </nav>
