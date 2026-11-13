@@ -65,8 +65,9 @@ export function ChatList({ chats, owner, onOpen }: ChatListProps) {
           <li key={chat.id}>
             <button
               type="button"
-              onClick={() => onOpen(chat.id)}
-              className="flex w-full items-center gap-3 px-5 py-[9px] text-left transition-colors active:bg-black/[0.05]"
+              onClick={chat.id === 'club' ? undefined : () => onOpen(chat.id)}
+              disabled={chat.id === 'club'}
+              className={`flex w-full items-center gap-3 px-5 py-[9px] text-left transition-colors ${chat.id === 'club' ? 'pointer-events-none' : 'active:bg-black/[0.05]'}`}
             >
               <Avatar src={chat.avatar} name={chat.name} size={48} />
               <span className="min-w-0 flex-1">

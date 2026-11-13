@@ -5,16 +5,18 @@ type AppIconProps = {
   showLabel?: boolean
   badge?: string
   onClick?: () => void
+  disabled?: boolean
   children: ReactNode
 }
 
-export function AppIcon({ name, showLabel = true, badge, onClick, children }: AppIconProps) {
+export function AppIcon({ name, showLabel = true, badge, onClick, disabled = false, children }: AppIconProps) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
       aria-label={badge ? `${name}, 읽지 않은 알림 ${badge}개` : name}
-      className="group flex flex-col items-center gap-[5px] outline-none [-webkit-tap-highlight-color:transparent]"
+      className={`group flex flex-col items-center gap-[5px] outline-none [-webkit-tap-highlight-color:transparent] ${disabled ? 'pointer-events-none' : ''}`}
     >
       <span className="relative block size-[60px] transition-transform duration-150 ease-out group-active:scale-[0.86] group-focus-visible:ring-2 group-focus-visible:ring-white/80 rounded-[22.5%]">
         <span className="relative block size-full overflow-hidden rounded-[22.5%] shadow-[0_3px_12px_rgba(0,0,0,0.25)] transition-[filter] duration-150 group-active:brightness-75">
