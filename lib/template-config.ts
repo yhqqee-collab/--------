@@ -56,7 +56,7 @@ export const GROUP_MEMBERS = {
   minwoo: { name: '정민우' },
   sujin: { name: '박수진' },
   yuna: { name: '이윤아' },
-  daeyoung: { name: '김대영', handle: 'dddaaaeee', avatar: '/avatars/daeyoung.jpg' },
+  daeyoung: { name: '김대영', handle: 'dddaaaeee', avatar: '/avatars/daeyoung-kakao.jpg' },
   sakuya: { name: '사쿠야', handle: 'fujinagakun', avatar: '/avatars/sakuya.jpg' },
   ryo: { name: '료', handle: 'ryoryoryo', avatar: '/avatars/ryo.jpg' },
 } satisfies Record<string, { name: string; handle?: string; avatar?: string }>
@@ -80,9 +80,10 @@ export const INSTAGRAM_AVATAR_OVERRIDES: Record<string, string> = {
   오시온: '/avatars/sion-insta.jpg',
   유우시: '/avatars/yushi.jpg',
   리쿠: '/avatars/riku.png',
+  김대영: '/avatars/daeyoung.jpg',
 }
 
-/** 인스타그램 아이디 고정값. 댓글·좋아요·DM에는 항상 이 아이디가 노출됩니다. */
+/** 인스타그램 아이디 고정���. 댓글·좋아요·DM에는 항상 이 아이디가 노출됩니다. */
 export const INSTAGRAM_IDS = {
   sion: { id: CHARACTERS.a.handle, name: CHARACTERS.a.name },
   riku: { id: CHARACTERS.b.handle, name: CHARACTERS.b.name },
