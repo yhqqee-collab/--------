@@ -678,15 +678,25 @@ const SION_DAY1: Record<string, PhaseNode> = {
         text: '부럽다 금공강 ㅠㅠ 나도 어제 너무 좋았어',
         susp: 0,
         reply: 'ㅋㅋ 귀여워 / 수업 잘 듣고 이따 저녁에 봐',
-        next: 'P2_Start',
+        next: 'Branch_Sion_Day1',
       },
       {
         id: 'B',
         text: '앗 립밤 너한테 있었구나 ㅋㅋ 고마워 이따 저녁에 봐!',
         susp: 0,
         reply: '응 ㅋㅋ / 점심 잘 챙겨 먹고 이따 보자~',
-        next: 'P2_Start',
+        next: 'Branch_Sion_Day1',
       },
+    ],
+  },
+  // 점심에 라멘야를 골랐으면(료 폭로 루트) 시온의 일반 오후 카톡을 막음
+  Branch_Sion_Day1: {
+    message: '',
+    choices: [],
+    branch: [
+      { all: [FLAG_RIKU_LUNCH_RAMEN], to: null },
+      { all: [FLAG_YUSHI_LUNCH_RAMEN], to: null },
+      { none: [FLAG_RIKU_LUNCH_RAMEN, FLAG_YUSHI_LUNCH_RAMEN], to: 'P2_Start' },
     ],
   },
   P2_Start: {
@@ -731,7 +741,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '나 이미 씻고 누웠어 ㅠㅠ',
         susp: 5,
-        reply: '써 누웠다고? / 집 바로 옆인데 ㅠㅠ / 알겠어 잘 자',
+        reply: '벌써 누웠다고? / 집 바로 옆인데 ㅠㅠ / 알겠어 잘 자',
         next: 'end',
       },
     ],
@@ -2231,8 +2241,8 @@ const STAFF_DAY1: GroupScript = {
   choices: [],
   stages: [
     {
-      // 점심 카톡이 모두 끝나면 오후 발표 수업 팝업 → 시온의 단톡방 공지 → 시온의 '일찍 와' 카톡
-      holdNodes: { a: 'P2_Start', b: 'P4_Start', c: 'P4_Start' },
+      // 1단계: 점심 카톡이 모두 끝나면 오후 발표 수업 팝업 → 단톡방 공지 → 시온의 '일찍 와(P2_Start)' 카톡만 해금!
+      holdNodes: { a: 'P2_Start' },
       interlude: '13:00 ~ 16:30\n오후 발표 수업 진행 중...',
       messages: [
         gl(G_SION, '애들아 오늘 저녁 7시 동방에서 주점 메뉴 관련 회의랑 시식 있는 거 안 잊었지?'),
@@ -2245,8 +2255,8 @@ const STAFF_DAY1: GroupScript = {
       ],
     },
     {
-      // 19:00 ~ 21:30 동아리 회의 및 시식회 종료 후 해산
-      holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
+      // 2단계: 19:00 ~ 21:30 동아리 회의 및 시식회 종료 후 해산 → 세 남자의 밤 카톡 해금!
+      holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P4_Start' },
       interlude: '19:00 ~ 21:30\n동아리방에서 주점 메뉴 회의 중...',
       messages: [
         gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
