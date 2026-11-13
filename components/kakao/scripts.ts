@@ -236,7 +236,7 @@ function splitReplyLines(text: string) {
   })
 }
 
-/** 모든 메시지 대기 시간(초)에 곱하는 배율. 순서는 그대로 유지하면서 전��� 속도만 조절합니다. */
+/** 모든 메시지 대기 시간(초)에 곱하는 배율. 순서는 그대로 유지하면서 전���� 속도만 조절합니다. */
 const TIME_SCALE = 0.5
 
 function fromPhases(start: string, phases: Record<string, PhaseNode>, rawTiming: PhaseTiming): Script {
@@ -732,7 +732,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
     message:
       '여주야 나 주차 좀 하고 갈 테니까 먼저 마트 들어가 있어 ㅋㅋ\n근데 방금 주차장 쪽에서 수진이 봤는데\n며칠 푹 쉬고 방금 본가에서 올라왔다던데?\n너 수요일 밤에 수진이 자취방에서 과제하며 밤샜다고 하지 않았어?',
     choices: [
-      { id: 'A', text: '수요일 늦게 내려갔을 걸?\n그전까지 같이 �� 거야!', susp: -15, reply: '아 그래? / 알겠어 얼른 들어갈게', next: 'P3_Night_Start' },
+      { id: 'A', text: '수요일 늦게 내��갔을 걸?\n그전까지 같이 �� 거야!', susp: -15, reply: '아 그래? / 알겠어 얼른 들어갈게', next: 'P3_Night_Start' },
       {
         id: 'B',
         text: '아 수진이 아니고 민지였어\n내가 헷갈렸다 ㅎㅎ',
@@ -956,7 +956,7 @@ const SION_DAY3: Record<string, PhaseNode> = {
   P1_Accept: {
     preWork: true,
     delay: 6,
-    message: 'ㅋㅋㅋㅋ 알았어\n천천히 준비해❤️\n1시에 소원대역 앞에서 보자',
+    message: 'ㅋㅋㅋㅋ 알았어\n천천히 준비해❤️\n1시에 소원대��� 앞에서 보자',
     // 이 답장 후 데이트 전환 팝업 (WORK_TRANSITION_TEXTS[3])
     choices: [{ id: 'A', text: '웅 이따 봐!', susp: 0, next: 'P2_Insta' }],
   },
@@ -1421,7 +1421,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     message: '수업 잘 들어가고 있어 ?\n아까 카페에서 밀크티 찍었는데\n인스타 스토리 올려도 돼 ?\n너 태그해서 ㅎㅎ',
     choices: [
       { id: 'A', text: '웅 당연하지!!', susp: -15, setFlag: FLAG_DAY4_YUSHI_STORY_TAG, next: 'P2_Allow_Story' },
-      { id: 'B', text: '헉 태그하면 애들이 다 보는데 ㅠㅠ', susp: 25, next: 'P2_Deny_Story' },
+      { id: 'B', text: '헉 태그하면 ��들이 다 보는데 ㅠㅠ', susp: 25, next: 'P2_Deny_Story' },
     ],
   },
   P2_Allow_Story: {
@@ -1890,7 +1890,7 @@ const RIKU_DAY6: Record<string, PhaseNode> = {
   P3_Night_Sweet1: {
     delay: 2,
     message: '진짜지...?\n그 말 들으니까 갑자기 눈물 날 거 같아\n넘 조아서...\n나 진짜 여주 없으면 안 된단 말이야\n맨날맨날 나만 봐야 해 ㅠㅠ',
-    choices: [{ id: 'A', text: '당연하지 내일 뒤풀이 끝나고\n리쿠 실컷 안아줄게 ㅎㅎ 얼른 자 ❤️', susp: -5, next: 'P3_Night_Sweet2' }],
+    choices: [{ id: 'A', text: '당연하지 내일 뒤풀이 끝나고\n리쿠 실컷 안아��게 ㅎㅎ 얼른 자 ❤️', susp: -5, next: 'P3_Night_Sweet2' }],
   },
   P3_Night_Sweet2: {
     delay: 3,
