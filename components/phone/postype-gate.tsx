@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export const POSTYPE_URL = 'https://posty.pe/put4o70c'
-export const TRIAL_LAST_DAY = 2
+export const POSTYPE_URL = 'https://posty.pe/ppbh8sic'
 
 type PostypeGateProps = {
   day: number
@@ -53,7 +52,7 @@ export function PostypeGate({ day, onRestart }: PostypeGateProps) {
             rel="noopener noreferrer"
             className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-neutral-900 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
           >
-            풀버전 하러가기
+            포스타입으로 이동하기
             <ExternalLink className="size-4" aria-hidden />
           </a>
           <button

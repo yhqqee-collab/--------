@@ -541,7 +541,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
 const YUSHI_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
     preWork: true,
-    message: '여주야\n잘 잤어 ?\n오늘 영현사 수업 끝나고 ���심 먹을래 ?\n수요일에 두고 간 머리끈도 챙겼어 ^_^',
+    message: '여주야\n잘 잤어 ?\n오늘 영현사 수업 끝나고 점심 먹을래 ?\n수요일에 두고 간 머리끈도 챙겼어 ^_^',
     choices: [
       {
         id: 'A',
@@ -755,7 +755,7 @@ export const FLAG_SHOP_SION = 'shop-sion'
 /** 시온·유우시의 밤 데이트 답장을 모두 받은 뒤 삼자대면 여부를 판정 */
 const SYNC_DAY2_NIGHT = 'day2-night'
 
-/** 시온 Day 2: 아침 인사 → 단톡방 장보기 분기 → 밤 호출 → 마무리 ��사 */
+/** 시온 Day 2: 아침 인사 → 단톡방 장보기 분기 → 밤 호출 → 마무리 인사 */
 const SION_DAY2: Record<string, PhaseNode> = {
   P0_Morning: {
     preWork: true,
@@ -950,7 +950,7 @@ const YUSHI_DAY2: Record<string, PhaseNode> = {
         text: '앗 나 방금 씻고 누워서...\n오늘은 좀 힘들 것 같아 ㅠㅠ',
         susp: 15,
         reply: '아쉬워라...\n알겠어 푹 쉬어 ^_^',
-        next: 'end',
+        next: 'P4_Reject',
       },
     ],
   },
@@ -983,6 +983,14 @@ const YUSHI_DAY2: Record<string, PhaseNode> = {
     choices: [
       { id: 'A', text: '웅 조심히 들어가 ㅎㅎ', susp: 0, reply: '잘 자~', next: 'end' },
       { id: 'B', text: '나도 잠깐 봐서 좋았어 ㅋㅋㅋㅋ\n조심히 가!', susp: -5, reply: '말도 예쁘게 해 ㅎㅎ', next: 'end' },
+    ],
+  },
+  P4_Reject: {
+    delay: 40,
+    message: '많이 피곤했나 보네\n어쩔 수 없지 ㅠㅠ 푹 쉬어',
+    choices: [
+      { id: 'A', text: '웅 ㅠㅠ 너도 오늘 고생했어! 잘 자', susp: 0, reply: '응 내일 보자 ^_^\n사랑해', next: 'end' },
+      { id: 'B', text: '알겠어 내일 봐', susp: 0, reply: '응\n잘 자 ~', next: 'end' },
     ],
   },
 }
@@ -1516,7 +1524,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     message: '애들이 보면 왜 안 되는데 ?\n어제 시온이 형 인스타엔 댓글도 달았잖아\n알았어\n안 올릴게',
     choices: [{ id: 'A', text: '미안...', susp: 0, next: 'P4_Night_Msg' }],
   },
-  // 22:00 귀가 후 (동방 작업 팝업은 리쿠 Day 4 P4_Club_Work 가 띄��� → 리쿠·시온 대화가 끝난 뒤 도착)
+  // 22:00 귀가 후 (동방 작업 팝업은 리쿠 Day 4 P4_Club_Work 가 띄�� → 리쿠·시온 대화가 끝난 뒤 도착)
   P4_Night_Msg: {
     waitOthers: true,
     delay: 24,
@@ -1693,7 +1701,7 @@ export const FLAG_DAY5_RIKU_VISIT = 'day5-riku-visit'
 
 /**
  * 리쿠 Day 5 (축제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
- * → 밤 질투 & 기습 방문 (시온 방문과 겹치면 즉���)
+ * → 밤 질투 & 기습 방문 (시온 방문과 겹치면 즉사)
  */
 const RIKU_DAY5: Record<string, PhaseNode> = {
   P1_Morning: {
@@ -1856,7 +1864,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
   },
   P3_Safe_Sion_After: {
     delay: 2,
-    message: '잠깐이라도 얼굴 보니까 피로가 다 풀리네 ㅎㅎ\n맛있게 먹고 푹 자 사���해 ❤️',
+    message: '잠깐이라도 얼굴 보니까 피로가 다 풀리네 ㅎㅎ\n맛있게 먹고 푹 자 사랑해 ❤️',
     choices: [{ id: 'A', text: '고마워 조심히 들어가 사랑해 ❤️', susp: -5, next: 'end' }],
   },
 }
@@ -1997,7 +2005,7 @@ const RIKU_DAY6: Record<string, PhaseNode> = {
     message:
       '여주야 집 잘 들어갓어??\n나 아까 맥주 한 캔 마셧더니 알딸딸하네 ㅎㅎ...\n근데 술 마시니까\n여주 더 보고 시퍼서 미치겟어 ㅠㅠ\n요즘 단둘이 손도 못 잡구...\n나 혼자만 안달 나 잇는 거 같아서\n가끔 막 불안하구 속상해 ㅠㅠ\n여주도 나 많이 좋아하는 거 맞지...?\n나 버리면 안 돼',
     choices: [
-      { id: 'A', text: '오늘 맥주 한 캔에 취했네 ㅋㅋㅋ\n아무 일도 없으니까 걱정 ���고 푹 자!', susp: 10, next: 'P3_Night_Sulk' },
+      { id: 'A', text: '오늘 맥주 한 캔에 취했네 ㅋㅋㅋ\n아무 일도 없으니까 걱정 말고 푹 자!', susp: 10, next: 'P3_Night_Sulk' },
       { id: 'B', text: '내가 널 왜 버려 바보야...\n나도 오늘 얼마나 참았는데...', susp: -5, next: 'P3_Night_Sweet1' },
     ],
   },

@@ -11,6 +11,7 @@ const PhoneSimulator = dynamic(
   { ssr: false },
 )
 
+const UNLOCK_KEY = 'fishbowl_unlocked_v1'
 const LANG_KEY = 'fishbowl_lang_v1'
 
 function readStorage(key: string) {
@@ -29,17 +30,19 @@ function writeStorage(key: string, value: string) {
 
 export function PasswordGate() {
   const [restored, setRestored] = useState(false)
-  const [ready, setReady] = useState(false)
   const [unlocked, setUnlocked] = useState(false)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     async function restore() {
+      const isUnlocked = readStorage(UNLOCK_KEY) === '1'
       const savedLang = readStorage(LANG_KEY) as Lang | null
       const validLang = savedLang && LANG_OPTIONS.some((option) => option.value === savedLang) ? savedLang : null
-      if (validLang) await setLang(validLang)
+      if (isUnlocked && validLang) await setLang(validLang)
       if (cancelled) return
-      setReady(validLang !== null)
+      setUnlocked(isUnlocked)
+      setReady(isUnlocked && validLang !== null)
       setRestored(true)
     }
     restore()
@@ -49,7 +52,15 @@ export function PasswordGate() {
   }, [])
 
   if (!restored) return null
-  if (!unlocked) return <PasswordScreen onUnlock={() => setUnlocked(true)} />
+  if (!unlocked)
+    return (
+      <PasswordScreen
+        onUnlock={() => {
+          writeStorage(UNLOCK_KEY, '1')
+          setUnlocked(true)
+        }}
+      />
+    )
   if (!ready)
     return (
       <LanguagePicker
