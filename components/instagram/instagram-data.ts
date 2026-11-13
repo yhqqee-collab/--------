@@ -210,6 +210,16 @@ STORIES_BY_DAY[4] = [
   }),
 ]
 
+/** 6일 차: 시온 거울 셀카 스토리 */
+STORIES_BY_DAY[6] = [
+  story(sion, '2시간', {
+    images: [
+      { src: '/stories/sion-day6-1.png', alt: '검은 나시와 회색 청바지 차림으로 휴대폰 플래시를 켜고 얼굴을 가린 시온의 거울 셀카' },
+      { src: '/stories/sion-day6-2.png', alt: '검은 나시와 회색 청바지 차림으로 손으로 앞머리를 넘기며 찍은 시온의 거울 셀카' },
+    ],
+  }),
+]
+
 export type Post = {
   id: string
   handle: string
@@ -219,7 +229,7 @@ export type Post = {
   images: { src: string; alt: string }[]
   caption: string
   likes: number
-  /** 좋아요 누른 사람 (첫 번째 아이디가 '○○님 외 N명'으로 노출) */
+  /** 좋아요 누른 사람 (첫 번째 아이디가 '○○님 외 N��'으로 노출) */
   likedBy?: string[]
   comments: PostComment[]
   commentsDisabled?: boolean
