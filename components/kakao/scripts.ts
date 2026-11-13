@@ -162,7 +162,7 @@ type PhaseChoice = {
   setFlag?: string
   gameOver?: boolean
   setGlobal?: Record<string, boolean>
-  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 ���람의 의심도 */
+  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �����람의 의심도 */
   sendTo?: { chat: string; message: string; delay: number; susp?: number }
 }
 /**
@@ -350,7 +350,7 @@ const C_TREE: Record<string, TreeNode> = {
   },
   T2: {
     speakerText: ['[��물 C의 반응]'],
-    options: [{ text: '[마무리 답장]', suspicionDelta: 0, nextNodeId: 'END' }],
+    options: [{ text: '[마���리 답장]', suspicionDelta: 0, nextNodeId: 'END' }],
   },
   END: { speakerText: ['[인물 C의 마지막 인사]'], options: [] },
 }
@@ -488,7 +488,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     choices: [],
     branch: [
       { all: [FLAG_DAY1_RIKU_LUNCH, FLAG_DAY1_YUSHI_LUNCH], to: 'P2_Lunch_Dead' },
-      { all: [FLAG_RIKU_LUNCH_RAMEN], to: 'P2_Ramen_Safe' },
+      // 라멘야는 료에게 목격되는 함정 — 근무 종료 후 ramen-exposure.ts 시퀀스로 진행
       { none: [FLAG_RIKU_LUNCH_RAMEN], to: 'P2_Safe1' },
     ],
   },
@@ -498,10 +498,6 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
     message:
       '여주야 수업 끝낫지?? ㅎㅎ\n빨리 보고 시퍼서 인문관 1층까지 마중 나왓어!\n얼른 내려와 ❤️\n[[대기:8]]\n여주야...?\n방금 유우시 내려오길래 인사햇는데\n유우시가 지금 너랑 점심 먹기로 햇다는데...?\n뭐야??\n[[대기:8]]\n아...\n점심 약속을 두 개나 잡아?\n우리 둘 다 가지고 노니까 재밋어...?',
     choices: [],
-  },
-  P2_Ramen_Safe: {
-    message: '라멘 완전 맛잇엇당 ㅎㅎ\n수업 잘 들어 여주야!',
-    choices: [{ id: 'A', text: '웅 리쿠도 수업 잘 들어!', susp: 0, next: 'P4_Start' }],
   },
   P2_Safe1: {
     message: '여주랑 점심 먹으니까 넘 행복하당 ㅎㅎ\n일요일에 내 후드집업 빌려간 거\n다음에 입고 왕 ㅎㅎ',
@@ -539,7 +535,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
   },
 }
 
-/** 유우시 Day 1: ��업 전 점심 제안 → 점심 동선 → 시식회 중 알리바이 추궁 → 밤 카톡 */
+/** 유우시 Day 1: 수업 전 점심 제안 → 점심 동선 → 시식회 중 알리바이 추궁 → 밤 카톡 */
 const YUSHI_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
     preWork: true,
@@ -600,7 +596,6 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
     choices: [],
     branch: [
       { all: [FLAG_DAY1_RIKU_LUNCH, FLAG_DAY1_YUSHI_LUNCH], to: 'P2_Lunch_Dead' },
-      { all: [FLAG_YUSHI_LUNCH_RAMEN], to: 'P2_Ramen_Safe' },
       { none: [FLAG_YUSHI_LUNCH_RAMEN], to: 'P2_Safe1' },
     ],
   },
@@ -610,10 +605,6 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
     message:
       '여주야 사물함 들렀다가 1층 먼저 내려왔는데\n인문관 앞에 리쿠가 서 있던데 ?\n너랑 점심 먹으러 왔다는데 무슨 소리야?\n[[대기:8]]\n실망이다\n리쿠랑 방금 카톡 맞춰 봤어\n수업 시간 내내 옆에 앉아서\n리쿠랑 점심 약속 잡고 있었네 ㅋㅋ\n사람 바보 만드는 거 쉽다',
     choices: [],
-  },
-  P2_Ramen_Safe: {
-    message: '라멘 맛있었어 ^_^\n수업 잘 들어',
-    choices: [{ id: 'A', text: '웅 고마워! 이따 동방에서 봐', susp: 0, next: 'P4_Start' }],
   },
   P2_Safe1: {
     message: '서가앤쿡 맛있네 ㅎㅎ\n머리끈 잘 챙겨 ^_^',
@@ -1095,9 +1086,9 @@ const YUSHI_DAY3: Record<string, PhaseNode> = {
   },
   P2_Insta_C: {
     nextCheckGlobal: SYNC_DAY3_EVENING,
-    message: '저번에 형 옷도 골라줬어?',
+    message: '저번에 형 옷도 골���줬어?',
     choices: [
-      { id: 'A', text: '아니 예전에 카톡으로 쇼핑몰 링크 보내준 거야 ㅠㅠ', susp: 30, reply: '아 카톡으로...?\n일단 알겠어\n쉬어', next: 'end' },
+      { id: 'A', text: '아니 예전에 카톡으로 쇼핑몰 링크 보��준 거야 ㅠㅠ', susp: 30, reply: '아 카톡으로...?\n일단 알겠어\n쉬어', next: 'end' },
     ],
   },
 }
@@ -1768,7 +1759,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 잘 잤어??\n오늘 축제 첫날이라며\n바쁘겠다 ㅠㅠ 무리하지 마',
     choices: [
-      { id: 'A', text: '웅 ㅠㅠ 오늘 하루종일 정신없을 듯\n틈틈이 연락할게 ❤️', susp: 0, next: 'P1_Insta_Jealous' },
+      { id: 'A', text: '웅 ㅠ��� 오늘 하루종일 정신없을 듯\n틈틈이 연락할게 ❤️', susp: 0, next: 'P1_Insta_Jealous' },
       { id: 'B', text: '괜찮아 ㅎㅎ\n끝나고 연락할게!!', susp: 0, next: 'P1_Insta_Jealous' },
     ],
   },
@@ -2213,7 +2204,7 @@ const STAFF_DAY1: GroupScript = {
       holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
       interlude: '19:00 ~ 21:30\n동아리방에서 주점 메뉴 회의 중...',
       messages: [
-        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보��� 맛있었���요 ㅋㅋㅋ'),
+        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
         gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
         gl(G_RIKU, '다들 맛잇게 먹어줘서 고마워 ㅎㅎ 주점 대박 날 듯!!'),
         gl(G_RYO, '오늘 다들 고생하셨어요 조심히 들어가세요~!!'),
