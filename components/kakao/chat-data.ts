@@ -101,7 +101,6 @@ export const CHATS: Chat[] = [
     preview: '푹 자 사랑해 ❤️',
     time: '어제',
     unread: 1,
-    pinned: true,
     items: [
       day('2026년 10월 31일 토요일'),
       ...block('오후 2:10', [
@@ -599,6 +598,21 @@ export const CHATS: Chat[] = [
       ...say(RYO, '오후 6:12', '넵!! 내일 대중문화 수업 끝나고 동방으로 바로 가겠습니다!'),
       ...say(ME, '오후 6:14', '다들 시험 고생했어!! 내일 동방에서 봐 ㅎㅎ'),
       ...say(SION, '오후 6:15', '오케이 내일 7시 동방 늦지 마셈!'),
+    ],
+  },
+
+  /* ─────────────────────── 김대영 (1:1, 5일차 국밥 약속) ─────────────────────── */
+  {
+    id: 'daeyoung',
+    name: DAEYOUNG,
+    avatar: GROUP_MEMBERS.daeyoung.avatar,
+    preview: '응응 동방에서 봐!',
+    time: '11월 6일',
+    unread: 0,
+    items: [
+      day('2026년 11월 6일 금요일'),
+      ...block('오후 5:40', [[T, '누나 오늘 회의 7시 동방 맞죠??']]),
+      ...block('오후 5:42', [[M, '응응 동방에서 봐!']]),
     ],
   },
 

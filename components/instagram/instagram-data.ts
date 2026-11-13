@@ -123,9 +123,8 @@ STORIES_BY_DAY[DAEYOUNG_TAG_DAY] = [
   {
     ...story(daeyoung, '1시간', {
       images: [
-        { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집에서 숟가락을 문 채 정면을 보는 대영, "여주 누나가 찍어줌" 문구' },
+        { src: '/stories/daeyoung-day5-1.jpg', alt: '국밥집 메뉴판 아래에서 검은 패딩 차림으로 숟가락을 문 채 정면을 보는 대영, "누나가 찍어줌" 문구' },
         { src: '/stories/daeyoung-day5-2.jpg', alt: '국밥집 메뉴판 아래에서 숟가락을 물고 옆을 보는 대영' },
-        { src: '/stories/daeyoung-day5-3.jpg', alt: '커튼 앞에서 흑백 래글런 티셔츠를 입고 살짝 웃는 대영의 셀카' },
       ],
     }),
     afterWork: true,
@@ -195,13 +194,36 @@ STORIES_BY_DAY[2] = [
   }),
 ]
 
+/** 3일 차: 리쿠 삼각김밥 스토리 */
+STORIES_BY_DAY[3] = [
+  story(riku, '2시간', {
+    image: { src: '/stories/riku-day3.jpg', alt: '갈라진 회색 벽 앞에서 남색 과잠을 입고 삼각김밥을 든 채 옆을 보며 웃는 리쿠' },
+  }),
+]
+
 /** 4일 차: 대학 강의실 옆자리에서 찍힌 대영 스토리 */
 STORIES_BY_DAY[4] = [
   story(daeyoung, '2시간', {
     image: { src: '/stories/daeyoung-day4.jpg', alt: '강의실에서 안경을 쓰고 노트에 낙서하며 옆을 보는 대영' },
   }),
+  story(sion, '2시간', {
+    image: { src: '/stories/sion-day4.png', alt: '회색 재킷을 입고 복도 문 옆 벽에 기대 위에서 찍은 시온의 셀카' },
+  }),
+  story(riku, '3시간', {
+    image: { src: '/stories/riku-day4.webp', alt: '청바지 무릎 위에서 손가락으로 집어 든 빨간 얼굴에 하늘색 몸통의 새 모양 인형 키링' },
+  }),
   story(sakuya, '5시간', {
     image: { src: '/stories/sakuya-day4.png', alt: '거리에서 친구와 함께 흔들리게 찍힌 체크 셔츠 차림의 사쿠야' },
+  }),
+]
+
+/** 6일 차: 시온 거울 셀카 스토리 */
+STORIES_BY_DAY[6] = [
+  story(sion, '2시간', {
+    images: [
+      { src: '/stories/sion-day6-1.png', alt: '검은 나시와 회색 청바지 차림으로 휴대폰 플래시를 켜고 얼굴을 가린 시온의 거울 셀카' },
+      { src: '/stories/sion-day6-2.png', alt: '검은 나시와 회색 청바지 차림으로 손으로 앞머리를 넘기며 찍은 시온의 거울 셀카' },
+    ],
   }),
 ]
 

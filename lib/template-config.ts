@@ -44,7 +44,7 @@ export type Character = {
 /** 메인 공략 캐릭터 3명. 키(a/b/c)는 채팅방 id·스크립트 키와 연결됩니다. */
 export const CHARACTERS: Record<'a' | 'b' | 'c', Character> = {
   a: { name: '오시온', handle: 'sion_5', avatar: '/avatars/sion.jpg', color: '#4F7DD8' },
-  b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku.png', color: '#E8A33D' },
+  b: { name: '리쿠', handle: 'maeda__', avatar: '/avatars/riku-kakao.webp', color: '#E8A33D' },
   c: { name: '유우시', handle: 'yushiii', avatar: '/avatars/yushi.png', color: '#4CAF7A' },
 }
 
@@ -79,6 +79,7 @@ export const PERSON_AVATARS: Record<string, string> = Object.fromEntries(
 export const INSTAGRAM_AVATAR_OVERRIDES: Record<string, string> = {
   오시온: '/avatars/sion-insta.jpg',
   유우시: '/avatars/yushi.jpg',
+  리쿠: '/avatars/riku.png',
 }
 
 /** 인스타그램 아이디 고정값. 댓글·좋아요·DM에는 항상 이 아이디가 노출됩니다. */

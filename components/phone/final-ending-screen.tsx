@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ENDING_CHOICES, canUnlockHarem, resolveFinalEnding, type FinalChoice } from '@/components/kakao/endings'
-import { personalizeText } from '@/components/kakao/replies'
+import { replaceUserNameLiterary } from '@/lib/korean-name'
 import { cn } from '@/lib/utils'
 
 type FinalEndingScreenProps = {
@@ -29,7 +29,7 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
 
   const haremUnlocked = canUnlockHarem(suspicion)
   const ending = route ? resolveFinalEnding(route, suspicion) : null
-  const lines = ending?.lines.map((line) => personalizeText(line, owner)) ?? []
+  const lines = ending?.lines.map((line) => replaceUserNameLiterary(line, owner)) ?? []
   const allShown = ending !== null && visibleLines >= lines.length
   const endingStyle = {
     happy: { accent: 'text-[#ffd9e4]', badge: 'HAPPY ENDING' },

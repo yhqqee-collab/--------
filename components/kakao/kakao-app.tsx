@@ -34,7 +34,9 @@ import * as Ramen from './ramen-exposure'
 import { INITIAL_SUSPICION, turnLimit } from './suspicion'
 
 /** 첫 카톡 도착 순서: 앞 사람에게 답장해야 다음 사람의 첫 카톡이 옵니다 (시온 → 리쿠 → 유우시) */
-const START_ORDER = ['a', 'b', 'c']
+const START_ORDER = ['daeyoung', 'a', 'b', 'c']
+/** 이 멤버 다음 사람은 답장이 아니라 대화가 완전히 끝나야 시작합니다 */
+const FINISH_BEFORE_NEXT = new Set(['daeyoung'])
 const SEQUENTIAL_START_DELAY_MS = 4000
 
 function personalizeChat(chat: Chat, owner: string): Chat {
@@ -48,6 +50,9 @@ function personalizeChat(chat: Chat, owner: string): Chat {
     items: chat.items.map((item) => item.type === 'msg' ? { ...item, text: replaceName(item.text) } : item),
   }
 }
+
+/** 마지막 답장 말풍선을 본 뒤 전환·시스템 팝업이 뜨기까지 최소 읽을 시간 */
+const READ_TIME_MS = 2500
 
 type KakaoAppProps = {
   open: boolean
@@ -130,6 +135,36 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
   const finishedDoomRef = useRef(new Set<string>())
   const gameOverAlertRef = useRef<string | undefined>(undefined)
 
+  /* 전환·시스템 팝업은 모든 남주의 답장이 끝까지 도착하고, 안 읽은 카톡이 없고,
+   * 마지막 말풍선을 본 뒤 READ_TIME_MS 가 지난 다음에만 뜹니다. */
+  const [replyPending, setReplyPending] = useState<Record<string, boolean>>({})
+  const quietQueueRef = useRef<(() => void)[]>([])
+  const [quietQueued, setQuietQueued] = useState(0)
+  const [readTick, setReadTick] = useState(0)
+  const lastReadEventRef = useRef(0)
+  const markReadEvent = useCallback(() => {
+    lastReadEventRef.current = Date.now()
+    setReadTick((tick) => tick + 1)
+  }, [])
+  useEffect(() => {
+    setReplyPending({})
+    quietQueueRef.current = []
+  }, [day])
+  const quiet = Object.keys(scriptsForDay(day)).every((id) => !unread[id] && !replyPending[id])
+  const whenQuiet = useCallback((fn: () => void) => {
+    quietQueueRef.current.push(fn)
+    setQuietQueued((count) => count + 1)
+  }, [])
+  useEffect(() => {
+    if (!quiet || !quietQueueRef.current.length) return
+    const timer = window.setTimeout(() => {
+      const fns = quietQueueRef.current
+      quietQueueRef.current = []
+      fns.forEach((fn) => fn())
+    }, Math.max(0, lastReadEventRef.current + READ_TIME_MS - Date.now()))
+    return () => window.clearTimeout(timer)
+  }, [quiet, quietQueued, readTick])
+
   const chats = useMemo(() => CHATS.map((chat) => personalizeChat(chat, owner)), [owner])
   const visibleChats = chats.map((chat) => ({
     ...chat,
@@ -147,9 +182,10 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
   const openRoom = useCallback((id: string) => {
     setRoomId(id)
     setUnread((current) => ({ ...current, [id]: 0 }))
+    markReadEvent()
     setStartedRooms((current) => (current.has(id) ? current : new Set(current).add(id)))
     callbacksRef.current.onRoomOpen?.(id)
-  }, [])
+  }, [markReadEvent])
 
   useEffect(() => {
     if (!requestedRoom || requestedRoom.nonce === handledNonce) return
@@ -256,7 +292,10 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     }
     if (interludeShownRef.current.has(stageIndex)) return
     interludeShownRef.current.add(stageIndex)
-    showInterlude(interlude, () => setStageCue((current) => Math.max(current, stageIndex + 1)))
+    whenQuiet(() => {
+      if (bustedRef.current) return
+      showInterlude(interlude, () => setStageCue((current) => Math.max(current, stageIndex + 1)))
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heldAt, completedScripts, stagesPlayed, stageCue, clockStarted, day, stagedGroupId, stagesSkipped])
 
@@ -290,16 +329,20 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     const ids = [...Object.keys(scriptsForDay(dayRef.current)), ...Object.keys(groupScriptsForDay(dayRef.current))]
     if (!ids.length || !ids.every((key) => completedScriptsRef.current.has(key))) return
     dayCompleteFiredRef.current = true
-    callbacksRef.current.onDayComplete?.(suspicionRef.current)
-  }, [])
+    whenQuiet(() => {
+      if (!bustedRef.current) callbacksRef.current.onDayComplete?.(suspicionRef.current)
+    })
+  }, [whenQuiet])
 
   const handleGateDone = useCallback((id: string) => {
     completedPreWorkRef.current.add(id)
     if (preWorkFiredRef.current || bustedRef.current) return
     if (!preWorkIds(dayRef.current).every((key) => completedPreWorkRef.current.has(key))) return
     preWorkFiredRef.current = true
-    preWorkCallbackRef.current?.()
-  }, [])
+    whenQuiet(() => {
+      if (!bustedRef.current) preWorkCallbackRef.current?.()
+    })
+  }, [whenQuiet])
 
   const handleCrossMessage = useCallback(
     ({ chat, texts, delayMs, delta, sync, setFlag }: CrossMessage) => {
@@ -432,11 +475,12 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
 
   const handleIncoming = useCallback((id: string, text: string) => {
     setPreviews((current) => ({ ...current, [id]: text }))
+    markReadEvent()
     if (id in exposureExpectedRef.current) setExposureReceived((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }))
     if (viewingRef.current === id) return
     setUnread((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }))
     callbacksRef.current.onIncoming?.(id, text)
-  }, [])
+  }, [markReadEvent])
 
   return (
     <section
@@ -517,7 +561,9 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               onStageDone={(index) => setStagesPlayed((current) => Math.max(current, index + 1))}
               startGate={(() => {
                 const prev = startPredecessor(chat.id)
-                return !prev || repliedChats.has(prev) || completedScripts.has(prev)
+                if (!prev) return true
+                if (FINISH_BEFORE_NEXT.has(prev)) return completedScripts.has(prev)
+                return repliedChats.has(prev) || completedScripts.has(prev)
               })()}
               gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
               onReply={() => markReplied(chat.id)}
@@ -525,7 +571,12 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               onFlag={(flag) => flagCallbackRef.current?.(flag)}
               forcedChoice={forcedChoices[chat.id] ?? null}
               onForcedChoice={() => handleForcedChoice(chat.id)}
-              onInterlude={(text, done) => (interludeCallbackRef.current ? interludeCallbackRef.current(text, done) : done())}
+              onInterlude={(text, done) =>
+                whenQuiet(() => (interludeCallbackRef.current ? interludeCallbackRef.current(text, done) : done()))
+              }
+              onReplyPending={(pending) =>
+                setReplyPending((current) => (Boolean(current[chat.id]) === pending ? current : { ...current, [chat.id]: pending }))
+              }
             />
           </div>
         )
