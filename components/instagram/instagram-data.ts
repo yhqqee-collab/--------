@@ -199,6 +199,9 @@ STORIES_BY_DAY[4] = [
   story(daeyoung, '2시간', {
     image: { src: '/stories/daeyoung-day4.jpg', alt: '강의실에서 안경을 쓰고 노트에 낙서하며 옆을 보는 대영' },
   }),
+  story(riku, '3시간', {
+    image: { src: '/stories/riku-day4.webp', alt: '청바지 무릎 위에서 손가락으로 집어 든 빨간 얼굴에 하늘색 몸통의 새 모양 인형 키링' },
+  }),
   story(sakuya, '5시간', {
     image: { src: '/stories/sakuya-day4.png', alt: '거리에서 친구와 함께 흔들리게 찍힌 체크 셔츠 차림의 사쿠야' },
   }),
