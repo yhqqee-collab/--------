@@ -553,7 +553,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         id: 'B',
         text: '1시 수업 발표 준비 때문에... 점심에 대본 봐야 할 것 같아... ㅠㅠ',
         susp: 15,
-        reply: '아 그래 ? / 수업 늦지 않게 얼른 와 / 옆자리 비워놨어',
+        reply: '아 그래 ? / 알 / 옆자리 비워놨어',
         next: 'P2_RikuFlow_B',
         setFlag: FLAG_YUSHI_EXCUSE_SOLO,
       },
@@ -561,7 +561,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
         id: 'C',
         text: '미안 ㅠㅠ 오늘 점심은 수진이랑 선약 있어',
         susp: 30,
-        reply: '이상하네... 수진이 수요일에 본가 내려갔다던데 ? / 급하게 올라왔나 보네',
+        reply: '이상하네... / 수진이 수요일에 본가 내려갔다던데 ? / 급하게 올라왔나 보네',
         next: 'P2_RikuFlow_C',
       },
     ],
@@ -747,7 +747,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
     preWork: true,
     message: '여주야 일어났어? ㅋㅋ\n밥 잘 챙겨 먹고 나와',
     choices: [
-      { id: 'A', text: '웅 방금 일어났어\n보고 싶다 ㅎㅎ', susp: 0, reply: 'ㅋㅋ 응 이따 봐', next: 'Branch_Group' },
+      { id: 'A', text: '웅 방금 일어났어\n보고 싶다 ㅎㅎ', susp: 0, reply: 'ㅋ�� 응 이따 봐', next: 'Branch_Group' },
       { id: 'B', text: '지금 씻고 나갈 준비 중!', susp: 0, reply: 'ㅋㅋ 응 이따 봐', next: 'Branch_Group' },
     ],
   },
@@ -1308,7 +1308,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     // 이 답장 후 수업 전환 팝업 (WORK_TRANSITION_TEXTS[4])
     choices: [{ id: 'A', text: '웅 이따 봐!! ㅎㅎ', susp: 0, next: 'P3_Class_Visit' }],
   },
-  // 16:40 소행론 수업 마치기 10분 전 (시온 카톡과 동시에 도착)
+  // 16:40 소행론 수업 마치기 10분 전 (시온 카���과 동시에 도착)
   P3_Class_Visit: {
     delay: 5,
     nextCheckGlobal: SYNC_DAY4_CLASS,
@@ -1436,7 +1436,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Bad: {
     delay: 6,
-    message: '어떻게 신경을 안 써...\n나 진짜 질투 난단 말이야...ㅠ',
+    message: '어떻�� 신경을 안 써...\n나 진짜 질투 난단 말이야...ㅠ',
     choices: [{ id: 'A', text: '(조금 더 다정하게 말해줄걸 그랬나 보다...)', susp: 0, next: 'end' }],
   },
 }
@@ -1612,7 +1612,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
   P2_Dead_End: {
     isGameOver: true,
     alert:
-      '유우시가 말없이 휴대폰을 끄고\n테이블 밑의 쇼핑백을 집어 든 채\n부스 안의 리쿠에게 성큼성큼 걸어갑니다.\n\n둘이 이야기를 나누더니\n표정이 딱딱하게 굳어졌습니다.\n\n(세다리 발각 - GAME OVER)',
+      '유우시가 말없이 휴대폰을 끄고\n테이블 밑의 쇼핑백을 집어 든 채\n부스 안의 리쿠에게 성큼성큼 걸어갑니다.\n\n둘이 이야기를 나누더니\n표정이 ���딱하게 굳어졌습니다.\n\n(세다리 발각 - GAME OVER)',
     message: '',
     choices: [],
   },
@@ -2047,7 +2047,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
   },
   P3_Night_Sweet2: {
     delay: 3,
-    message: '응 내일 뒤풀이 때 보자\n잘 자 사랑해 ^_^',
+    message: '응 내일 뒤풀이 때 보자\n잘 자 사���해 ^_^',
     choices: [{ id: 'A', text: '웅 사랑해 ❤️', susp: 0, next: 'end' }],
   },
   P3_Night_Sulk: {
@@ -2234,7 +2234,7 @@ const STAFF_DAY2: GroupScript = {
           id: 'riku',
           text: '나는 리쿠랑 다이소 갈게!',
           setFlag: FLAG_SHOP_RIKU,
-          reply: [gl(G_RIKU, '앗싸 ㅎㅎ 이따 정문에서 보자!'), gl(G_DAEYOUNG, '오키 그럼 이마트는 내가 시온이 형이랑 갈게')],
+          reply: [gl(G_RIKU, '앗싸 ㅎㅎ 이따 정문에서 보자!'), gl(G_DAEYOUNG, '오키 그럼 이마트는 내가 ��온이 형이랑 갈게')],
         },
         {
           id: 'sion',
