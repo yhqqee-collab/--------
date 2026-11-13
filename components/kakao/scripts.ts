@@ -162,7 +162,7 @@ type PhaseChoice = {
   setFlag?: string
   gameOver?: boolean
   setGlobal?: Record<string, boolean>
-  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �������람의 의심도 */
+  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �������람의 ���심도 */
   sendTo?: { chat: string; message: string; delay: number; susp?: number }
 }
 /**
@@ -350,7 +350,7 @@ const C_TREE: Record<string, TreeNode> = {
   },
   T2: {
     speakerText: ['[��물 C의 반응]'],
-    options: [{ text: '[마���리 답장]', suspicionDelta: 0, nextNodeId: 'END' }],
+    options: [{ text: '[마���리 답���]', suspicionDelta: 0, nextNodeId: 'END' }],
   },
   END: { speakerText: ['[인물 C의 마지막 인사]'], options: [] },
 }
@@ -767,7 +767,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
     message: 'ㅠㅠ 나랑 같이 가지...\n왜 리쿠랑 같이 가 ㅡㅡ\n걸어가면 다리도 아플 텐데',
     choices: [
       { id: 'A', text: '나두 다이소에 살 게 있어서 ㅠㅠ\n미안해...', susp: 10, reply: '그래 그럼 ㅋㅋㅋ / 이따 봐', next: 'P3_Night_Start' },
-      { id: 'B', text: '리쿠가 같이 가자고 해서... ㅠㅠ 이따 봐', susp: 15, reply: '아 그래 ㅋㅋ 알겠어', next: 'P3_Night_Start' },
+      { id: 'B', text: '리쿠가 같이 가자고 해서... ��ㅠ 이따 봐', susp: 15, reply: '아 그래 ㅋㅋ 알겠어', next: 'P3_Night_Start' },
     ],
   },
   P2_Sion_Alibi: {
@@ -1348,7 +1348,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     message: '',
     choices: [{ id: 'A', susp: 0, next: 'P4_Club_Work' }],
   },
-  // [A-2] 1층 대기 + 시온 승낙 (로비 정면충돌)
+  // [A-2] 1층 ���기 + 시온 승낙 (로비 정면충돌)
   P3_Route_A_Clash: {
     isSystem: true,
     alert: '시온과 함께 1층 로비로 내려오다\n바닐라라떼를 들고 기다리던 리쿠와\n정면으로 마주쳤습니다!',
@@ -1653,7 +1653,7 @@ export const FLAG_DAY5_SION_VISIT = 'day5-sion-visit'
 export const FLAG_DAY5_RIKU_VISIT = 'day5-riku-visit'
 
 /**
- * 리쿠 Day 5 (축제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
+ * 리쿠 Day 5 (���제 첫날): 후드집업 입고 가기 / 쇼핑백 → 부스 세팅 → (주점 종료 팝업은 유우시 방)
  * → 밤 질투 & 기습 방문 (시온 방문과 겹치면 즉사)
  */
 const RIKU_DAY5: Record<string, PhaseNode> = {
@@ -1811,7 +1811,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
   },
   P3_Safe_Sion: {
     isSystem: true,
-    alert: '집 앞에서 시온이 사 온 야식을 받으며\n다정하게 인사를 나눴습니다!',
+    alert: '집 앞에서 ���온이 사 온 야식을 받으며\n다정하게 인사를 나눴습니다!',
     message: '',
     choices: [{ id: 'A', susp: 0, next: 'P3_Safe_Sion_After' }],
   },
@@ -2226,8 +2226,8 @@ const STAFF_DAY2: GroupScript = {
       messages: [
         gl(G_SION, '애들아 어제 말한 대로 주점 장보기 팀 나누자 ㅋㅋ'),
         gl(G_SION, '나는 차 끌고 이마트 가서 식재료랑 음료 사 ���게'),
-        gl(G_RIKU, '나�� 다이소 가서 앞치마랑 데코 소품 사 올게! 가까우니까 걸어갈 거야 ㅎㅎ'),
-        gl(G_DAEYOUNG, '여주누나는 어디 따라갈래?'),
+        gl(G_RIKU, '나�� 다이소 가서 앞치마랑 데코 소품 사 올게!'),
+        gl(G_DAEYOUNG, '여주 누나는 어디 가실래요??'),
       ],
       choices: [
         {
@@ -2240,7 +2240,7 @@ const STAFF_DAY2: GroupScript = {
           id: 'sion',
           text: '나는 시온이랑 이마트 갈게!',
           setFlag: FLAG_SHOP_SION,
-          reply: [gl(G_SION, 'ㅋㅋ 오키 2시에 정문 앞으로 차 끌고 갈게'), gl(G_SAKUYA, '그럼 다이소는 제가 리쿠 형이랑 갈게여')],
+          reply: [gl(G_SION, '오키~ 2시까지 정문으로 와 ㅎㅎ'), gl(G_SAKUYA, '그럼 다이소는 제가 리쿠 형이랑 갈게여')],
         },
       ],
     },
