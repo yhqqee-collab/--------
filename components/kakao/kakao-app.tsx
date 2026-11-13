@@ -34,7 +34,9 @@ import * as Ramen from './ramen-exposure'
 import { INITIAL_SUSPICION, turnLimit } from './suspicion'
 
 /** 첫 카톡 도착 순서: 앞 사람에게 답장해야 다음 사람의 첫 카톡이 옵니다 (시온 → 리쿠 → 유우시) */
-const START_ORDER = ['a', 'b', 'c']
+const START_ORDER = ['daeyoung', 'a', 'b', 'c']
+/** 이 멤버 다음 사람은 답장이 아니라 대화가 완전히 끝나야 시작합니다 */
+const FINISH_BEFORE_NEXT = new Set(['daeyoung'])
 const SEQUENTIAL_START_DELAY_MS = 4000
 
 function personalizeChat(chat: Chat, owner: string): Chat {
@@ -559,7 +561,9 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               onStageDone={(index) => setStagesPlayed((current) => Math.max(current, index + 1))}
               startGate={(() => {
                 const prev = startPredecessor(chat.id)
-                return !prev || repliedChats.has(prev) || completedScripts.has(prev)
+                if (!prev) return true
+                if (FINISH_BEFORE_NEXT.has(prev)) return completedScripts.has(prev)
+                return repliedChats.has(prev) || completedScripts.has(prev)
               })()}
               gatedStartMs={startPredecessor(chat.id) ? SEQUENTIAL_START_DELAY_MS : undefined}
               onReply={() => markReplied(chat.id)}

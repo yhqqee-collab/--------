@@ -767,7 +767,7 @@ const SION_DAY2: Record<string, PhaseNode> = {
     message: 'ㅠㅠ 나랑 같이 가지...\n왜 리쿠랑 같이 가 ㅡㅡ\n걸어가면 다리도 아플 텐데',
     choices: [
       { id: 'A', text: '나두 다이소에 살 게 있어서 ㅠㅠ\n미안해...', susp: 10, reply: '그래 그럼 ㅋㅋㅋ / 이따 봐', next: 'P3_Night_Start' },
-      { id: 'B', text: '리쿠가 같이 가자고 해서... ��ㅠ 이따 봐', susp: 15, reply: '아 그래 ㅋㅋ 알겠어', next: 'P3_Night_Start' },
+      { id: 'B', text: '���쿠가 같이 가자고 해서... ��ㅠ 이따 봐', susp: 15, reply: '아 그래 ㅋㅋ 알겠어', next: 'P3_Night_Start' },
     ],
   },
   P2_Sion_Alibi: {
@@ -1097,7 +1097,7 @@ const YUSHI_DAY3: Record<string, PhaseNode> = {
 const RIKU_DAY3: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
-    message: '여주야 일어낫���??\n오늘 뭐해 ㅎㅎ',
+    message: '여주야 일어낫����??\n오늘 뭐해 ㅎㅎ',
     choices: [
       { id: 'A', text: '오늘 뭐하�� ㅎㅎ', susp: 0, next: 'P1_Prop' },
       { id: 'B', text: '아직 침대야 ㅠㅠ 리쿠는 뭐해?', susp: 0, next: 'P1_Prop' },
@@ -1505,7 +1505,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     preWork: true,
     delay: 6,
     message: '애들이 보면 왜 안 되는데 ?\n어제 시온이 형 인스타엔 댓글도 달았잖아\n알았어\n안 올릴게',
-    choices: [{ id: 'A', text: '미안...', susp: 0, next: 'P4_Night_Msg' }],
+    choices: [{ id: 'A', text: '���안...', susp: 0, next: 'P4_Night_Msg' }],
   },
   // 22:00 귀가 후 (동방 작업 팝업은 리쿠 Day 4 P4_Club_Work 가 띄움 → 리쿠·시온 대화가 끝난 뒤 도착)
   P4_Night_Msg: {
@@ -1541,6 +1541,36 @@ export const SYNC_DAY5_PUB = 'day5-pub'
  * 유우시 Day 5 (축제 첫날): 모닝톡 → (부스 세팅) → 리쿠 후드집업 선택에 따라 15:15 추궁 / 즉사 지뢰
  * → 주점 종료 → (단톡방 번따 폭로) → 23:35 질투 카톡
  */
+const DAEYOUNG_DAY5_TIMING: PhaseTiming = {
+  initialDelay: 2,
+  phaseDelay: 10,
+  replyDelayMs: 1500,
+  workEndDelay: 0,
+}
+
+const DAEYOUNG_DAY5: Record<string, PhaseNode> = {
+  P1_Morning: {
+    preWork: true,
+    message: '누나 오늘 12시에 교양 끝나죠\n저랑 료도 12시에 수업 끝나는데\n국밥 한 그릇 드실래요',
+    choices: [
+      {
+        id: 'A',
+        text: '오 국밥 완전 좋지 ㅋㅋㅋ 12시에 정문 앞에서 보자!',
+        susp: 0,
+        reply: '넵',
+        next: 'end',
+      },
+      {
+        id: 'B',
+        text: '날 추운데 뜨끈하게 좋네 ㅎㅎㅎ',
+        susp: 0,
+        reply: '이따봐여',
+        next: 'end',
+      },
+    ],
+  },
+}
+
 const YUSHI_DAY5: Record<string, PhaseNode> = {
   P1_Morning: {
     preWork: true,
@@ -1664,7 +1694,7 @@ const RIKU_DAY5: Record<string, PhaseNode> = {
       { id: 'A', text: '웅 알겠어\n리쿠 옷 입고 나갈게 ㅎㅎ ❤️', susp: -15, setFlag: FLAG_DAY5_RIKU_HOODIE_WEAR, next: 'P1_Wear_Yes' },
       {
         id: 'B',
-        text: '입고 가면 일하다 더러워질까 봐 ㅠㅠ\n쇼핑백에 접어서 들고 갈게!',
+        text: '입고 가면 일하다 더러워질까 ��� ㅠㅠ\n쇼핑백에 접어서 들고 갈게!',
         susp: 0,
         setFlag: FLAG_DAY5_RIKU_HOODIE_BAG,
         next: 'P1_Bring_Bag',
@@ -2111,6 +2141,7 @@ export const DAY_SCRIPTS: Record<number, Record<string, Script>> = {
     a: fromPhases('P1_Morning', SION_DAY5, SAMPLE_TIMING.a),
     b: fromPhases('P1_Morning', RIKU_DAY5, SAMPLE_TIMING.b),
     c: fromPhases('P1_Morning', YUSHI_DAY5, SAMPLE_TIMING.c),
+    daeyoung: fromPhases('P1_Morning', DAEYOUNG_DAY5, DAEYOUNG_DAY5_TIMING),
   },
   6: {
     a: fromPhases('P1_Morning', SION_DAY6, SAMPLE_TIMING.a),
