@@ -541,7 +541,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
 const YUSHI_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
     preWork: true,
-    message: '여주야\n잘 잤어 ?\n오늘 영현사 수업 끝나고 점심 먹을래 ?\n수요일에 두고 간 머리끈도 챙겼어 ^_^',
+    message: '여주야\n잘 잤어 ?\n오늘 영현사 수업 끝나고 ���심 먹을래 ?\n수요일에 두고 간 머리끈도 챙겼어 ^_^',
     choices: [
       {
         id: 'A',
@@ -1524,7 +1524,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     message: '애들이 보면 왜 안 되는데 ?\n어제 시온이 형 인스타엔 댓글도 달았잖아\n알았어\n안 올릴게',
     choices: [{ id: 'A', text: '미안...', susp: 0, next: 'P4_Night_Msg' }],
   },
-  // 22:00 귀가 후 (동방 작업 팝업은 리쿠 Day 4 P4_Club_Work 가 띄움 → 리쿠·시온 대화가 끝난 뒤 도착)
+  // 22:00 귀가 후 (동방 작업 팝업은 리쿠 Day 4 P4_Club_Work 가 띄�� → 리쿠·시온 대화가 끝난 뒤 도착)
   P4_Night_Msg: {
     waitOthers: true,
     delay: 24,
@@ -1864,7 +1864,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
   },
   P3_Safe_Sion_After: {
     delay: 2,
-    message: '잠깐이라도 얼굴 보니까 피로가 다 풀리네 ㅎㅎ\n맛있게 먹고 푹 자 사랑해 ❤️',
+    message: '잠깐이라도 얼굴 보니까 피로가 다 풀리네 ㅎㅎ\n맛있게 먹고 푹 자 사랑��� ❤️',
     choices: [{ id: 'A', text: '고마워 조심히 들어가 사랑해 ❤️', susp: -5, next: 'end' }],
   },
 }
@@ -2005,7 +2005,7 @@ const RIKU_DAY6: Record<string, PhaseNode> = {
     message:
       '여주야 집 잘 들어갓어??\n나 아까 맥주 한 캔 마셧더니 알딸딸하네 ㅎㅎ...\n근데 술 마시니까\n여주 더 보고 시퍼서 미치겟어 ㅠㅠ\n요즘 단둘이 손도 못 잡구...\n나 혼자만 안달 나 잇는 거 같아서\n가끔 막 불안하구 속상해 ㅠㅠ\n여주도 나 많이 좋아하는 거 맞지...?\n나 버리면 안 돼',
     choices: [
-      { id: 'A', text: '오늘 맥주 한 캔에 취했네 ㅋㅋㅋ\n아무 일도 없으니까 걱정 말고 푹 자!', susp: 10, next: 'P3_Night_Sulk' },
+      { id: 'A', text: '오늘 맥주 한 캔에 취했네 ㅋㅋㅋ\n아무 일도 없으니까 걱정 말��� 푹 자!', susp: 10, next: 'P3_Night_Sulk' },
       { id: 'B', text: '내가 널 왜 버려 바보야...\n나도 오늘 얼마나 참았는데...', susp: -5, next: 'P3_Night_Sweet1' },
     ],
   },
@@ -2242,7 +2242,8 @@ const STAFF_DAY1: GroupScript = {
   stages: [
     {
       // 1단계: 점심 카톡이 모두 끝나면 오후 발표 수업 팝업 → 단톡방 공지 → 시온의 '일찍 와(P2_Start)' 카톡만 해금!
-      holdNodes: { a: 'P2_Start' },
+      // 리쿠·유우시는 점심 카톡(P2_*)에 답해 P4_Start 로 넘어갈 때까지 기다려야 수업 팝업 뒤에 점심 카톡이 끼어들지 않음
+      holdNodes: { a: 'P2_Start', b: 'P4_Start', c: 'P4_Start' },
       interlude: '13:00 ~ 16:30\n오후 발표 수업 진행 중...',
       messages: [
         gl(G_SION, '애들아 오늘 저녁 7시 동방에서 주점 메뉴 관련 회의랑 시식 있는 거 안 잊었지?'),
