@@ -20,7 +20,6 @@ import { StockApp } from '@/components/stock/stock-app'
 import { HotelApp } from '@/components/hotel/hotel-app'
 import { MapsApp } from '@/components/maps/maps-app'
 import { WeverseApp } from '@/components/weverse/weverse-app'
-import { FortuneApp } from '@/components/fortune/fortune-app'
 import { NotesApp } from '@/components/notes/notes-app'
 import { EverytimeApp } from '@/components/everytime/everytime-app'
 import { BaeminApp } from '@/components/baemin/baemin-app'
@@ -29,9 +28,7 @@ import { BustedScreen } from './busted-screen'
 import { SpamOverlay } from './spam-overlay'
 import type { SpamNotification } from '@/components/kakao/scripts'
 import { DayIntro } from './day-intro'
-import { PostypeGate } from './postype-gate'
 
-const DEMO_LAST_DAY = 2
 /** 유우시 스토리 태그 허락 후 스토리가 올라오기까지 */
 const YUSHI_STORY_DELAY_MS = 5000
 /** 태그 알림 배너가 머무는 시간 (등장 지연 + 노출 + 퇴장) */
@@ -61,7 +58,6 @@ type AppId =
   | 'hotel'
   | 'maps'
   | 'weverse'
-  | 'fortune'
   | 'notes'
   | 'everytime'
   | 'baemin'
@@ -161,7 +157,12 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const handleDayComplete = useCallback(
     (suspicion: Record<string, number>) => {
       if (currentDay === FINAL_DAY) {
-        window.setTimeout(() => setFinalSuspicion({ ...suspicion }), 2500)
+        // 마지막 카톡 5초 뒤 뒤풀이 전환 화면 → 닫히면 최종 선택 모달
+        window.setTimeout(() => {
+          interludeDoneRef.current = () => setFinalSuspicion({ ...suspicion })
+          setKakaoNotice(null)
+          setInterlude({ text: workTransitionText(FINAL_DAY), nonce: Date.now() })
+        }, 5000)
         return
       }
       window.setTimeout(() => setSleepReady(true), 1500)
@@ -169,13 +170,8 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
     [currentDay],
   )
   const [sleepReady, setSleepReady] = useState(false)
-  const [postypeGate, setPostypeGate] = useState(false)
   function goToSleep() {
     setSleepReady(false)
-    if (currentDay >= DEMO_LAST_DAY) {
-      setPostypeGate(true)
-      return
-    }
     setCurrentDay((day) => day + 1)
     setWorkPhase('before')
   }
@@ -298,14 +294,12 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenHotel={() => setOpenApp('hotel')}
         onOpenMaps={() => setOpenApp('maps')}
         onOpenWeverse={() => setOpenApp('weverse')}
-        onOpenFortune={() => setOpenApp('fortune')}
         onOpenNotes={() => setOpenApp('notes')}
         onOpenEverytime={() => setOpenApp('everytime')}
         onOpenBaemin={() => setOpenApp('baemin')}
       />
       <EverytimeApp open={activeApp === 'everytime'} />
       <BaeminApp open={activeApp === 'baemin'} />
-      <FortuneApp open={activeApp === 'fortune'} day={currentDay} dateLabel={dayLabel(currentDay)} />
       <NotesApp open={activeApp === 'notes'} />
       <PhotosApp open={activeApp === 'photos'} />
       <MapsApp open={activeApp === 'maps'} />
@@ -384,7 +378,6 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         </div>
       )}
       {busted && <BustedScreen day={currentDay} onRetryDay={onRetryDay} onRestart={onRestart} message={bustedAlert} />}
-      {postypeGate && !busted && <PostypeGate day={currentDay} onRestart={onRestart} />}
       {trueEnd && <TrueEndScreen onRestart={onRestart} />}
       {finalSuspicion && !busted && (
         <FinalEndingScreen

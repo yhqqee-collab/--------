@@ -277,7 +277,7 @@ export const POSTS: Post[] = [
     likes: 301,
     likedBy: [sakuya.id, ryo.id],
     comments: [{ name: sakuya.id, text: '오~ 훈남', time: '방금', likes: 1 }],
-    day: 2,
+    day: 3,
     afterWork: true,
   },
   {
@@ -404,7 +404,7 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     avatar: avatarOf(sakuya),
     time: '1주 전',
     images: [
-      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹��� 분홍 티셔츠의 사쿠야' },
+      { src: '/posts/sakuya-feed-gelato.jpg', alt: '가로수 길에서 젤라또를 먹는 분홍 티셔츠의 사쿠야' },
     ],
     caption: '',
     likes: 389,

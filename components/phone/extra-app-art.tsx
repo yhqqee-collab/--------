@@ -1,14 +1,6 @@
 import Image from 'next/image'
-import { Sparkles, TrendingUp } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { NaverMapLogo } from '@/components/maps/naver-map-logo'
-
-export function FortuneArt() {
-  return (
-    <span className="flex size-full items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-800 to-fuchsia-700">
-      <Sparkles aria-hidden className="size-7 text-yellow-200" strokeWidth={2.2} />
-    </span>
-  )
-}
 
 function IconImage({ src }: { src: string }) {
   return <Image src={src} alt="" fill sizes="60px" className="object-cover" />
