@@ -701,7 +701,7 @@ const SION_DAY1: Record<string, PhaseNode> = {
   },
   P2_Start: {
     delay: 45,
-    message: '여주야 나 셋팅하러 동방 먼저 와 있어 ㅋㅋ\n아직 애들 아무도 안 왔는데\n일찍 올 수 있으면 카페 가자\n어제 그 립밤도 �� 겸 ㅎㅎ',
+    message: '여주야 나 셋팅하러 동방 먼저 와 있어 ㅋㅋ\n아직 애들 아무도 안 왔는데\n일찍 올 수 있으면 카페 가자\n어제 그 립밤도 줄 겸 ㅎㅎ',
     choices: [
       {
         id: 'A',
@@ -1095,7 +1095,7 @@ const YUSHI_DAY3: Record<string, PhaseNode> = {
   },
   P2_Insta_B: {
     nextCheckGlobal: SYNC_DAY3_EVENING,
-    message: '시온이 형 인스타에 댓글 달았네\n솔직히 질투나 ㅋㅋㅋ ㅠㅠ\n다른 남자 인스타에 댓글 달지 마...',
+    message: '시온이 형 인스타에 댓글 달았네\n솔직히 질투나 ㅋㅋㅋ ㅠㅠ\n다른 남자 인스타에 댓글 달지 ��...',
     choices: [{ id: 'A', text: '잠깐 깼는데 피드에 떠서 ㅠㅠ 미안해 유우시!', susp: 10, reply: '응 ㅎㅎ\n푹 쉬어', next: 'end' }],
   },
   P2_Insta_C: {
@@ -1437,7 +1437,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
   },
   P4_Night_Msg: {
     delay: 16,
-    message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n내 ��각이지?',
+    message: '여주야 집 도착햇어??\n아까 작업할 때 시온이 형이 너 엄청 챙기더라\n가위도 계속 건네주고 ㅎㅎ\n�� ��각이지?',
     choices: [
       { id: 'A', text: '시온이 원래 잘 챙겨주잖아\n오늘 내 눈엔 리쿠밖에 안 보였어 ❤️', susp: -10, next: 'P4_Night_Good' },
       { id: 'B', text: '어차피 다같이 있는데 뭐 ~\n신경쓰지 마 ㅎㅎ', susp: 5, next: 'P4_Night_Bad' },
@@ -1615,7 +1615,7 @@ const YUSHI_DAY5: Record<string, PhaseNode> = {
     // 유우시 답장 없이(읽씹) 바로 주점 종료로
     choices: [
       { id: 'A', text: '미안 ㅠㅠ', susp: 0, next: 'P3_Pub_Skip' },
-      { id: 'B', text: '옆에 리쿠가 있어서... ㅜㅜ', susp: 0, next: 'P3_Pub_Skip' },
+      { id: 'B', text: '옆에 리쿠��� 있어서... ㅜㅜ', susp: 0, next: 'P3_Pub_Skip' },
     ],
   },
   P2_Bag_Dead: {
@@ -1889,7 +1889,7 @@ const SION_DAY6: Record<string, PhaseNode> = {
   },
   P3_Night_Sweet1: {
     delay: 2,
-    message: '진짜지\n사람들 앞에서 내 거라고 자랑도 못 하고\n몰래 눈만 마주치는 거 힘드네 ㅎㅎ\n그냥 확 공개해버릴까?',
+    message: '진짜지\n사람들 앞에서 내 거라고 자��도 못 하고\n몰래 눈만 마주치는 거 힘드네 ㅎㅎ\n그냥 확 공개해버릴까?',
     choices: [{ id: 'A', text: '조금만 참아 ㅎㅎ\n내일 뒤풀이 끝나면 둘이서만 오래 있자 ❤️', susp: -5, next: 'P3_Night_Sweet2' }],
   },
   P3_Night_Sweet2: {
@@ -2072,7 +2072,7 @@ const YUSHI_DAY6: Record<string, PhaseNode> = {
 }
 
 /* ─────────────────────── 7일 차 (축제 마지막 날 · 뒤풀이) ───────────────────────
- * 선택지 없이 ��온(0초) → 리쿠(5초) → 유우시(10초) 순으로 카톡이 도착하고,
+ * ���택지 없이 ��온(0초) → 리쿠(5초) → 유우시(10초) 순으로 카톡이 도착하고,
  * 마지막 카톡 이후 최종 선택 화면이 열립니다.
  */
 const DAY7_TIMING: Record<'a' | 'b' | 'c', PhaseTiming> = {
@@ -2218,7 +2218,7 @@ const STAFF_DAY1: GroupScript = {
       holdNodes: { a: 'P3_Start', b: 'P4_Start', c: 'P5_Start' },
       interlude: '19:00 ~ 21:30\n동아리방에서 주점 메뉴 회의 중...',
       messages: [
-        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었어요 ㅋㅋㅋ'),
+        gl(G_DAEYOUNG, '와 오늘 리쿠 형이 해준 야끼소바 진짜 파는 거보다 맛있었���요 ㅋㅋㅋ'),
         gl(G_SAKUYA, 'ㅇㅈ 저 타코야끼 열 알은 먹은 듯 ㅋㅋㅋ'),
         gl(G_RIKU, '다들 맛잇게 먹어줘서 고마워 ㅎㅎ 주점 대박 날 듯!!'),
         gl(G_RYO, '오늘 다들 고생하셨어요 조심히 들어가세요~!!'),
