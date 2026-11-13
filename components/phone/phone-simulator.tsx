@@ -28,6 +28,7 @@ import { BustedScreen } from './busted-screen'
 import { SpamOverlay } from './spam-overlay'
 import type { SpamNotification } from '@/components/kakao/scripts'
 import { DayIntro } from './day-intro'
+import { PostypeGate, TRIAL_LAST_DAY } from './postype-gate'
 
 /** 유우시 스토리 태그 허락 후 스토리가 올라오기까지 */
 const YUSHI_STORY_DELAY_MS = 5000
@@ -169,7 +170,8 @@ type PhoneSessionProps = {
 }
 
 function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, onRestart }: PhoneSessionProps) {
-  const startDay = resume?.day ?? 1
+  const startDay = Math.min(resume?.day ?? 1, TRIAL_LAST_DAY)
+  const [trialEnded, setTrialEnded] = useState((resume?.day ?? 1) > TRIAL_LAST_DAY)
   const [busted, setBusted] = useState(false)
   const [bustedAlert, setBustedAlert] = useState<string>()
   const [spams, setSpams] = useState<(SpamNotification & { key: number })[] | null>(null)
@@ -208,6 +210,10 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
           setKakaoNotice(null)
           setInterlude({ text: workTransitionText(FINAL_DAY), nonce: Date.now() })
         }, 5000)
+        return
+      }
+      if (currentDay >= TRIAL_LAST_DAY) {
+        window.setTimeout(() => setTrialEnded(true), 1500)
         return
       }
       window.setTimeout(() => setSleepReady(true), 1500)
@@ -422,6 +428,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
           </button>
         </div>
       )}
+      {trialEnded && !busted && <PostypeGate day={TRIAL_LAST_DAY} onRestart={onRestart} />}
       {busted && <BustedScreen day={currentDay} onRetryDay={onRetryDay} onRestart={onRestart} message={bustedAlert} />}
       {trueEnd && <TrueEndScreen onRestart={onRestart} />}
       {finalSuspicion && !busted && (
