@@ -9,7 +9,7 @@ import type { SuspicionStage } from './suspicion'
 
 /** 모든 멤버의 '일정 시작 전' 대화가 끝나면 4초간 표시되는 전환 문구 (일차별) */
 const WORK_TRANSITION_TEXTS: Record<number, string> = {
-  1: '⏳ [오전 수업 후 점심시간 & 오후 발표 수업 진행 중...] (10:30 ~ 16:30) ⏳',
+  1: '⏳ [오전 수업 끝나고 점심시간...] (10:30 ~ 12:00) ⏳',
   2: '⏳ [장본 물품을 들고 동아리방에서 다 같이 짐 정리 중...] (16:00 ~ 21:30) ⏳',
   3: '⏳ [시온과 용산공원에서 피크닉 데이트 중...] (13:00 ~ 17:00) ⏳',
   4: '⏳ [월요일 수업 듣는 중...] (13:00 ~ 16:40) ⏳',
@@ -162,7 +162,7 @@ type PhaseChoice = {
   setFlag?: string
   gameOver?: boolean
   setGlobal?: Record<string, boolean>
-  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �����람의 의심도 */
+  /** 고르면 chat 톡방에 message 가 delay 초 뒤 도착 (TIME_SCALE 미적용). susp 는 받는 �������람의 의심도 */
   sendTo?: { chat: string; message: string; delay: number; susp?: number }
 }
 /**
@@ -621,7 +621,7 @@ const YUSHI_DAY1: Record<string, PhaseNode> = {
   P4_Start: {
     delay: 40,
     message:
-      '방금 시온이 형이 얘기했는데 \n 일요일에 집에만 있었어? \n 나한테는 본가 다녀왔다고 했잖아',
+      '근데 혹시\n일요일에 집에만 있었어?\n나한테는 본가 다녀왔다고 했잖아',
     choices: [
       {
         id: 'A',
@@ -1123,7 +1123,7 @@ const RIKU_DAY3: Record<string, PhaseNode> = {
     choices: [
       { id: 'A', text: 'SL 오피스텔 맞지? 1층이야!!', susp: 30, next: 'P2_Wrong_A' },
       { id: 'B', text: '다온빌라 맞지? 1층 앞임!', susp: -10, next: 'P2_Correct_B' },
-      { id: 'C', text: '청솔원룸 맞지? 거의 다 와따', susp: 40, next: 'P2_Wrong_C' },
+      { id: 'C', text: '청솔원룸 ��지? 거의 다 와따', susp: 40, next: 'P2_Wrong_C' },
     ],
   },
   P2_Correct_B: {
@@ -1953,7 +1953,7 @@ const RIKU_DAY6: Record<string, PhaseNode> = {
   // 오후 11:40 — 주점 마지막 날 마감 후
   P3_Night_Drunk: {
     message:
-      '여주야 집 잘 들어갓어??\n나 아까 맥주 한 캔 마셧더니 알딸딸하네 ㅎㅎ...\n근데 술 마시니까\n여주 더 보고 시퍼서 미치겟어 ㅠㅠ\n요즘 단둘이 손도 못 잡구...\n나 혼자만 안달 나 잇는 거 같아서\n가끔 막 불안하구 속상해 ㅠㅠ\n여주도 나 많이 좋아하는 거 맞지...?\n나 버리면 안 돼',
+      '여주야 집 잘 들어갓어??\n나 아까 맥주 한 캔 마셧더니 알딸딸하네 ㅎㅎ...\n근데 술 마시니까\n여주 더 보고 시퍼서 미치겟�� ㅠㅠ\n요즘 단둘이 손도 못 잡구...\n나 혼자만 안달 나 잇는 거 같아서\n가끔 막 불안하구 속상해 ㅠㅠ\n여주도 나 많이 좋아하는 거 맞지...?\n나 버리면 안 돼',
     choices: [
       { id: 'A', text: '오늘 맥주 한 캔에 취했네 ㅋㅋㅋ\n아무 일도 없으니까 걱정 말고 푹 자!', susp: 10, next: 'P3_Night_Sulk' },
       { id: 'B', text: '내가 리쿠를 왜 버려 바보야 ㅠㅠ\n나도 오늘 얼마나 참았는데 ❤️', susp: -10, next: 'P3_Night_Sweet1' },
@@ -2187,8 +2187,9 @@ const STAFF_DAY1: GroupScript = {
   choices: [],
   stages: [
     {
-      // 오후 수업이 끝나고 시식회 시작 전
+      // 점심 카톡이 모두 끝나면 오후 발표 수업 팝업 → 시온의 단톡방 공지 → 시온의 '일찍 와' 카톡
       holdNodes: { a: 'P2_Start', b: 'P4_Start', c: 'P4_Start' },
+      interlude: '13:00 ~ 16:30\n오후 발표 수업 진행 중...',
       messages: [
         gl(G_SION, '애들아 오늘 저녁 7시 동방에서 주점 메뉴 관련 회의랑 시식 있는 거 안 잊었지?'),
         gl(G_SION, '나 지금 일찍 가서 동방 테이블 먼저 세팅해 둘게~'),
@@ -2294,7 +2295,7 @@ const STAFF_DAY4: GroupScript = {
           text: '나도 치킨 완전 찬성!!',
           reply: [
             gl2(G_YUSHI, '그럼 치킨 시키자 내가 배민으로 주문 넣어둘게'),
-            gl2(G_SAKUYA, '오 치킨이면 인정이지 ㅎㅎ 사이드로 치즈볼도 추가해 주세용'),
+            gl2(G_SAKUYA, '오 치킨이면 인정이지 ��ㅎ 사이드로 치즈볼도 추가해 주세용'),
             gl2(G_RYO, 'ㅋㅋㅋㅋ 돼지야'),
           ],
         },
@@ -2438,7 +2439,7 @@ export const SUSPICION_100_SPAM_LIST: SpamNotification[] = [
     '나 말고 딴 새끼 만나냐? ㅋㅋ',
     '어쩐지 요즘 연락도 그렇고 앞뒤가 하나도 안 맞더라',
     '나 두고 바람피우니까 재밌어?',
-    '사람 하나 제대로 병신 만들었네',
+    '사람 하나 제대로 병신 만��었네',
     '읽씹하지 말고 전화 받아',
   ]),
   ...spam('b', [
