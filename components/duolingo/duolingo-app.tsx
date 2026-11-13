@@ -4,64 +4,39 @@ import { Heart, Volume2, X } from 'lucide-react'
 import { useState } from 'react'
 import { AppShell } from '@/components/phone/app-shell'
 import { cn } from '@/lib/utils'
+import { DUOLINGO_QUESTIONS } from './duolingo-data'
 
 type Lesson = {
   badge: string
   prompt: string
   answer: string[]
   tiles: string[]
+  tip?: string
 }
 
-const LESSONS: Lesson[] = [
-  {
-    badge: '과거 시제',
-    prompt: '너 어젯밤에 몇 시에 잤어?',
-    answer: ['What', 'time', 'did', 'you', 'go', 'to', 'bed', 'last', 'night?'],
-    tiles: ['went', 'bed', 'What', 'night?', 'do', 'you', 'the', 'last', 'go', 'yesterday', 'did', 'to', 'sleep', 'time'],
-  },
-  {
-    badge: '과거완료',
-    prompt: '그가 도착했을 때 나는 이미 집을 나간 상태였어요',
-    answer: ['I', 'had', 'already', 'left', 'home', 'when', 'he', 'arrived'],
-    tiles: ['arrives', 'left', 'have', 'he', 'yet', 'when', 'I', 'leave', 'home', 'had', 'the', 'arrived', 'already', 'while'],
-  },
-  {
-    badge: '가정법 과거완료',
-    prompt: '비가 오지 않았다면 우리는 소풍을 갔을 거예요',
-    answer: ['If', 'it', 'had', 'not', 'rained,', 'we', 'would', 'have', 'gone', 'on', 'a', 'picnic'],
-    tiles: ['went', 'a', 'rained,', 'will', 'If', 'have', 'did', 'on', 'we', 'has', 'picnic', 'it', 'to', 'had', 'gone', 'would', 'not', 'rains,'],
-  },
-  {
-    badge: '목적격 + to부정사',
-    prompt: '그녀가 그렇게까지 화낼 줄은 몰랐어',
-    answer: ["I", "didn't", 'expect', 'her', 'to', 'get', 'that', 'angry'],
-    tiles: ['she', 'angry', "don't", 'to', 'expected', 'that', 'I', 'got', 'her', 'angrily', 'get', 'so', "didn't", 'expect', 'getting'],
-  },
-  {
-    badge: '양보 구문',
-    prompt: '아무리 바빠도 연락 정도는 할 수 있잖아',
-    answer: ['No', 'matter', 'how', 'busy', 'you', 'are,', 'you', 'can', 'at', 'least', 'text', 'me'],
-    tiles: ['least', 'you', 'what', 'are,', 'me', 'busy', 'could', 'No', 'at', 'how', 'texted', 'can', 'last', 'matter', 'you', 'text', 'were,', 'most'],
-  },
-  {
-    badge: '가정법 혼합',
-    prompt: '내가 너였다면 그 사람한테 절대 먼저 연락하지 않았을 거야',
-    answer: ['If', 'I', 'were', 'you,', 'I', 'would', 'never', 'have', 'contacted', 'him', 'first'],
-    tiles: ['contact', 'him', 'was', 'If', 'ever', 'have', 'I', 'will', 'first', 'you,', 'had', 'never', 'her', 'I', 'contacted', 'would', 'at', 'were'],
-  },
-  {
-    badge: '동명사 + 수동',
-    prompt: '그는 거짓말하다 들키지 않으려고 무척 애썼다',
-    answer: ['He', 'tried', 'hard', 'not', 'to', 'get', 'caught', 'lying'],
-    tiles: ['lie', 'to', 'caught', 'hardly', 'He', 'not', 'trying', 'catch', 'get', 'lying', 'tried', 'being', 'hard', 'to', 'lied'],
-  },
-  {
-    badge: '최종 보스',
-    prompt: '네가 그날 밤 어디 있었는지 내가 모를 거라고 생각했다면 착각이야',
-    answer: ['If', 'you', 'thought', 'I', "wouldn't", 'find', 'out', 'where', 'you', 'were', 'that', 'night,', "you're", 'wrong'],
-    tiles: ["you're", 'where', 'think', 'night,', 'I', 'out', 'what', 'If', 'were', "won't", 'you', 'found', 'that', 'wrong', 'was', 'thought', 'find', "wouldn't", 'you', 'right', 'this'],
-  },
-]
+function seededShuffle<T>(items: T[], seed: number): T[] {
+  const result = [...items]
+  let state = seed * 9301 + 49297
+  for (let i = result.length - 1; i > 0; i--) {
+    state = (state * 9301 + 49297) % 233280
+    const j = Math.floor((state / 233280) * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
+const LESSONS: Lesson[] = DUOLINGO_QUESTIONS.map((q) => {
+  const toEnglish = q.id % 2 === 1
+  const answer = toEnglish ? q.answerWordsEn : q.answerWordsKo
+  const distractors = toEnglish ? q.distractorsEn : q.distractorsKo
+  return {
+    badge: toEnglish ? '영작' : '한역',
+    prompt: toEnglish ? q.korean : q.english,
+    answer,
+    tiles: seededShuffle([...answer, ...distractors], q.id),
+    tip: q.owlTip,
+  }
+})
 
 const TOTAL_STEPS = LESSONS.length
 const MAX_HEARTS = 3
@@ -252,6 +227,9 @@ export function DuolingoApp({ open }: { open: boolean }) {
               ? '모든 단계를 끝냈어요. 처음부터 다시 복습해요!'
               : '훌륭해요, 다음은 조금 더 어려워요!'}
         </p>
+        {lesson.tip && (
+          <p className="mt-2 text-pretty text-[13px] font-semibold text-neutral-600">{lesson.tip}</p>
+        )}
         <button
           type="button"
           onClick={proceed}

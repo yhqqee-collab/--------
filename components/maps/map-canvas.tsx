@@ -110,7 +110,7 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
 
       // Own pane keeps the campus art above the canvas-rendered neighborhood blocks.
       map.createPane('campus').style.zIndex = '450'
-      L.imageOverlay(
+      const campusOverlay = L.imageOverlay(
         CAMPUS_IMAGE.src,
         L.latLngBounds(
           toLatLng(CAMPUS_IMAGE.west, CAMPUS_IMAGE.south),
@@ -118,6 +118,16 @@ export function MapCanvas({ mapRef, active, zoom, selectedId, route, navPoint, o
         ),
         { pane: 'campus', interactive: false, alt: '소원대학교 캠퍼스 지도' },
       ).addTo(map)
+      // Fade the art's baked-in outer streets so it blends into the generated blocks instead of a hard rectangle.
+      const campusElement = campusOverlay.getElement()
+      if (campusElement) {
+        const feather =
+          'linear-gradient(to right, transparent 0%, #000 9%, #000 93%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 91%, transparent 100%)'
+        campusElement.style.maskImage = feather
+        campusElement.style.maskComposite = 'intersect'
+        campusElement.style.webkitMaskImage = feather
+        campusElement.style.setProperty('-webkit-mask-composite', 'source-in')
+      }
 
       const nextElements: Record<string, HTMLElement> = {}
       for (const place of PLACES) {

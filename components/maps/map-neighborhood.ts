@@ -9,7 +9,8 @@ const ORIGIN_X = -300
 const ORIGIN_Y = 250
 const MINOR_ROAD = 12
 const MAJOR_ROAD = 30
-const CAMPUS_BOX = { minX: -300, maxX: 300, minY: -310, maxY: 250 }
+// Matches CAMPUS_IMAGE bounds so blocks run right up to (and under) the campus art with no gaps.
+const CAMPUS_BOX = { minX: -366, maxX: 318, minY: -277.5, maxY: 297 }
 const RIVER_X = -1000
 const RIVER_HALF = 55
 
@@ -46,7 +47,7 @@ function roadLines(origin: number, cell: number, majorEvery: number) {
 }
 
 function overlapsCampus(x1: number, y1: number, x2: number, y2: number) {
-  return x2 > CAMPUS_BOX.minX && x1 < CAMPUS_BOX.maxX && y2 > CAMPUS_BOX.minY && y1 < CAMPUS_BOX.maxY
+  return x1 >= CAMPUS_BOX.minX && x2 <= CAMPUS_BOX.maxX && y1 >= CAMPUS_BOX.minY && y2 <= CAMPUS_BOX.maxY
 }
 
 function riverOffset(y: number) {

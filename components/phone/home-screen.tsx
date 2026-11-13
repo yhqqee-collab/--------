@@ -12,7 +12,7 @@ import {
   XArt,
   YouTubeMusicArt,
 } from './app-icon-art'
-import { AblyArt, BaeminArt, DuolingoArt, EverytimeArt, FortuneArt, NaverMapArt, StockArt, WeverseArt } from './extra-app-art'
+import { AblyArt, BaeminArt, DuolingoArt, EverytimeArt, NaverMapArt, StockArt, WeverseArt } from './extra-app-art'
 import { Wallpaper } from './wallpaper'
 import { CalendarWidget, NotesWidget } from './widgets'
 
@@ -32,7 +32,6 @@ type HomeScreenProps = {
   onOpenHotel: () => void
   onOpenMaps: () => void
   onOpenWeverse: () => void
-  onOpenFortune: () => void
   onOpenNotes: () => void
   onOpenEverytime: () => void
   onOpenBaemin: () => void
@@ -54,7 +53,6 @@ export function HomeScreen({
   onOpenHotel,
   onOpenMaps,
   onOpenWeverse,
-  onOpenFortune,
   onOpenNotes,
   onOpenEverytime,
   onOpenBaemin,
@@ -103,7 +101,6 @@ export function HomeScreen({
               { name: '에이블리', onClick: onOpenAbly, art: <AblyArt /> },
               { name: '주식', onClick: onOpenStock, art: <StockArt /> },
               { name: 'Weverse', onClick: onOpenWeverse, art: <WeverseArt /> },
-              { name: '운세', onClick: onOpenFortune, art: <FortuneArt /> },
               { name: '에브리타임', onClick: onOpenEverytime, art: <EverytimeArt /> },
             ]}
           />

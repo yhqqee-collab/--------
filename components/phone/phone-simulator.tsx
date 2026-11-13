@@ -20,7 +20,6 @@ import { StockApp } from '@/components/stock/stock-app'
 import { HotelApp } from '@/components/hotel/hotel-app'
 import { MapsApp } from '@/components/maps/maps-app'
 import { WeverseApp } from '@/components/weverse/weverse-app'
-import { FortuneApp } from '@/components/fortune/fortune-app'
 import { NotesApp } from '@/components/notes/notes-app'
 import { EverytimeApp } from '@/components/everytime/everytime-app'
 import { BaeminApp } from '@/components/baemin/baemin-app'
@@ -59,7 +58,6 @@ type AppId =
   | 'hotel'
   | 'maps'
   | 'weverse'
-  | 'fortune'
   | 'notes'
   | 'everytime'
   | 'baemin'
@@ -291,14 +289,12 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenHotel={() => setOpenApp('hotel')}
         onOpenMaps={() => setOpenApp('maps')}
         onOpenWeverse={() => setOpenApp('weverse')}
-        onOpenFortune={() => setOpenApp('fortune')}
         onOpenNotes={() => setOpenApp('notes')}
         onOpenEverytime={() => setOpenApp('everytime')}
         onOpenBaemin={() => setOpenApp('baemin')}
       />
       <EverytimeApp open={activeApp === 'everytime'} />
       <BaeminApp open={activeApp === 'baemin'} />
-      <FortuneApp open={activeApp === 'fortune'} day={currentDay} dateLabel={dayLabel(currentDay)} />
       <NotesApp open={activeApp === 'notes'} />
       <PhotosApp open={activeApp === 'photos'} />
       <MapsApp open={activeApp === 'maps'} />
