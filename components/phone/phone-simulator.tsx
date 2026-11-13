@@ -157,7 +157,12 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const handleDayComplete = useCallback(
     (suspicion: Record<string, number>) => {
       if (currentDay === FINAL_DAY) {
-        window.setTimeout(() => setFinalSuspicion({ ...suspicion }), 2500)
+        // 마지막 카톡 5초 뒤 뒤풀이 전환 화면 → 닫히면 최종 선택 모달
+        window.setTimeout(() => {
+          interludeDoneRef.current = () => setFinalSuspicion({ ...suspicion })
+          setKakaoNotice(null)
+          setInterlude({ text: workTransitionText(FINAL_DAY), nonce: Date.now() })
+        }, 5000)
         return
       }
       window.setTimeout(() => setSleepReady(true), 1500)
