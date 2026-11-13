@@ -194,6 +194,13 @@ STORIES_BY_DAY[2] = [
   }),
 ]
 
+/** 3일 차: 리쿠 삼각김밥 스토리 */
+STORIES_BY_DAY[3] = [
+  story(riku, '2시간', {
+    image: { src: '/stories/riku-day3.jpg', alt: '갈라진 회색 벽 앞에서 남색 과잠을 입고 삼각김밥을 든 채 옆을 보며 웃는 리쿠' },
+  }),
+]
+
 /** 4일 차: 대학 강의실 옆자리에서 찍힌 대영 스토리 */
 STORIES_BY_DAY[4] = [
   story(daeyoung, '2시간', {
