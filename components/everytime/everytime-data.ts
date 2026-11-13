@@ -31,22 +31,22 @@ export const TIMETABLE_START_HOUR = 9
 export const TIMETABLE_END_HOUR = 18
 
 export const MY_CLASSES: ClassBlock[] = [
-  { name: '대중문화의 이해', room: '대강당 101호', day: 0, start: 13, end: 15 },
+  { name: '대중문화의 이해', room: '사회과학관 101호', day: 0, start: 13, end: 15 },
   { name: '소비자행동론', room: '경영관 302호', day: 0, start: 15, end: 17 },
   { name: '영화와 현대사회', room: '인문관 204호', day: 1, start: 10.5, end: 12 },
   { name: '브랜드마케팅', room: '경영관 401호', day: 1, start: 13, end: 15 },
   { name: '재무관리원론', room: '경영관 201호', day: 3, start: 10.5, end: 12 },
   { name: '브랜드마케팅', room: '경영관 401호', day: 3, start: 15, end: 17 },
   { name: '영화와 현대사회', room: '인문관 204호', day: 4, start: 10.5, end: 12 },
-  { name: '대중문화의 이해', room: '대강당 101호', day: 4, start: 13, end: 15 },
+  { name: '대중문화의 이해', room: '사회과학관 101호', day: 4, start: 13, end: 15 },
 ]
 
 const DAEYOUNG_CLASSES: ClassBlock[] = [
-  { name: '대중문화의 이해', room: '대강당 101호', day: 0, start: 13, end: 15 },
+  { name: '대중문화의 이해', room: '사회과학관 101호', day: 0, start: 13, end: 15 },
   { name: '경영학원론', room: '경영관 101호', day: 1, start: 10.5, end: 12 },
   { name: '회계원리', room: '경영관 102호', day: 2, start: 13, end: 15 },
   { name: '경영학원론', room: '경영관 101호', day: 3, start: 10.5, end: 12 },
-  { name: '대중문화의 이해', room: '대강당 101호', day: 4, start: 13, end: 15 },
+  { name: '대중문화의 이해', room: '사회과학관 101호', day: 4, start: 13, end: 15 },
 ]
 
 const CHARACTERS: Friend[] = [

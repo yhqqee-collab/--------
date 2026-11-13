@@ -22,7 +22,15 @@ import {
   SYNC_EXTERNAL_SOURCES,
   type SpamNotification,
   type CrossMessage,
+  ME_LINE_PREFIX,
+  FLAG_DAY1_RIKU_LUNCH,
+  FLAG_DAY1_YUSHI_LUNCH,
+  FLAG_RIKU_LUNCH_RAMEN,
+  FLAG_YUSHI_LUNCH_RAMEN,
+  FLAG_RIKU_EXCUSE_SOLO,
+  FLAG_YUSHI_EXCUSE_SOLO,
 } from './scripts'
+import * as Ramen from './ramen-exposure'
 import { INITIAL_SUSPICION, turnLimit } from './suspicion'
 
 /** 첫 카톡 도착 순서: 앞 사람에게 답장해야 다음 사람의 첫 카톡이 옵니다 (시온 → 리쿠 → 유우시) */
@@ -130,7 +138,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     unread: unread[chat.id] || undefined,
   }))
 
-  const deliver = useCallback((id: string, texts: string[], options?: Pick<Delivery, 'instant' | 'badge' | 'urgent'>) => {
+  const deliver = useCallback((id: string, texts: string[], options?: Pick<Delivery, 'instant' | 'badge' | 'urgent' | 'sender' | 'time'>) => {
     deliverySeqRef.current += 1
     const delivery: Delivery = { id: deliverySeqRef.current, texts, ...options }
     setInbox((current) => ({ ...current, [id]: [...(current[id] ?? []), delivery] }))
@@ -312,8 +320,119 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
     return () => window.removeEventListener(INSTA_CROSS_MESSAGE_EVENT, onInstaComment)
   }, [handleCrossMessage])
 
+  /** Day 1 라멘야 함정: 근무 종료 시점에 한 번 판정 (둘 다 점심 수락이면 기존 P2_Lunch_Dead 가 우선) */
+  const exposureRef = useRef<Ramen.ExposureCase | null | undefined>(undefined)
+  if (exposureRef.current === undefined && day === 1 && workEnded) {
+    const f = flagsRef.current
+    const doubleLunch = f.has(FLAG_DAY1_RIKU_LUNCH) && f.has(FLAG_DAY1_YUSHI_LUNCH)
+    exposureRef.current = doubleLunch
+      ? null
+      : f.has(FLAG_YUSHI_LUNCH_RAMEN)
+        ? 'yushi'
+        : f.has(FLAG_RIKU_LUNCH_RAMEN)
+          ? 'riku'
+          : null
+  }
+  const exposure = day === 1 ? (exposureRef.current ?? null) : null
+  const accuser = exposure === 'yushi' ? 'b' : 'c'
+  const exposureExpected: Record<string, number> = exposure
+    ? {
+        a: Ramen.SION_FIRST.length + Ramen.SION_FINAL.length,
+        [accuser]:
+          exposure === 'yushi'
+            ? Ramen.rikuAccusation(false).length + Ramen.RIKU_FINAL.length
+            : Ramen.yushiAccusation(false).length,
+      }
+    : {}
+  const exposureExpectedRef = useRef(exposureExpected)
+  exposureExpectedRef.current = exposureExpected
+  const [exposureReceived, setExposureReceived] = useState<Record<string, number>>({})
+  const [forcedChoices, setForcedChoices] = useState<Record<string, string>>({})
+  const ownerRef = useRef(owner)
+  ownerRef.current = owner
+  const exposureTimersRef = useRef<number[]>([])
+
+  const exposureAt = useCallback((ms: number, fn: () => void) => {
+    exposureTimersRef.current.push(
+      window.setTimeout(() => {
+        if (!bustedRef.current) fn()
+      }, ms),
+    )
+  }, [])
+
+  const sendExposureLine = useCallback(
+    (room: string, line: Ramen.ExposureLine) => {
+      deliver(room, [replaceUserName(line.text, ownerRef.current)], { badge: true, sender: line.sender, time: line.time })
+    },
+    [deliver],
+  )
+
+  /** lines 를 gap 간격으로 보내고, 마지막 줄을 보낸 시점(ms)을 돌려줍니다 */
+  const sendExposureLines = useCallback(
+    (room: string, lines: Ramen.ExposureLine[], startMs: number, gapMs: number) => {
+      lines.forEach((line, index) => exposureAt(startMs + index * gapMs, () => sendExposureLine(room, line)))
+      return startMs + (lines.length - 1) * gapMs
+    },
+    [exposureAt, sendExposureLine],
+  )
+
+  useEffect(() => {
+    if (!exposure) return
+    const flags = flagsRef.current
+    const groupEnd = sendExposureLines('staff', Ramen.GROUP_LINES[exposure], Ramen.EXPOSURE_START_DELAY_MS, Ramen.GROUP_LINE_GAP_MS)
+
+    const sionFirstEnd = sendExposureLines('a', Ramen.SION_FIRST, groupEnd + Ramen.SION_DELAY_MS, Ramen.SION_LINE_GAP_MS)
+    sendExposureLines('a', Ramen.SION_FINAL, sionFirstEnd + Ramen.SION_SILENCE_MS, Ramen.SION_FINAL_GAP_MS)
+
+    if (exposure === 'yushi') {
+      const rikuEnd = sendExposureLines(
+        'b',
+        Ramen.rikuAccusation(flags.has(FLAG_RIKU_EXCUSE_SOLO)),
+        groupEnd + Ramen.RIKU_DELAY_MS,
+        Ramen.RIKU_LINE_GAP_MS,
+      )
+      exposureAt(rikuEnd + Ramen.RIKU_LINE_GAP_MS, () => setForcedChoices((current) => ({ ...current, b: Ramen.RIKU_REPLY_TEXT })))
+    } else {
+      sendExposureLines('c', Ramen.yushiAccusation(flags.has(FLAG_YUSHI_EXCUSE_SOLO)), groupEnd + Ramen.YUSHI_DELAY_MS, Ramen.YUSHI_LINE_GAP_MS)
+    }
+
+    const timers = exposureTimersRef.current
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id))
+      exposureTimersRef.current = []
+    }
+  }, [exposure, exposureAt, sendExposureLines])
+
+  const handleForcedChoice = useCallback(
+    (id: string) => {
+      const text = forcedChoices[id]
+      if (!text) return
+      setForcedChoices(({ [id]: _picked, ...rest }) => rest)
+      deliver(id, [`${ME_LINE_PREFIX}${text}`], { instant: true, time: Ramen.RIKU_REPLY_TIME })
+      setPreviews((current) => ({ ...current, [id]: text }))
+      markReplied(id)
+      if (id === 'b') sendExposureLines('b', Ramen.RIKU_FINAL, Ramen.RIKU_FINAL_DELAY_MS, Ramen.RIKU_FINAL_GAP_MS)
+    },
+    [forcedChoices, deliver, markReplied, sendExposureLines],
+  )
+
+  const exposureReadAll =
+    Boolean(exposure) &&
+    Object.entries(exposureExpected).every(([id, count]) => (exposureReceived[id] ?? 0) >= count && !unread[id])
+
+  useEffect(() => {
+    if (!exposure || !exposureReadAll) return
+    const timer = window.setTimeout(() => {
+      if (bustedRef.current) return
+      bustedRef.current = true
+      callbacksRef.current.onBusted?.(Ramen.EXPOSURE_ALERT[exposure])
+    }, Ramen.EXPOSURE_GAME_OVER_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [exposure, exposureReadAll])
+
   const handleIncoming = useCallback((id: string, text: string) => {
     setPreviews((current) => ({ ...current, [id]: text }))
+    if (id in exposureExpectedRef.current) setExposureReceived((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }))
     if (viewingRef.current === id) return
     setUnread((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }))
     callbacksRef.current.onIncoming?.(id, text)
@@ -353,7 +472,7 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               : true
           : false
         const roomReady = isGroupRoom ? groupReady : groupsFinished
-        const roomWorkEnded = isGroupRoom ? workEnded : workEnded && afterWorkGroupsFinished
+        const roomWorkEnded = !exposure && (isGroupRoom ? workEnded : workEnded && afterWorkGroupsFinished)
         return (
           <div
             key={chat.id}
@@ -404,6 +523,8 @@ export function KakaoApp({ open, owner, requestedRoom, onRoomOpen, onIncoming, o
               onReply={() => markReplied(chat.id)}
               onCrossMessage={handleCrossMessage}
               onFlag={(flag) => flagCallbackRef.current?.(flag)}
+              forcedChoice={forcedChoices[chat.id] ?? null}
+              onForcedChoice={() => handleForcedChoice(chat.id)}
               onInterlude={(text, done) => (interludeCallbackRef.current ? interludeCallbackRef.current(text, done) : done())}
             />
           </div>
