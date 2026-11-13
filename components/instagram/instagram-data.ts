@@ -190,7 +190,10 @@ STORIES_BY_DAY[2] = [
     image: { src: '/stories/daeyoung-day2.jpg', alt: '나무 그늘 아래 검은 나시 차림으로 앉아 옆을 보는 대영' },
   }),
   story(yushi, '6시간', {
-    image: { src: '/stories/yushi-day2.png', alt: '현관 거울 앞에서 친구와 함께 팔을 들어 거울 셀카를 찍는 유우시' },
+    images: [
+      { src: '/stories/yushi-day2.png', alt: '현관 거울 앞에서 친구와 함께 팔을 들어 거울 셀카를 찍는 유우시' },
+      { src: '/stories/yushi-day2-2.png', alt: '흰 별무늬 티셔츠 차림의 친구 어깨에 기대 카메라를 보며 웃는 유우시의 셀카' },
+    ],
   }),
 ]
 
@@ -222,7 +225,7 @@ STORIES_BY_DAY[6] = [
   story(sion, '2시간', {
     images: [
       { src: '/stories/sion-day6-1.png', alt: '검은 나시와 회색 청바지 차림으로 휴대폰 플래시를 켜고 얼굴을 가린 시온의 거울 셀카' },
-      { src: '/stories/sion-day6-2.png', alt: '검은 나시와 회색 청바지 차림으로 손으로 앞머리를 넘기며 찍은 시온의 거울 셀카' },
+      { src: '/stories/sion-day6-2.png', alt: '검은 나시와 회색 청바지 차림으로 손으로 앞��리를 넘기며 찍은 시온의 거울 셀카' },
     ],
   }),
 ]
