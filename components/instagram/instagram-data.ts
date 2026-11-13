@@ -382,7 +382,7 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     handle: riku.id,
     avatar: avatarOf(riku),
     time: '5일 전',
-    images: [{ src: '/posts/riku-vintage.png', alt: '빈티지 숍 계단 앞에서 안경과 이어폰을 끼고 회색 재킷을 여미는 리쿠' }],
+    images: [{ src: '/posts/riku-vintage.png', alt: '빈티지 숍 계단 앞에서 안경과 이어폰을 끼고 회색 재��을 여미는 리쿠' }],
     caption: '',
     likes: 987,
     likedBy: [yushi.id, ryo.id],
@@ -408,6 +408,19 @@ export const PROFILE_ONLY_POSTS: Post[] = [
     caption: '',
     likes: 876,
     likedBy: [riku.id, daeyoung.id],
+    comments: [],
+  },
+  {
+    id: 'yushi-amusement-post',
+    handle: yushi.id,
+    avatar: avatarOf(yushi),
+    time: '1주 전',
+    images: [
+      { src: '/posts/yushi-amusement.png', alt: '밤의 놀이공원에서 체크 셔츠 차림으로 두 손을 머리 뒤로 올린 유우시' },
+    ],
+    caption: '',
+    likes: 342,
+    likedBy: [sakuya.id, riku.id],
     comments: [],
   },
   {
