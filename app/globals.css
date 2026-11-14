@@ -158,6 +158,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* 모바일에서 채팅을 위로 끝까지 올렸을 때 브라우저의 당겨서 새로고침이 발동하지 않도록 막습니다. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
   body {
     @apply bg-background text-foreground;
   }
