@@ -1,5 +1,7 @@
 'use client'
 
+// 게임 시간 관리자(자동 저장·복원용). 다른 게임 모듈보다 먼저 불러와야 합니다.
+import '@/lib/session-clock'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Moon } from 'lucide-react'
 import type { DaySnapshot } from '@/components/kakao/snapshot'
@@ -24,6 +26,17 @@ import { NotesApp } from '@/components/notes/notes-app'
 import { EverytimeApp } from '@/components/everytime/everytime-app'
 import { BaeminApp } from '@/components/baemin/baemin-app'
 import { DEFAULT_INSTAGRAM_ID, DEFAULT_OWNER_NAME } from '@/lib/template-config'
+import { isReplaying } from '@/lib/session-clock'
+import {
+  failReplay,
+  finishReplay,
+  loadSession,
+  prepareReplay,
+  replaySession,
+  setSessionRoot,
+  startSegment,
+  type SavedSession,
+} from '@/lib/session-recorder'
 import { BustedScreen } from './busted-screen'
 import { SpamOverlay } from './spam-overlay'
 import type { SpamNotification } from '@/components/kakao/scripts'
@@ -112,24 +125,89 @@ export function PhoneSimulator() {
   const [loaded, setLoaded] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
   const [resume, setResume] = useState<DaySnapshot | null>(null)
+  /** 새로고침 직후: 저장된 기록을 빨리 감기로 재생해야 하는 구간 */
+  const [pendingReplay, setPendingReplay] = useState<SavedSession | null>(null)
+  const [replayProgress, setReplayProgress] = useState<number | null>(null)
   const latestSnapshotRef = useRef<DaySnapshot | null>(null)
   const userNameRef = useRef<string | null>(null)
+  /** 지금 화면(PhoneSession)이 시작된 날짜. 날짜가 넘어가면 그 날의 시작 상태로 새 기록 구간을 엽니다. */
+  const sessionDayRef = useRef(1)
+
+  /** 새 기록 구간을 열고 화면을 그 상태로 다시 시작합니다 (하루 시작·다시하기·처음부터) */
+  const restartSession = useCallback((snapshot: DaySnapshot | null, name: string | null) => {
+    sessionDayRef.current = snapshot?.day ?? 1
+    latestSnapshotRef.current = snapshot
+    startSegment(snapshot, name)
+    setUserName(name)
+    setResume(snapshot)
+    setRun((current) => current + 1)
+  }, [])
 
   useEffect(() => {
+    const session = loadSession()
     const save = readSave()
-    if (save) {
+    if (session) {
+      // 새로고침 전 기록이 있으면: 그 구간의 시작 상태로 화면을 띄운 뒤 입력 기록을 재생합니다.
+      userNameRef.current = session.meta.userName ?? save?.userName ?? null
+      latestSnapshotRef.current = session.meta.resume
+      sessionDayRef.current = session.meta.resume?.day ?? 1
+      prepareReplay(session)
+      setUserName(session.meta.userName)
+      setResume(session.meta.resume)
+      setPendingReplay(session)
+      setReplayProgress(0)
+    } else if (save) {
+      // 예전 버전 저장(하루 시작 상태만 있음): 그 날 처음부터 이어서 시작
       userNameRef.current = save.userName
       latestSnapshotRef.current = save.snapshot
+      sessionDayRef.current = save.snapshot.day
+      startSegment(save.snapshot, save.userName)
       setUserName(save.userName)
       setResume(save.snapshot)
+    } else {
+      startSegment(null, null)
     }
     setLoaded(true)
   }, [])
 
-  const handleDaySnapshot = useCallback((snapshot: DaySnapshot) => {
-    latestSnapshotRef.current = snapshot
-    if (userNameRef.current) writeSave(userNameRef.current, snapshot)
-  }, [])
+  useEffect(() => {
+    if (!pendingReplay) return
+    let cancelled = false
+    let shown = 0
+    replaySession(pendingReplay, (ratio) => {
+      // 화면 전체가 다시 그려지지 않도록 10% 단위로만 갱신
+      if (cancelled || ratio - shown < 0.1) return
+      shown = ratio
+      setReplayProgress(ratio)
+    })
+      .then(() => {
+        if (cancelled) return
+        finishReplay()
+        setPendingReplay(null)
+        setReplayProgress(null)
+      })
+      .catch((error) => {
+        console.error('[save] 기록 재생 실패, 그 날 처음부터 다시 시작합니다', error)
+        if (cancelled) return
+        failReplay()
+        setPendingReplay(null)
+        setReplayProgress(null)
+        restartSession(pendingReplay.meta.resume, pendingReplay.meta.userName)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [pendingReplay, restartSession])
+
+  const handleDaySnapshot = useCallback(
+    (snapshot: DaySnapshot) => {
+      latestSnapshotRef.current = snapshot
+      if (userNameRef.current) writeSave(userNameRef.current, snapshot)
+      // 잠들기로 날짜가 넘어갔으면 이 날의 시작 상태에서 새 기록 구간을 시작합니다.
+      if (snapshot.day > sessionDayRef.current && !isReplaying()) restartSession(snapshot, userNameRef.current)
+    },
+    [restartSession],
+  )
   const handleStart = useCallback((name: string) => {
     userNameRef.current = name
     setUserName(name)
@@ -139,23 +217,34 @@ export function PhoneSimulator() {
   if (!loaded) return null
 
   return (
-    <PhoneSession
-      key={run}
-      userName={userName}
-      resume={resume}
-      onStart={handleStart}
-      onDaySnapshot={handleDaySnapshot}
-      onRetryDay={() => {
-        setResume(latestSnapshotRef.current)
-        setRun((current) => current + 1)
-      }}
-      onRestart={() => {
-        latestSnapshotRef.current = null
-        writeSave(null, null)
-        setResume(null)
-        setRun((current) => current + 1)
-      }}
-    />
+    <>
+      <div ref={setSessionRoot} className="contents">
+        <PhoneSession
+          key={run}
+          userName={userName}
+          resume={resume}
+          onStart={handleStart}
+          onDaySnapshot={handleDaySnapshot}
+          onRetryDay={() => restartSession(latestSnapshotRef.current, userNameRef.current)}
+          onRestart={() => {
+            writeSave(null, null)
+            restartSession(null, userNameRef.current)
+          }}
+        />
+      </div>
+      {replayProgress !== null && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-[1000] flex flex-col items-center justify-center gap-4 bg-[#0b070c] text-white"
+        >
+          <p className="text-base font-semibold">이어서 불러오는 중…</p>
+          <div className="h-1.5 w-48 overflow-hidden rounded-full bg-white/15">
+            <div className="h-full rounded-full bg-pink-300 transition-[width] duration-200" style={{ width: `${Math.round(replayProgress * 100)}%` }} />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
