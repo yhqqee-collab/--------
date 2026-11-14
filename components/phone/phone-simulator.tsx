@@ -10,7 +10,7 @@ import { StoryViewer } from '@/components/instagram/story-viewer'
 import { DAEYOUNG_ID, DAEYOUNG_TAG_DAY, NOTIFICATION_COMMENT, YUSHI_ID } from '@/components/instagram/instagram-data'
 import { CHAT_DISPLAY_NAMES } from '@/components/kakao/chat-data'
 import { KakaoApp } from '@/components/kakao/kakao-app'
-import { FINAL_DAY, FLAG_DAY4_YUSHI_STORY_TAG, WORK_FIRST_DAYS, workTransitionText } from '@/components/kakao/scripts'
+import { FINAL_DAY, FLAG_DAY4_YUSHI_STORY_TAG, GROUP_DONE_FLAG_PREFIX, WORK_FIRST_DAYS, workTransitionText } from '@/components/kakao/scripts'
 import { MessagesApp } from '@/components/messages/messages-app'
 import { PhotosApp } from '@/components/photos/photos-app'
 import { SafariApp } from '@/components/safari/safari-app'
@@ -253,8 +253,16 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
 
   const [yushiTagDay, setYushiTagDay] = useState<number | null>(null)
   const [autoOpenStory, setAutoOpenStory] = useState<{ handle: string; nonce: number } | null>(null)
+  const [doneGroups, setDoneGroups] = useState<{ day: number; ids: ReadonlySet<string> }>({ day: 0, ids: new Set() })
+  const todayDoneGroups = doneGroups.day === currentDay ? doneGroups.ids : undefined
   const handleFlag = useCallback(
     (flag: string) => {
+      if (flag.startsWith(GROUP_DONE_FLAG_PREFIX)) {
+        const id = flag.slice(GROUP_DONE_FLAG_PREFIX.length)
+        const day = currentDay
+        setDoneGroups((current) => ({ day, ids: new Set([...(current.day === day ? current.ids : []), id]) }))
+        return
+      }
       if (flag !== FLAG_DAY4_YUSHI_STORY_TAG) return
       const day = currentDay
       window.setTimeout(() => {
@@ -381,7 +389,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
       <CalendarApp open={activeApp === 'calendar'} day={currentDay} />
       <SafariApp open={activeApp === 'safari'} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />
       <MessagesApp open={activeApp === 'messages'} owner={name} />
-      <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} workEnded={workPhase === 'after'} yushiTagged={yushiTagDay === currentDay} autoOpenStory={autoOpenStory} />
+      <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} workEnded={workPhase === 'after'} doneGroups={todayDoneGroups} yushiTagged={yushiTagDay === currentDay} autoOpenStory={autoOpenStory} />
       <StoryViewer open={showStory} owner={name} onClose={() => setStoryOpen(false)} />
       <LockScreen visible={locked} name={userName ?? ''} onUnlock={setOwner} dateLabel={dayLabel(currentDay)} />
       {userName === null && (

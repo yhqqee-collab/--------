@@ -240,9 +240,12 @@ export function InstagramApp({
   hasMyStory = false,
   day = 1,
   workEnded = true,
+  doneGroups,
   yushiTagged = false,
   autoOpenStory,
 }: { 
+  /** 오늘 대화가 끝난 단톡방 id. afterGroup 게시물 노출에 사용 */
+  doneGroups?: ReadonlySet<string>
   /** 4일 차 유우시가 플레이어를 태그한 스토리를 올렸는지 */
   yushiTagged?: boolean
   /** 알림을 눌렀을 때 바로 열 스토리 (nonce 가 바뀔 때마다 다시 열림) */
@@ -276,7 +279,7 @@ export function InstagramApp({
     item.mentionOwner && item.story ? { ...item, story: { ...item.story, mention: ownerHandle } } : item,
   )
   const todayStories = yushiTagged ? [...dayStories, yushiTagStory(ownerHandle)] : dayStories
-  const visible = (post: Post) => isPostVisible(post, day, workEnded)
+  const visible = (post: Post) => isPostVisible(post, day, workEnded, doneGroups)
   const feedPosts = POSTS.filter(visible)
   const profileFor = (handle: string) => {
     const base = PROFILES[handle]

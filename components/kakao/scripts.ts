@@ -153,7 +153,7 @@ export type Script = {
 
 type PhaseChoice = {
   id: string
-  /** 시스템 팝업 노드에서는 생략 (팝업을 닫으면 자동 진행) */
+  /** 시스템 팝업 노드에서는 ���략 (팝업을 닫으면 자동 진행) */
   text?: string
   susp: number
   alert?: string
@@ -541,7 +541,7 @@ const RIKU_DAY1: Record<string, PhaseNode> = {
 const YUSHI_DAY1: Record<string, PhaseNode> = {
   P1_Start: {
     preWork: true,
-    message: '여주야\n잘 잤어 ?\n오늘 영현사 수업 끝나고 ���심 먹을래 ?\n수요일에 두고 간 머리끈도 챙겼어 ^_^',
+    message: '여주야\n잘 잤어 ?\n오늘 영현사 수업 끝나고 �����심 먹을래 ?\n수요일에 두고 간 머리끈도 챙겼어 ^_^',
     choices: [
       {
         id: 'A',
@@ -1323,7 +1323,7 @@ const RIKU_DAY4: Record<string, PhaseNode> = {
     nextCheckGlobal: SYNC_DAY4_CLASS,
     message: '여주야 나 오늘 수업 일찍 마쳣어 ㅎㅎ\n여주 보고 시퍼서 바닐라라떼 사 들고 경영관 3층 올라가는 중!!\n소행론 강의실 앞이징?? ❤️',
     choices: [
-      { id: 'A', text: '헐 3층 오지 마!!\n사람 너무 많아 ㅠㅠ\n1층 로비에 있으면 내가 내려갈게', susp: 0, setFlag: FLAG_DAY4_RIKU_A, next: 'CHECK_SION_FOR_RIKU_A' },
+      { id: 'A', text: '헐 3층 오지 마!!\n사람 너무 많아 ㅠㅠ\n1층 ��비에 있으면 내가 내려갈게', susp: 0, setFlag: FLAG_DAY4_RIKU_A, next: 'CHECK_SION_FOR_RIKU_A' },
       { id: 'B', text: '헉 지금 올라오는 중이야?!\n알겠어 문 앞에서 보장', susp: 0, setFlag: FLAG_DAY4_RIKU_B, next: 'CHECK_SION_FOR_RIKU_B' },
       { id: 'C', text: '나 동방 바로 가야할 것 같은데...ㅠ', susp: 5, next: 'P3_Route_C_Clear' },
     ],
@@ -1522,7 +1522,7 @@ const YUSHI_DAY4: Record<string, PhaseNode> = {
     delay: 24,
     message: '집 잘 들어갔어 ?\n오늘 고생했네 ~~\n근데 아까 동방에서 리쿠랑 무슨 얘기 했어?\n둘이 계속 웃던데',
     choices: [
-      { id: 'A', text: '에이 그냥 동방 얘기지 ㅋㅋ\n난 작업 내내 유우시 얼굴만 봤구만 ❤️', susp: -10, next: 'P4_Night_Good' },
+      { id: 'A', text: '에이 그냥 동방 얘기지 ㅋㅋ\n난 작업 내내 유우시 얼��만 봤구만 ❤️', susp: -10, next: 'P4_Night_Good' },
       { id: 'B', text: '다른 애들도 다 같이 있었는데 뭘 ㅠㅠ\n그냥 장난친 거야!', susp: 10, next: 'P4_Night_Bad' },
     ],
   },
@@ -1862,7 +1862,7 @@ const SION_DAY5: Record<string, PhaseNode> = {
 }
 
 /* ─────────────────────── 6일 차 (11/11 빼빼로데이) ─────────────────────── */
-/** Day 6: 동방 냉장고 빼빼로 결과를 정하는 동기화 키 (리쿠 Day 6 스크립트도 같은 키를 쓰면 함께 대기) */
+/** Day 6: 동방 냉장고 빼빼로 결과를 ��하는 동기화 키 (리쿠 Day 6 스크립트도 같은 키를 쓰면 함께 대기) */
 export const SYNC_DAY6_FRIDGE = 'day6-fridge'
 /** Day 6: 리쿠가 동방 냉장고 빼빼로를 가져감 → 시온 쪽은 대화 종료 (게임 오버는 리쿠 방에서 처리) */
 export const FLAG_DAY6_RIKU_TAKE = 'day6-riku-take'
@@ -2432,6 +2432,9 @@ const DAY_GROUP_SCRIPTS: Record<number, Record<string, GroupScript>> = {
   5: { staff: STAFF_DAY5 },
   6: { staff: STAFF_DAY6 },
 }
+
+/** 단톡방 대화가 끝났을 때 onFlag 로 전달되는 플래그 접두사 (뒤에 단톡방 id) */
+export const GROUP_DONE_FLAG_PREFIX = 'group-done:'
 
 export function groupScriptsForDay(day: number): Record<string, GroupScript> {
   return DAY_GROUP_SCRIPTS[day] ?? {}
