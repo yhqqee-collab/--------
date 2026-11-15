@@ -335,6 +335,9 @@ export function InstagramApp({
   const [activeProfile, setActiveProfile] = useState<string | null>(null)
   const [tab, setTab] = useState<'home' | 'profile'>('home')
   const [myFeedIndex, setMyFeedIndex] = useState<number | null>(null)
+  // 처음 열기 전에는 피드·스토리 사진을 그리지 않습니다 (메모리 절약)
+  const [everOpened, setEverOpened] = useState(open)
+  if (open && !everOpened) setEverOpened(true)
   useEffect(() => {
     if (open && autoOpenPostId) {
       setActivePost(autoOpenPostId)
@@ -378,6 +381,8 @@ export function InstagramApp({
         open ? 'scale-100 opacity-100' : 'pointer-events-none scale-[0.2] opacity-0',
       )}
     >
+      {everOpened && (
+      <>
       <header className="flex shrink-0 items-center justify-between px-[14px] pb-[4px] pt-[54px]">
         <h1 className={cn(logoFont.className, 'text-[32px] leading-none text-black')}>Instagram</h1>
         <div className="flex items-center gap-[20px] text-black">
@@ -592,7 +597,8 @@ export function InstagramApp({
           else if (PROFILES[handle]) setActiveProfile(handle)
         }}
       />
-
+      </>
+      )}
     </section>
   )
 }

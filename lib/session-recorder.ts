@@ -12,7 +12,7 @@ import type { DaySnapshot } from '@/components/kakao/snapshot'
 import * as clock from './session-clock'
 
 /** 스크립트 내용이 바뀌면 이 값을 올려 주세요. 예전 기록은 "그날 처음부터"로 복원됩니다. */
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 const META_KEY = 'fishbowl_session_meta_v2'
 const LOG_KEY = 'fishbowl_session_log_v2'
@@ -39,6 +39,8 @@ type RecordedEvent = {
   p: string
   /** 대상 태그 (검증용) */
   g: string
+  /** 클릭한 버튼의 글자 (검증용: 재생 때 같은 버튼이 나타날 때까지 기다립니다) */
+  x?: string
   v?: string
   key?: string
 }
@@ -107,6 +109,11 @@ function resolvePath(path: string): Element | null {
   return node
 }
 
+function labelOf(el: Element) {
+  const button = el.closest('button, a, [role=button]') ?? el
+  return (button.getAttribute('aria-label') || button.textContent || '').trim().slice(0, 60)
+}
+
 function elapsed() {
   return current ? clock.now() - current.meta.startAt : 0
 }
@@ -123,6 +130,7 @@ function record(event: Event, kind: RecordedEvent['k']) {
   const path = pathOf(target)
   if (path === null) return
   const entry: RecordedEvent = { t: elapsed(), f: clock.firedCount(), k: kind, p: path, g: target.tagName }
+  if (kind === 'c') entry.x = labelOf(target)
   if (kind === 'i') entry.v = (target as HTMLInputElement).value
   if (kind === 'k') entry.key = (event as KeyboardEvent).key
   current.events.push(entry)
@@ -214,6 +222,14 @@ function nextFrame() {
 const inputValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
 const textareaValueSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
 
+function matches(event: RecordedEvent) {
+  const el = resolvePath(event.p)
+  if (!el || el.tagName !== event.g) return false
+  if (event.x !== undefined && labelOf(el) !== event.x) return false
+  if (el.closest('fieldset:disabled, button:disabled')) return false
+  return true
+}
+
 function dispatch(event: RecordedEvent) {
   const el = resolvePath(event.p)
   if (!el || el.tagName !== event.g) return false
@@ -268,8 +284,18 @@ export async function replaySession(saved: SavedSession, onProgress?: (ratio: nu
     const event = events[i]
     const at = meta.startAt + event.t
     await advanceTo(at, event.f)
+    // 기록 당시 눌렀던 버튼(선택지 등)이 아직 안 나타났으면, 나타날 때까지 시간을 조금 더 흘려 봅니다
+    for (let guard = 0; guard < 400 && !matches(event); guard += 1) {
+      const due = clock.peekDue()
+      if (due === undefined || due > at + 30_000) break
+      clock.fireNext()
+      await settle()
+    }
     clock.setVirtualNow(at)
-    if (!clock.runAt(at, () => dispatch(event))) skipped += 1
+    if (!clock.runAt(at, () => dispatch(event))) {
+      skipped += 1
+      console.warn('[save] 재생 중 대상을 찾지 못한 입력', i, event)
+    }
     await settle()
     await nextFrame()
     onProgress?.((i + 1) / total)

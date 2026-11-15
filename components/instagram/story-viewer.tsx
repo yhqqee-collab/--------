@@ -51,6 +51,7 @@ export function StoryViewer({ open, owner, onClose }: { open: boolean; owner: st
               <div
                 onAnimationEnd={close}
                 style={{ animationPlayState: sheetOpen ? 'paused' : 'running' }}
+                data-story-progress
                 className="h-full w-0 animate-[story-progress_7s_linear_forwards] rounded-full bg-white"
               />
             )}

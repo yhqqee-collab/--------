@@ -2,7 +2,7 @@
 
 // 게임 시간 관리자(자동 저장·복원용). 다른 게임 모듈보다 먼저 불러와야 합니다.
 import '@/lib/session-clock'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Moon } from 'lucide-react'
 import type { DaySnapshot } from '@/components/kakao/snapshot'
 import { CalendarApp } from '@/components/calendar/calendar-app'
@@ -118,6 +118,29 @@ function writeSave(userName: string | null, snapshot: DaySnapshot | null) {
     if (userName && snapshot) window.localStorage.setItem(SAVE_KEY, JSON.stringify({ userName, snapshot }))
     else window.localStorage.removeItem(SAVE_KEY)
   } catch {}
+}
+
+/**
+ * 앱을 처음 열 때까지는 화면에 그리지 않습니다 (안 연 앱의 사진까지 메모리에 올라가 폰이 버티지 못하던 문제).
+ * 처음 마운트될 때는 닫힌 상태로 한 프레임 그린 뒤 열어서, 여는 애니메이션도 그대로 보이게 합니다.
+ */
+function OnFirstOpen({ open, children }: { open: boolean; children: (open: boolean) => ReactNode }) {
+  const [mounted, setMounted] = useState(open)
+  const [ready, setReady] = useState(open)
+  if (open && !mounted) setMounted(true)
+  useEffect(() => {
+    if (!mounted || ready) return
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setReady(true))
+    })
+    return () => {
+      cancelAnimationFrame(outer)
+      cancelAnimationFrame(inner)
+    }
+  }, [mounted, ready])
+  if (!mounted) return null
+  return <>{children(ready && open)}</>
 }
 
 export function PhoneSimulator() {
@@ -440,16 +463,16 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenEverytime={() => setOpenApp('everytime')}
         onOpenBaemin={() => setOpenApp('baemin')}
       />
-      <EverytimeApp open={activeApp === 'everytime'} />
-      <BaeminApp open={activeApp === 'baemin'} />
-      <NotesApp open={activeApp === 'notes'} />
-      <PhotosApp open={activeApp === 'photos'} />
-      <MapsApp open={activeApp === 'maps'} />
-      <WeverseApp open={activeApp === 'weverse'} onClose={goHome} />
-      <DuolingoApp open={activeApp === 'duolingo'} />
-      <AblyApp open={activeApp === 'ably'} />
-      <StockApp open={activeApp === 'stock'} />
-      <HotelApp open={activeApp === 'hotel'} />
+      <OnFirstOpen open={activeApp === 'everytime'}>{(shown) => <EverytimeApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'baemin'}>{(shown) => <BaeminApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'notes'}>{(shown) => <NotesApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'photos'}>{(shown) => <PhotosApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'maps'}>{(shown) => <MapsApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'weverse'}>{(shown) => <WeverseApp open={shown} onClose={goHome} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'duolingo'}>{(shown) => <DuolingoApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'ably'}>{(shown) => <AblyApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'stock'}>{(shown) => <StockApp open={shown} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'hotel'}>{(shown) => <HotelApp open={shown} />}</OnFirstOpen>
       <KakaoApp
         open={activeApp === 'kakao'}
         owner={name}
@@ -475,9 +498,9 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onInterlude={handleInterlude}
         onFlag={handleFlag}
       />
-      <CalendarApp open={activeApp === 'calendar'} day={currentDay} />
-      <SafariApp open={activeApp === 'safari'} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />
-      <MessagesApp open={activeApp === 'messages'} owner={name} />
+      <OnFirstOpen open={activeApp === 'calendar'}>{(shown) => <CalendarApp open={shown} day={currentDay} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'safari'}>{(shown) => <SafariApp open={shown} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'messages'}>{(shown) => <MessagesApp open={shown} owner={name} />}</OnFirstOpen>
       <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} workEnded={workPhase === 'after'} doneGroups={todayDoneGroups} yushiTagged={yushiTagDay === currentDay} autoOpenStory={autoOpenStory} />
       <StoryViewer open={showStory} owner={name} onClose={() => setStoryOpen(false)} />
       <LockScreen visible={locked} name={userName ?? ''} onUnlock={setOwner} dateLabel={dayLabel(currentDay)} />

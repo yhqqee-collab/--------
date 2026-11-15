@@ -102,6 +102,7 @@ export function FriendStoryViewer({
                         key={`${shown.handle}-${i}`}
                         onAnimationEnd={next}
                         style={{ animationPlayState: replying ? 'paused' : 'running' }}
+                        data-story-progress
                         className="h-full w-0 animate-[story-progress_7s_linear_forwards] rounded-full bg-white"
                       />
                     )}
