@@ -13,6 +13,7 @@ import {
   YouTubeMusicArt,
 } from './app-icon-art'
 import { AblyArt, BaeminArt, DuolingoArt, EverytimeArt, NaverMapArt, StockArt, WeverseArt } from './extra-app-art'
+import { EndingCollectionArt } from './ending-collection'
 import { Wallpaper } from './wallpaper'
 import { CalendarWidget, NotesWidget } from './widgets'
 
@@ -35,6 +36,7 @@ type HomeScreenProps = {
   onOpenNotes: () => void
   onOpenEverytime: () => void
   onOpenBaemin: () => void
+  onOpenEndings: () => void
 }
 
 export function HomeScreen({
@@ -56,6 +58,7 @@ export function HomeScreen({
   onOpenNotes,
   onOpenEverytime,
   onOpenBaemin,
+  onOpenEndings,
 }: HomeScreenProps) {
   return (
     <section aria-label="홈 화면" aria-hidden={!active} inert={!active} className="absolute inset-0">
@@ -104,6 +107,9 @@ export function HomeScreen({
               { name: '에브리타임', onClick: onOpenEverytime, art: <EverytimeArt /> },
             ]}
           />
+          <AppIcon name="엔딩 도감" onClick={onOpenEndings}>
+            <EndingCollectionArt />
+          </AppIcon>
         </div>
 
         <div className="mt-auto flex flex-col items-center gap-[14px]">

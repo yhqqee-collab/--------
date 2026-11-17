@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ENDING_CHOICES, canUnlockHarem, resolveFinalEnding, type FinalChoice } from '@/components/kakao/endings'
+import { endingIdOf, markEndingSeen } from '@/lib/ending-collection'
 import { replaceUserNameLiterary } from '@/lib/korean-name'
 import { cn } from '@/lib/utils'
 
@@ -13,11 +14,12 @@ type FinalEndingScreenProps = {
   onRetryDay: () => void
   onRestart: () => void
   onViewHistory: () => void
+  onOpenCollection: () => void
 }
 
 const LINE_FADE_MS = 700
 
-export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRetryDay, onRestart, onViewHistory }: FinalEndingScreenProps) {
+export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRetryDay, onRestart, onViewHistory, onOpenCollection }: FinalEndingScreenProps) {
   const [shown, setShown] = useState(false)
   const [route, setRoute] = useState<FinalChoice | null>(null)
   const [visibleLines, setVisibleLines] = useState(0)
@@ -41,6 +43,7 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
   const { accent, badge } = endingStyle
 
   function choose(id: FinalChoice) {
+    markEndingSeen(endingIdOf(id, resolveFinalEnding(id, suspicion)))
     setRoute(id)
     window.setTimeout(() => setVisibleLines(1), 1200)
   }
@@ -157,6 +160,13 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
               className="min-h-11 rounded-full border border-white/25 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               처음부터 다시하기
+            </button>
+            <button
+              type="button"
+              onClick={onOpenCollection}
+              className="min-h-11 rounded-full border border-[#ffd9e4]/40 px-7 py-3 text-sm font-semibold text-[#ffd9e4] transition-colors hover:bg-[#ffd9e4]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              엔딩 도감 보기
             </button>
             <button
               type="button"

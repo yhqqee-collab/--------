@@ -49,6 +49,7 @@ const TAG_NOTICE_MS = 6500
 /** 5일 차 시작 후 대영 점심 스토리 태그 알림까지 (시온 카톡보다 먼저 뜨도록) */
 const DAEYOUNG_TAG_DELAY_MS = 1200
 import { TrueEndScreen } from './true-end-screen'
+import { EndingCollection } from './ending-collection'
 import { FinalEndingScreen } from './final-ending-screen'
 import { HomeScreen } from './home-screen'
 import { IPhoneFrame } from './iphone-frame'
@@ -290,6 +291,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
   const [owner, setOwner] = useState<string | null>(resume ? userName : null)
   const [openApp, setOpenApp] = useState<AppId | null>(null)
   const [storyOpen, setStoryOpen] = useState(false)
+  const [endingsOpen, setEndingsOpen] = useState(false)
   const [kakaoNotice, setKakaoNotice] = useState<{ id: string; text: string; nonce: number } | null>(null)
   const [safariNotification, setSafariNotification] = useState(false)
   const [safariNotificationUsed, setSafariNotificationUsed] = useState(false)
@@ -462,6 +464,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenNotes={() => setOpenApp('notes')}
         onOpenEverytime={() => setOpenApp('everytime')}
         onOpenBaemin={() => setOpenApp('baemin')}
+        onOpenEndings={() => setEndingsOpen(true)}
       />
       <OnFirstOpen open={activeApp === 'everytime'}>{(shown) => <EverytimeApp open={shown} />}</OnFirstOpen>
       <OnFirstOpen open={activeApp === 'baemin'}>{(shown) => <BaeminApp open={shown} />}</OnFirstOpen>
@@ -552,6 +555,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
           hidden={viewingHistory}
           onRetryDay={onRetryDay}
           onRestart={onRestart}
+          onOpenCollection={() => setEndingsOpen(true)}
           onViewHistory={() => {
             setViewingHistory(true)
             setOwner((current) => current ?? name)
@@ -568,6 +572,9 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
           엔딩 화면으로 돌아가기
         </button>
       )}
+      <OnFirstOpen open={endingsOpen}>
+        {(shown) => <EndingCollection open={shown} owner={name} onClose={() => setEndingsOpen(false)} />}
+      </OnFirstOpen>
     </IPhoneFrame>
   )
 }
