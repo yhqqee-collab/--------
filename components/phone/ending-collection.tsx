@@ -31,6 +31,7 @@ function seenLabel(ms: number) {
   const lang = getLang()
   if (lang === 'en') return `First seen ${MONTHS_EN[month]} ${day}`
   if (lang === 'zh') return `${month + 1}月${day}日首次解锁`
+  if (lang === 'ja') return `${month + 1}月${day}日に初めて解放`
   return `${month + 1}월 ${day}일 처음 봄`
 }
 

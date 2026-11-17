@@ -16,7 +16,7 @@ export function LanguagePicker({ onReady }: { onReady: () => void }) {
     <section className="flex w-full max-w-xs flex-col items-center gap-8 px-6 text-center text-white">
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-bold tracking-tight">어장 키우기 Uni ver.</h2>
-        <p className="text-sm text-white/60">언어를 선택하세요 · Select language · 选择语言</p>
+        <p className="text-sm text-white/60">언어를 선택하세요 · Select language · 选择语言 · 言語を選択</p>
       </div>
       <div className="flex w-full flex-col gap-3">
         {LANG_OPTIONS.map((option) => (

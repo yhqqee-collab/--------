@@ -1,9 +1,10 @@
-export type Lang = 'ko' | 'en' | 'zh'
+export type Lang = 'ko' | 'en' | 'zh' | 'ja'
 
 export const LANG_OPTIONS: { value: Lang; label: string; sub: string; htmlLang: string }[] = [
   { value: 'ko', label: '한국어', sub: 'Korean', htmlLang: 'ko' },
   { value: 'en', label: 'English', sub: 'English', htmlLang: 'en' },
   { value: 'zh', label: '中文', sub: 'Chinese', htmlLang: 'zh-CN' },
+  { value: 'ja', label: '日本語', sub: 'Japanese', htmlLang: 'ja' },
 ]
 
 /** 고른 언어를 기억하는 localStorage 키 */
@@ -23,7 +24,9 @@ export async function setLang(lang: Lang) {
       ? (await import('./i18n/en.json')).default
       : lang === 'zh'
         ? (await import('./i18n/zh.json')).default
-        : {},
+        : lang === 'ja'
+          ? (await import('./i18n/ja.json')).default
+          : {},
   )
   const option = LANG_OPTIONS.find((o) => o.value === lang)
   if (option) document.documentElement.lang = option.htmlLang
@@ -82,6 +85,7 @@ const TIME_LABELS: Record<Lang, Record<string, string>> = {
   ko: {},
   en: { 오전: 'AM', 오후: 'PM', 어제: 'Yesterday', 오늘: 'Today' },
   zh: { 오전: '上午', 오후: '下午', 어제: '昨天', 오늘: '今天' },
+  ja: { 오전: '午前', 오후: '午後', 어제: '昨日', 오늘: '今日' },
 }
 
 function translateTime(value: string) {
