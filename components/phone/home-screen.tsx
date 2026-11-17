@@ -110,12 +110,13 @@ export function HomeScreen({
               { name: '에브리타임', onClick: onOpenEverytime, art: <EverytimeArt /> },
             ]}
           />
-          <AppIcon name="엔딩 도감" onClick={onOpenEndings}>
-            <EndingCollectionArt />
-          </AppIcon>
-          <AppIcon name="설정" onClick={onOpenSettings}>
-            <SettingsArt />
-          </AppIcon>
+          <AppFolder
+            name="게임"
+            apps={[
+              { name: '엔딩 도감', onClick: onOpenEndings, art: <EndingCollectionArt /> },
+              { name: '설정', onClick: onOpenSettings, art: <SettingsArt /> },
+            ]}
+          />
         </div>
 
         <div className="mt-auto flex flex-col items-center gap-[14px]">

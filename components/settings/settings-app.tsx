@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Gauge, Settings, UserRound } from 'lucide-react'
+import { Check, Gauge, Globe, Settings, UserRound } from 'lucide-react'
 import { changeSpeed, getSpeed, SPEED_OPTIONS } from '@/lib/game-settings'
+import { LANG_OPTIONS, LANG_STORAGE_KEY, getLang, type Lang } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /** 홈 화면 아이콘 그림 (iOS 설정 앱 느낌의 회색 톱니바퀴) */
@@ -44,6 +45,15 @@ export function SettingsApp({ open, name, onRename }: SettingsAppProps) {
     if (!canSave) return
     onRename(trimmed)
     setSaved(true)
+  }
+
+  const pickLang = (value: Lang) => {
+    if (value === getLang()) return
+    try {
+      window.localStorage.setItem(LANG_STORAGE_KEY, value)
+    } catch {}
+    // 화면 전체를 새 언어로 다시 그리기 위해 새로고침합니다. 진행 상황은 자동 저장돼 그대로 이어집니다.
+    window.location.reload()
   }
 
   const pickSpeed = (value: number) => {
@@ -126,6 +136,36 @@ export function SettingsApp({ open, name, onRename }: SettingsAppProps) {
         </div>
         <p className="mt-1.5 px-4 text-[12px] leading-relaxed text-[#6d6d72]">
           답장과 메시지가 오기까지 기다리는 시간이 빨라져요. 선택지는 빨리 골라야 하는 게 아니라서 게임 난이도는 그대로예요.
+        </p>
+
+        <h3 className="mb-1.5 mt-7 flex items-center gap-1.5 px-4 text-[13px] text-[#6d6d72]">
+          <Globe className="size-3.5" aria-hidden />
+          언어
+        </h3>
+        <ul data-no-record role="radiogroup" aria-label="언어" className="overflow-hidden rounded-[12px] bg-white">
+          {LANG_OPTIONS.map((option, index) => {
+            const selected = getLang() === option.value
+            return (
+              <li key={option.value} className={index > 0 ? 'border-t border-black/[0.08]' : undefined}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => pickLang(option.value)}
+                  className="flex w-full items-center justify-between px-4 py-3 text-left text-[16px]"
+                >
+                  <span translate="no">
+                    {option.label}
+                    {option.label !== option.sub && <span className="ml-2 text-[13px] text-[#8e8e93]">{option.sub}</span>}
+                  </span>
+                  {selected && <Check className="size-5 text-[#007AFF]" strokeWidth={2.5} aria-hidden />}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        <p className="mt-1.5 px-4 text-[12px] leading-relaxed text-[#6d6d72]">
+          언어를 바꾸면 화면을 한 번 새로 불러와요. 진행 상황은 그대로 이어져요.
         </p>
       </div>
     </section>

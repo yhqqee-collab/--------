@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { LanguagePicker } from '@/components/language-picker'
 import { PasswordScreen } from '@/components/password-screen'
-import { LANG_OPTIONS, getLang, setLang, type Lang } from '@/lib/i18n'
+import { LANG_OPTIONS, LANG_STORAGE_KEY, getLang, setLang, type Lang } from '@/lib/i18n'
 
 const PhoneSimulator = dynamic(
   () => import('@/components/phone/phone-simulator').then((m) => m.PhoneSimulator),
   { ssr: false },
 )
 
-const LANG_KEY = 'fishbowl_lang_v1'
+const LANG_KEY = LANG_STORAGE_KEY
 const UNLOCK_KEY = 'fishbowl_unlocked_v1'
 
 function readStorage(key: string) {

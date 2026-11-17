@@ -9,6 +9,7 @@ import {
   type CollectedEndings,
   type EndingEntry,
 } from '@/lib/ending-collection'
+import { getLang } from '@/lib/i18n'
 import { replaceUserNameLiterary } from '@/lib/korean-name'
 import { cn } from '@/lib/utils'
 
@@ -20,9 +21,17 @@ const TYPE_STYLE = {
   catastrophe: { badge: 'CATASTROPHE', className: 'text-[#ff5c5c] border-[#ff5c5c]/40' },
 } as const
 
-function formatDate(ms: number) {
+const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** "11월 17일 처음 봄" (언어별) */
+function seenLabel(ms: number) {
   const date = new Date(ms)
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`
+  const month = date.getMonth()
+  const day = date.getDate()
+  const lang = getLang()
+  if (lang === 'en') return `First seen ${MONTHS_EN[month]} ${day}`
+  if (lang === 'zh') return `${month + 1}月${day}日首次解锁`
+  return `${month + 1}월 ${day}일 처음 봄`
 }
 
 /** 홈 화면 아이콘 그림 */
@@ -106,7 +115,7 @@ export function EndingCollection({ open, owner, onClose }: EndingCollectionProps
         {count === total && <p className="mt-3 text-center text-sm font-semibold text-[#ffd27a]">모든 엔딩을 모았어요! 🎉</p>}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-12">
+      <div className="flex-1 overflow-y-auto px-6 pb-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group) => (
           <div key={group.name} className="mb-6">
             <h3 className="mb-2 text-xs font-semibold tracking-wider text-white/45">{group.name}</h3>
@@ -119,10 +128,7 @@ export function EndingCollection({ open, owner, onClose }: EndingCollectionProps
                   return (
                     <li key={entry.id} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5">
                       <Lock className="size-4 shrink-0 text-white/30" aria-hidden />
-                      <div className="min-w-0">
-                        <p className="text-[15px] font-bold tracking-widest text-white/35">???</p>
-                        <p className="mt-0.5 text-xs text-white/40">{entry.hint}</p>
-                      </div>
+                      <p className="text-[15px] font-bold tracking-widest text-white/35">???</p>
                     </li>
                   )
                 }
@@ -139,7 +145,7 @@ export function EndingCollection({ open, owner, onClose }: EndingCollectionProps
                           {style.badge}
                         </span>
                         <p className="mt-1.5 text-[15px] font-bold leading-snug">{entry.scene.title}</p>
-                        <p className="mt-0.5 text-xs text-white/40">{formatDate(seenAt)} 처음 봄</p>
+                        <p className="mt-0.5 text-xs text-white/40">{seenLabel(seenAt)}</p>
                       </div>
                       <ChevronDown className={cn('size-4 shrink-0 text-white/50 transition-transform', isOpen && 'rotate-180')} aria-hidden />
                     </button>

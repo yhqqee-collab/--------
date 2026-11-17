@@ -22,26 +22,19 @@ export type EndingEntry = {
   /** 도감 묶음 제목 (캐릭터 이름 또는 '특별 엔딩') */
   group: string
   scene: EndingScene
-  /** 아직 못 본 엔딩에 보여줄 힌트 */
-  hint: string
 }
 
-const TYPE_HINT = {
-  happy: '의심을 거의 사지 않고 마지막에 고른다면',
-  obsessive: '조금 들켰지만 그래도 마지막에 고른다면',
-  breakup: '너무 많이 들킨 채로 마지막에 고른다면',
-} as const
 
 /** 도감에 표시되는 순서 그대로의 엔딩 목록 */
 export const ENDING_CATALOG: EndingEntry[] = [
   ...ENDING_CHOICES.flatMap(({ id, name }) =>
     (['happy', 'obsessive', 'breakup'] as const).flatMap((type) => {
       const scene = ENDINGS[id][type]
-      return scene ? [{ id: `${id}-${type}` as EndingId, group: name, scene, hint: TYPE_HINT[type] }] : []
+      return scene ? [{ id: `${id}-${type}` as EndingId, group: name, scene }] : []
     }),
   ),
-  { id: 'harem', group: '특별 엔딩', scene: HAREM_ENDING, hint: '세 사람 모두를 완벽하게 속였다면…' },
-  { id: 'catastrophe', group: '특별 엔딩', scene: CATASTROPHE_ENDING, hint: '모두에게 들켜 버렸다면…' },
+  { id: 'harem', group: '특별 엔딩', scene: HAREM_ENDING },
+  { id: 'catastrophe', group: '특별 엔딩', scene: CATASTROPHE_ENDING },
 ]
 
 export function endingIdOf(choice: FinalChoice, scene: EndingScene): EndingId {

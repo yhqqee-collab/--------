@@ -6,6 +6,9 @@ export const LANG_OPTIONS: { value: Lang; label: string; sub: string; htmlLang: 
   { value: 'zh', label: '中文', sub: 'Chinese', htmlLang: 'zh-CN' },
 ]
 
+/** 고른 언어를 기억하는 localStorage 키 */
+export const LANG_STORAGE_KEY = 'fishbowl_lang_v1'
+
 let currentLang: Lang = 'ko'
 let dictionary: Record<string, string> = {}
 

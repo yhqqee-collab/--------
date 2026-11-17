@@ -10,6 +10,7 @@
  */
 import type { DaySnapshot } from '@/components/kakao/snapshot'
 import * as clock from './session-clock'
+import { tr } from './i18n'
 
 /** 스크립트 내용이 바뀌면 이 값을 올려 주세요. 예전 기록은 "그날 처음부터"로 복원됩니다. */
 export const SAVE_VERSION = 3
@@ -114,6 +115,11 @@ function labelOf(el: Element) {
   return (button.getAttribute('aria-label') || button.textContent || '').trim().slice(0, 60)
 }
 
+/** 화면 번역(영어·중국어)이 적용되기 전·후 글자도 같은 버튼으로 봅니다 */
+function sameLabel(a: string, b: string) {
+  return a === b || tr(a) === b || a === tr(b) || tr(a) === tr(b)
+}
+
 function elapsed() {
   return current ? clock.now() - current.meta.startAt : 0
 }
@@ -127,6 +133,8 @@ function record(event: Event, kind: RecordedEvent['k']) {
   if (!current || clock.isReplaying() || !event.isTrusted) return
   const target = event.target
   if (!(target instanceof Element)) return
+  // 언어 바꾸기처럼 새로고침을 일으키는 버튼은 기록하지 않습니다 (재생 때 다시 누르면 무한 새로고침)
+  if (target.closest('[data-no-record]')) return
   const path = pathOf(target)
   if (path === null) return
   const entry: RecordedEvent = { t: elapsed(), f: clock.firedCount(), k: kind, p: path, g: target.tagName }
@@ -225,7 +233,7 @@ const textareaValueSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.
 function matches(event: RecordedEvent) {
   const el = resolvePath(event.p)
   if (!el || el.tagName !== event.g) return false
-  if (event.x !== undefined && labelOf(el) !== event.x) return false
+  if (event.x !== undefined && !sameLabel(labelOf(el), event.x)) return false
   if (el.closest('fieldset:disabled, button:disabled')) return false
   return true
 }
