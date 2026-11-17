@@ -50,6 +50,8 @@ const TAG_NOTICE_MS = 6500
 const DAEYOUNG_TAG_DELAY_MS = 1200
 import { TrueEndScreen } from './true-end-screen'
 import { EndingCollection } from './ending-collection'
+import { SettingsApp } from '@/components/settings/settings-app'
+import { loadSavedSpeed } from '@/lib/game-settings'
 import { FinalEndingScreen } from './final-ending-screen'
 import { HomeScreen } from './home-screen'
 import { IPhoneFrame } from './iphone-frame'
@@ -75,6 +77,7 @@ type AppId =
   | 'notes'
   | 'everytime'
   | 'baemin'
+  | 'settings'
 
 const INITIALS = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'c', 'k', 't', 'p', 'h']
 const MEDIALS = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i']
@@ -168,6 +171,7 @@ export function PhoneSimulator() {
   }, [])
 
   useEffect(() => {
+    loadSavedSpeed()
     const session = loadSession()
     const save = readSave()
     if (session) {
@@ -248,6 +252,7 @@ export function PhoneSimulator() {
           userName={userName}
           resume={resume}
           onStart={handleStart}
+          onRename={handleStart}
           onDaySnapshot={handleDaySnapshot}
           onRetryDay={() => restartSession(latestSnapshotRef.current, userNameRef.current)}
           onRestart={() => {
@@ -276,12 +281,13 @@ type PhoneSessionProps = {
   userName: string | null
   resume: DaySnapshot | null
   onStart: (name: string) => void
+  onRename: (name: string) => void
   onDaySnapshot: (snapshot: DaySnapshot) => void
   onRetryDay: () => void
   onRestart: () => void
 }
 
-function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, onRestart }: PhoneSessionProps) {
+function PhoneSession({ userName, resume, onStart, onRename, onDaySnapshot, onRetryDay, onRestart }: PhoneSessionProps) {
   const startDay = Math.min(resume?.day ?? 1, FINAL_DAY)
   const [busted, setBusted] = useState(false)
   const [bustedAlert, setBustedAlert] = useState<string>()
@@ -465,6 +471,7 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
         onOpenEverytime={() => setOpenApp('everytime')}
         onOpenBaemin={() => setOpenApp('baemin')}
         onOpenEndings={() => setEndingsOpen(true)}
+        onOpenSettings={() => setOpenApp('settings')}
       />
       <OnFirstOpen open={activeApp === 'everytime'}>{(shown) => <EverytimeApp open={shown} />}</OnFirstOpen>
       <OnFirstOpen open={activeApp === 'baemin'}>{(shown) => <BaeminApp open={shown} />}</OnFirstOpen>
@@ -503,6 +510,18 @@ function PhoneSession({ userName, resume, onStart, onDaySnapshot, onRetryDay, on
       />
       <OnFirstOpen open={activeApp === 'calendar'}>{(shown) => <CalendarApp open={shown} day={currentDay} />}</OnFirstOpen>
       <OnFirstOpen open={activeApp === 'safari'}>{(shown) => <SafariApp open={shown} onVisit={() => { if (NOTIFICATION_COMMENT && !safariNotificationUsed) { setSafariNotificationUsed(true); setSafariNotification(true) } }} />}</OnFirstOpen>
+      <OnFirstOpen open={activeApp === 'settings'}>
+        {(shown) => (
+          <SettingsApp
+            open={shown}
+            name={name}
+            onRename={(next) => {
+              onRename(next)
+              setOwner(next)
+            }}
+          />
+        )}
+      </OnFirstOpen>
       <OnFirstOpen open={activeApp === 'messages'}>{(shown) => <MessagesApp open={shown} owner={name} />}</OnFirstOpen>
       <InstagramApp open={activeApp === 'instagram'} owner={instagramOwner} ownerName={name === DEFAULT_OWNER_NAME ? undefined : name} onOpenMyStory={() => setStoryOpen(true)} autoOpenPostId={autoOpenPostId} revealNotificationComment={revealNotificationComment} hasMyStory={hasMyStory} day={currentDay} workEnded={workPhase === 'after'} doneGroups={todayDoneGroups} yushiTagged={yushiTagDay === currentDay} autoOpenStory={autoOpenStory} />
       <StoryViewer open={showStory} owner={name} onClose={() => setStoryOpen(false)} />

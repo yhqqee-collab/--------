@@ -35,10 +35,34 @@ const native = {
 
 declare const __TEST_SPEED__: number
 /** 테스트 빌드에서만 1보다 큼 (시간 빨리 흐르게) */
-const SPEED = typeof __TEST_SPEED__ === 'number' ? __TEST_SPEED__ : 1
-const BASE = native.now()
+const TEST_SPEED = typeof __TEST_SPEED__ === 'number' ? __TEST_SPEED__ : 1
+
+/* ---------- 플레이 속도 (설정 앱의 배속) ----------
+ * 게임 속 시간이 실제 시간보다 speed 배 빨리 흐릅니다. 기다리는 시간(답장·메시지 도착)만 짧아지고,
+ * 게임 속 시각으로 기록·재생하므로 새로고침 복원에는 영향이 없습니다. */
+let speed = TEST_SPEED
+let anchorReal = native.now()
+let anchorScaled = anchorReal
 function realNow() {
-  return SPEED === 1 ? native.now() : BASE + (native.now() - BASE) * SPEED
+  return anchorScaled + (native.now() - anchorReal) * speed
+}
+
+export function getSpeed() {
+  return speed / TEST_SPEED
+}
+
+export function setSpeed(factor: number) {
+  const next = Math.min(4, Math.max(1, Number(factor) || 1)) * TEST_SPEED
+  if (next === speed) return
+  anchorScaled = realNow()
+  anchorReal = native.now()
+  speed = next
+  if (mode !== 'live') return
+  // 이미 걸려 있는 타이머를 새 속도로 다시 겁니다
+  for (const timer of timers.values()) {
+    if (timer.nativeId !== undefined) native.clearTimeout(timer.nativeId)
+    armNative(timer)
+  }
 }
 
 let mode: 'live' | 'replay' = 'live'
@@ -85,7 +109,7 @@ function toDelay(ms: unknown) {
 }
 
 function armNative(timer: Timer) {
-  timer.nativeId = native.setTimeout(() => fire(timer), Math.max(0, timer.due - now()) / SPEED)
+  timer.nativeId = native.setTimeout(() => fire(timer), Math.max(0, timer.due - now()) / speed)
 }
 
 function fire(timer: Timer) {

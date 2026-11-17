@@ -14,6 +14,7 @@ import {
 } from './app-icon-art'
 import { AblyArt, BaeminArt, DuolingoArt, EverytimeArt, NaverMapArt, StockArt, WeverseArt } from './extra-app-art'
 import { EndingCollectionArt } from './ending-collection'
+import { SettingsArt } from '@/components/settings/settings-app'
 import { Wallpaper } from './wallpaper'
 import { CalendarWidget, NotesWidget } from './widgets'
 
@@ -37,6 +38,7 @@ type HomeScreenProps = {
   onOpenEverytime: () => void
   onOpenBaemin: () => void
   onOpenEndings: () => void
+  onOpenSettings: () => void
 }
 
 export function HomeScreen({
@@ -59,6 +61,7 @@ export function HomeScreen({
   onOpenEverytime,
   onOpenBaemin,
   onOpenEndings,
+  onOpenSettings,
 }: HomeScreenProps) {
   return (
     <section aria-label="홈 화면" aria-hidden={!active} inert={!active} className="absolute inset-0">
@@ -109,6 +112,9 @@ export function HomeScreen({
           />
           <AppIcon name="엔딩 도감" onClick={onOpenEndings}>
             <EndingCollectionArt />
+          </AppIcon>
+          <AppIcon name="설정" onClick={onOpenSettings}>
+            <SettingsArt />
           </AppIcon>
         </div>
 
