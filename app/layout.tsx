@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import { SITE } from '@/lib/template-config'
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { Noto_Sans_KR } from 'next/font/google'
 import './globals.css'
 
@@ -39,6 +40,15 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        {/* Cloudflare Web Analytics */}
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token": "06076b78fff244ab88b5280c8d769320"}'
+            strategy="afterInteractive"
+          />
+        )}
+        {/* End Cloudflare Web Analytics */}
       </body>
     </html>
   )
