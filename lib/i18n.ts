@@ -96,9 +96,59 @@ function translateTime(value: string) {
   })
 }
 
+const WEEKDAY_KO = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+const WEEKDAY_NAMES: Record<Exclude<Lang, 'ko'>, string[]> = {
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  zh: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+  ja: ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'],
+}
+const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const OPEN_APP: Record<Exclude<Lang, 'ko'>, (app: string) => string> = {
+  en: (app) => `Tap the notification to open ${app}`,
+  zh: (app) => `点击通知打开${app}`,
+  ja: (app) => `通知をタップして${app}を開く`,
+}
+
+/** '2026년 11월 6일 금요일', '11월 6일 금요일', '11월 6일', '금요일' 같은 날짜 표기를 현재 언어로 바꿉니다. */
+function translateDate(value: string) {
+  if (currentLang === 'ko') return value
+  const lang = currentLang
+  const weekdays = WEEKDAY_NAMES[lang]
+  const onlyWeekday = WEEKDAY_KO.indexOf(value.trim())
+  if (onlyWeekday >= 0) return value.replace(value.trim(), weekdays[onlyWeekday])
+  const replaced = value.replace(
+    /(?:(\d{4})년\s*)?(\d{1,2})월\s*(\d{1,2})일(?:\s*([일월화수목금토])요일)?/g,
+    (_m, year: string | undefined, month: string, dayNum: string, wd: string | undefined) => {
+      const weekday = wd ? weekdays[WEEKDAY_KO.indexOf(`${wd}요일`)] : ''
+      const m = Number(month)
+      if (lang === 'en') {
+        const date = `${MONTHS_EN[m - 1]} ${dayNum}${year ? `, ${year}` : ''}`
+        return weekday ? `${weekday}, ${date}` : date
+      }
+      return `${year ? `${year}年` : ''}${m}月${dayNum}日${weekday ? ` ${weekday}` : ''}`
+    },
+  )
+  return replaced === value ? value : translateTime(replaced)
+}
+
 function translateText(value: string) {
   if (!HANGUL.test(value)) return value
   let next = tr(value)
+  if (next === value && value.includes('\n')) {
+    // 여러 줄이 한 덩어리로 들어온 경우(공지를 그대로 붙여 보낸 메시지 등) 줄마다 따로 찾아봅니다.
+    const lines = value.split('\n')
+    const translated = lines.map((line) => (HANGUL.test(line) ? translateLine(line) : line))
+    if (translated.some((line, i) => line !== lines[i])) return fillName(translated.join('\n'), playerName)
+  }
+  return fillName(translateLine(value, next), playerName)
+}
+
+function translateLine(value: string, first?: string) {
+  let next = first ?? tr(value)
+  if (next === value) {
+    const openApp = value.match(/^(\s*)알림을 눌러 (.+) 열기(\s*)$/)
+    if (openApp && currentLang !== 'ko') return openApp[1] + OPEN_APP[currentLang](openApp[2]) + openApp[3]
+  }
   if (next === value) {
     const match = value.match(/^([^\p{L}\p{N}]*)(.*?)([^\p{L}\p{N}]*)$/su)
     if (match && match[2]) {
@@ -106,8 +156,9 @@ function translateText(value: string) {
       if (inner !== match[2]) next = match[1] + inner + match[3]
     }
   }
+  if (next === value) next = translateDate(value)
   if (next === value) next = translateTime(value)
-  return fillName(next, playerName)
+  return next
 }
 
 let playerName = ''
