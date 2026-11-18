@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ENDING_CHOICES, canUnlockHarem, resolveFinalEnding, type FinalChoice } from '@/components/kakao/endings'
 import { endingIdOf, markEndingSeen } from '@/lib/ending-collection'
+import { trackPlay } from '@/lib/play-stats'
 import { replaceUserNameLiterary } from '@/lib/korean-name'
 import { cn } from '@/lib/utils'
 
@@ -43,7 +44,11 @@ export function FinalEndingScreen({ owner, day, suspicion, hidden = false, onRet
   const { accent, badge } = endingStyle
 
   function choose(id: FinalChoice) {
-    markEndingSeen(endingIdOf(id, resolveFinalEnding(id, suspicion)))
+    const scene = resolveFinalEnding(id, suspicion)
+    const endingId = endingIdOf(id, scene)
+    markEndingSeen(endingId)
+    const who = ENDING_CHOICES.find((choice) => choice.id === id)?.name ?? (id === 'harem' ? '다같살' : id)
+    trackPlay('ending', endingId, `${scene.type === 'catastrophe' ? '파국' : who} · ${scene.title}`)
     setRoute(id)
     window.setTimeout(() => setVisibleLines(1), 1200)
   }

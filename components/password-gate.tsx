@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { LanguagePicker } from '@/components/language-picker'
 import { PasswordScreen } from '@/components/password-screen'
 import { LANG_OPTIONS, LANG_STORAGE_KEY, getLang, setLang, type Lang } from '@/lib/i18n'
+import { trackPlay } from '@/lib/play-stats'
 
 const PhoneSimulator = dynamic(
   () => import('@/components/phone/phone-simulator').then((m) => m.PhoneSimulator),
@@ -56,6 +57,7 @@ export function PasswordGate() {
       <PasswordScreen
         onUnlock={() => {
           writeStorage(UNLOCK_KEY, '1')
+          trackPlay('unlock')
           setUnlocked(true)
         }}
       />

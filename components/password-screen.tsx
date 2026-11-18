@@ -58,6 +58,11 @@ export function PasswordScreen({ onUnlock }: { onUnlock: () => void }) {
           확인 · Enter · 确认
         </button>
       </form>
+      <p className="text-[11px] leading-relaxed text-white/35">
+        게임 개선을 위해 익명 플레이 기록(진행 일차·엔딩)을 모아요
+        <br />
+        Anonymous play stats are collected · 收集匿名游戏统计
+      </p>
     </section>
   )
 }

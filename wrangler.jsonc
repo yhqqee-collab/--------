@@ -1,7 +1,17 @@
 {
   "name": "univer",
   "compatibility_date": "2026-11-13",
+  // 플레이 통계 서버 (/api/track, /stats). 나머지 주소는 아래 out 폴더 파일을 그대로 보여줍니다.
+  "main": "worker/index.js",
   "assets": {
-    "directory": "./out"
-  }
+    "directory": "./out",
+    "binding": "ASSETS",
+    // 통계 주소만 서버 코드를 거치고, 게임 파일은 지금처럼 무료·무제한으로 바로 나갑니다
+    "run_worker_first": ["/api/*", "/stats", "/stats/"]
+  },
+  // 통계 저장소 (무료 플랜에서 쓸 수 있는 SQLite Durable Object, 배포 때 자동으로 만들어져요)
+  "durable_objects": {
+    "bindings": [{ "name": "STATS", "class_name": "StatsStore" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["StatsStore"] }]
 }

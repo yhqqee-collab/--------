@@ -27,6 +27,7 @@ import { EverytimeApp } from '@/components/everytime/everytime-app'
 import { BaeminApp } from '@/components/baemin/baemin-app'
 import { DEFAULT_INSTAGRAM_ID, DEFAULT_OWNER_NAME } from '@/lib/template-config'
 import { isReplaying } from '@/lib/session-clock'
+import { trackPlay } from '@/lib/play-stats'
 import {
   failReplay,
   finishReplay,
@@ -232,7 +233,10 @@ export function PhoneSimulator() {
       latestSnapshotRef.current = snapshot
       if (userNameRef.current) writeSave(userNameRef.current, snapshot)
       // 잠들기로 날짜가 넘어갔으면 이 날의 시작 상태에서 새 기록 구간을 시작합니다.
-      if (snapshot.day > sessionDayRef.current && !isReplaying()) restartSession(snapshot, userNameRef.current)
+      if (snapshot.day > sessionDayRef.current && !isReplaying()) {
+        trackPlay('day', snapshot.day)
+        restartSession(snapshot, userNameRef.current)
+      }
     },
     [restartSession],
   )
@@ -240,6 +244,7 @@ export function PhoneSimulator() {
     userNameRef.current = name
     setUserName(name)
     writeSave(name, latestSnapshotRef.current)
+    trackPlay('start')
   }, [])
 
   if (!loaded) return null
